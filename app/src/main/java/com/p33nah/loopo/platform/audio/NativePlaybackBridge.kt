@@ -7,14 +7,21 @@ internal object NativePlaybackBridge {
 
 	external fun create(sampleRate: Int, channelCount: Int, capacityFrames: Int): Long
 	external fun destroy(handle: Long)
+	external fun prerollFrames(handle: Long, playbackRate: Float): Int
+	external fun prime(handle: Long, samples: FloatArray, frameCount: Int, channelCount: Int, playbackRate: Float): Boolean
 	external fun write(
 		handle: Long,
 		samples: FloatArray,
 		offsetFrames: Int,
-		frameCount: Int,
+		inputFrames: Int,
+		outputFrames: Int,
 		channelCount: Int,
 		sourceStartFrame: Long,
+		sourceFramesPerOutputFrame: Double,
+		loopStartFrame: Long,
+		loopEndFrame: Long,
 	): Int
+	external fun finish(handle: Long, playbackRate: Float, outputRemainder: Double, endFrame: Long): Boolean
 	external fun writeSpace(handle: Long): Int
 	external fun queuedFrames(handle: Long): Int
 	external fun resetAtFrame(handle: Long, sourceFrame: Long): Boolean

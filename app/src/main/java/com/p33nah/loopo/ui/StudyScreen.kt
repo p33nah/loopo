@@ -33,12 +33,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.p33nah.loopo.data.audio.TrackInspection
 import com.p33nah.loopo.domain.model.TrackInfo
 import com.p33nah.loopo.domain.model.LoopRegion
+import com.p33nah.loopo.domain.model.PlaybackRate
 import com.p33nah.loopo.domain.audio.PlaybackError
 import com.p33nah.loopo.domain.audio.PlaybackSnapshot
 import com.p33nah.loopo.domain.waveform.WaveformPhase
@@ -49,6 +51,7 @@ import com.p33nah.loopo.ui.theme.Card
 import com.p33nah.loopo.ui.theme.Line
 import com.p33nah.loopo.ui.theme.Muted
 import com.p33nah.loopo.ui.theme.TextPrimary
+import kotlin.math.roundToInt
 
 @Composable
 fun StudyScreen(
@@ -59,6 +62,7 @@ fun StudyScreen(
 	onTogglePlayback: () -> Unit,
 	onSeekToFrame: (Long) -> Unit,
 	onSetLoopRegion: (LoopRegion) -> Unit,
+	onSetPlaybackRate: (PlaybackRate) -> Unit,
 ) {
 	Column(
 		modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp, vertical = 12.dp),
@@ -84,6 +88,7 @@ fun StudyScreen(
 			playback = playback,
 			onTogglePlayback = onTogglePlayback,
 			onSeekToFrame = onSeekToFrame,
+			onSetPlaybackRate = onSetPlaybackRate,
 		)
 	}
 }
@@ -306,15 +311,25 @@ private fun TransportBar(
 	playback: PlaybackSnapshot,
 	onTogglePlayback: () -> Unit,
 	onSeekToFrame: (Long) -> Unit,
+	onSetPlaybackRate: (PlaybackRate) -> Unit,
 ) {
 	val duration = track?.durationFrames ?: 0L
 	val position = playback.positionFrame.coerceIn(0, duration)
 	val progress = if (duration > 0) position.toFloat() / duration.toFloat() else 0f
 	var isSeeking by remember(track?.id) { mutableStateOf(false) }
 	var seekProgress by remember(track?.id) { mutableFloatStateOf(0f) }
+	var rateDraft by remember { mutableFloatStateOf(playback.playbackRate.percent.toFloat()) }
+	var isChangingRate by remember { mutableStateOf(false) }
+	LaunchedEffect(playback.playbackRate.percent) {
+		if (isChangingRate && playback.playbackRate.percent == rateDraft.roundToInt()) {
+			isChangingRate = false
+		} else if (!isChangingRate) {
+			rateDraft = playback.playbackRate.percent.toFloat()
+		}
+	}
 	Column(
-		modifier = Modifier.fillMaxWidth().height(84.dp).background(Card, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 6.dp),
-		verticalArrangement = Arrangement.Center,
+		modifier = Modifier.fillMaxWidth().height(136.dp).background(Card, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 5.dp),
+		verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
 	) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Text(position.formatTime(track?.sampleRate ?: 1), color = TextPrimary, fontSize = 12.sp)
@@ -342,8 +357,47 @@ private fun TransportBar(
 				Text(if (playback.isPlaying) "Pausa" else if (playback.isEnded) "Ripeti" else "Play", fontWeight = FontWeight.SemiBold)
 			}
 		}
+		Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+			Text("Velocità", color = Muted, fontSize = 11.sp)
+			Slider(
+				value = rateDraft,
+				onValueChange = {
+					isChangingRate = true
+					rateDraft = it
+				},
+				onValueChangeFinished = {
+					val selectedRate = PlaybackRate.fromPercent(
+						rateDraft.roundToInt().coerceIn(PlaybackRate.MIN_PERCENT, PlaybackRate.MAX_PERCENT),
+					)
+					rateDraft = selectedRate.percent.toFloat()
+					isChangingRate = selectedRate != playback.playbackRate
+					onSetPlaybackRate(
+						selectedRate,
+					)
+				},
+				valueRange = PlaybackRate.MIN_PERCENT.toFloat()..PlaybackRate.MAX_PERCENT.toFloat(),
+				steps = 0,
+				enabled = track != null,
+				modifier = Modifier.weight(1f),
+			)
+			Text(
+				PlaybackRate.fromPercent(rateDraft.roundToInt().coerceIn(PlaybackRate.MIN_PERCENT, PlaybackRate.MAX_PERCENT)).label,
+				color = TextPrimary,
+				fontSize = 12.sp,
+				textAlign = TextAlign.End,
+			)
+			OutlinedButton(
+				onClick = {
+					isChangingRate = playback.playbackRate != PlaybackRate.NORMAL
+					rateDraft = PlaybackRate.NORMAL_PERCENT.toFloat()
+					onSetPlaybackRate(PlaybackRate.NORMAL)
+				},
+				enabled = track != null,
+				shape = RoundedCornerShape(12.dp),
+			) { Text("1x") }
+		}
 		val latency = playback.estimatedLatencyMillis?.let { "  ·  stima ${it.toInt()} ms" }.orEmpty()
-		val status = playback.error?.message() ?: if (track == null) "Nessun brano aperto" else "1.00x  ·  dropout ${playback.underrunCount}$latency"
+		val status = playback.error?.message() ?: if (track == null) "Nessun brano aperto" else "dropout ${playback.underrunCount}$latency"
 		Text(status, color = if (playback.error == null) Muted else Accent, fontSize = 10.sp, modifier = Modifier.align(Alignment.End))
 	}
 }

@@ -11,7 +11,8 @@ public:
 		: channelCount_(channelCount), capacityFrames_(capacityFrames), samples_(channelCount * capacityFrames, 0.0f),
 		  sourceFrames_(capacityFrames, 0) {}
 
-	int write(const float* input, int frameCount, int64_t sourceStartFrame) {
+	int write(const float* input, int frameCount, int64_t sourceStartFrame,
+			double sourceFramesPerOutputFrame, int64_t loopStartFrame, int64_t loopEndFrame) {
 		const auto writeFrame = writeFrame_.load(std::memory_order_relaxed);
 		const auto readFrame = readFrame_.load(std::memory_order_acquire);
 		const auto queued = writeFrame - readFrame;
@@ -19,7 +20,11 @@ public:
 		for (int64_t frame = 0; frame < writable; ++frame) {
 			const auto target = ((writeFrame + frame) % capacityFrames_) * channelCount_;
 			std::copy_n(input + frame * channelCount_, channelCount_, samples_.data() + target);
-			sourceFrames_[(writeFrame + frame) % capacityFrames_] = sourceStartFrame + frame;
+			auto sourceFrame = sourceStartFrame + static_cast<int64_t>(frame * sourceFramesPerOutputFrame);
+			if (loopEndFrame > loopStartFrame && sourceFrame >= loopEndFrame) {
+				sourceFrame = loopStartFrame + (sourceFrame - loopStartFrame) % (loopEndFrame - loopStartFrame);
+			}
+			sourceFrames_[(writeFrame + frame) % capacityFrames_] = sourceFrame;
 		}
 		writeFrame_.store(writeFrame + writable, std::memory_order_release);
 		return static_cast<int>(writable);

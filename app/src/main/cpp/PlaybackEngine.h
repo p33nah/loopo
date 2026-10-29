@@ -7,6 +7,7 @@
 #include <oboe/Oboe.h>
 
 #include "PcmRingBuffer.h"
+#include "TimeStretcher.h"
 
 class PlaybackEngine final : public oboe::AudioStreamDataCallback,
 							 public std::enable_shared_from_this<PlaybackEngine> {
@@ -19,7 +20,11 @@ public:
 	bool play();
 	bool pauseAndWait();
 	bool resetAtFrame(int64_t sourceFrame);
-	int write(const float* samples, int frames, int64_t sourceStartFrame);
+	int prerollFrames(float playbackRate) const;
+	bool prime(const float* samples, int frames, float playbackRate);
+	int write(const float* samples, int inputFrames, int outputFrames, int64_t sourceStartFrame,
+			double sourceFramesPerOutputFrame, int64_t loopStartFrame, int64_t loopEndFrame);
+	bool finish(float playbackRate, double outputRemainder, int64_t endFrame);
 	int writeSpace() const;
 	int channelCount() const;
 	void setEndOfStream(bool ended);
@@ -37,6 +42,7 @@ private:
 	const int sampleRate_;
 	const int channelCount_;
 	PcmRingBuffer ring_;
+	TimeStretcher stretcher_;
 	std::vector<int64_t> callbackSourceFrames_;
 	std::vector<std::atomic<int64_t>> audiblePositionHistory_;
 	std::shared_ptr<oboe::AudioStream> stream_;

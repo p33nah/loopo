@@ -1,6 +1,7 @@
 package com.p33nah.loopo.domain.audio
 
 import com.p33nah.loopo.domain.model.LoopRegion
+import com.p33nah.loopo.domain.model.PlaybackRate
 
 data class PlaybackSnapshot(
 	val positionFrame: Long = 0,
@@ -12,6 +13,7 @@ data class PlaybackSnapshot(
 	val loopRegion: LoopRegion? = null,
 	val effectiveCrossfadeFrames: Long = 0,
 	val isLoopCommandPending: Boolean = false,
+	val playbackRate: PlaybackRate = PlaybackRate.NORMAL,
 )
 
 enum class PlaybackError {

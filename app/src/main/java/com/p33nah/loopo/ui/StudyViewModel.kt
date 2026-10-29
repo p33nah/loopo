@@ -14,6 +14,7 @@ import com.p33nah.loopo.domain.audio.PcmDecoderResult
 import com.p33nah.loopo.domain.audio.PcmReadResult
 import com.p33nah.loopo.domain.audio.PlaybackError
 import com.p33nah.loopo.domain.model.LoopRegion
+import com.p33nah.loopo.domain.model.PlaybackRate
 import com.p33nah.loopo.domain.waveform.WaveformState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -84,6 +85,10 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 
 	fun setLoopRegion(region: LoopRegion) {
 		viewModelScope.launch { playbackController.setLoopRegion(region) }
+	}
+
+	fun setPlaybackRate(rate: PlaybackRate) {
+		viewModelScope.launch { playbackController.setPlaybackRate(rate) }
 	}
 
 	fun pauseForLifecycle() {

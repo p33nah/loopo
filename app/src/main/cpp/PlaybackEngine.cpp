@@ -6,6 +6,7 @@
 
 PlaybackEngine::PlaybackEngine(int sampleRate, int channelCount, int capacityFrames)
 		: sampleRate_(sampleRate), channelCount_(channelCount), ring_(channelCount, capacityFrames),
+		  stretcher_(sampleRate, channelCount),
 		  callbackSourceFrames_(capacityFrames), audiblePositionHistory_(capacityFrames) {}
 
 PlaybackEngine::~PlaybackEngine() {
@@ -74,6 +75,7 @@ bool PlaybackEngine::resetAtFrame(int64_t sourceFrame) {
 	if (stream_->getState() == oboe::StreamState::Paused &&
 			stream_->flush(500'000'000) != oboe::Result::OK) return false;
 	ring_.clear();
+	stretcher_.reset();
 	sourcePosition_.store(sourceFrame, std::memory_order_release);
 	basePosition_.store(sourceFrame, std::memory_order_release);
 	renderedOutputFrames_.store(0, std::memory_order_release);
@@ -82,9 +84,33 @@ bool PlaybackEngine::resetAtFrame(int64_t sourceFrame) {
 	return true;
 }
 
-int PlaybackEngine::write(const float* samples, int frames, int64_t sourceStartFrame) {
-	if (!samples || frames <= 0 || inputEnded_.load(std::memory_order_acquire)) return 0;
-	return ring_.write(samples, frames, sourceStartFrame);
+int PlaybackEngine::prerollFrames(float playbackRate) const {
+	return stretcher_.prerollFrames(playbackRate);
+}
+
+bool PlaybackEngine::prime(const float* samples, int frames, float playbackRate) {
+	if (inputEnded_.load(std::memory_order_acquire)) return false;
+	return stretcher_.prime(samples, frames, playbackRate);
+}
+
+int PlaybackEngine::write(const float* samples, int inputFrames, int outputFrames, int64_t sourceStartFrame,
+		double sourceFramesPerOutputFrame, int64_t loopStartFrame, int64_t loopEndFrame) {
+	if (!samples || inputFrames <= 0 || inputEnded_.load(std::memory_order_acquire)) return 0;
+	const auto processed = stretcher_.process(samples, inputFrames, outputFrames);
+	if (processed != outputFrames) return 0;
+	const auto written = ring_.write(stretcher_.output(), outputFrames, sourceStartFrame,
+			sourceFramesPerOutputFrame, loopStartFrame, loopEndFrame);
+	return written == outputFrames ? inputFrames : 0;
+}
+
+bool PlaybackEngine::finish(float playbackRate, double outputRemainder, int64_t endFrame) {
+	if (inputEnded_.load(std::memory_order_acquire)) return false;
+	const auto tail = stretcher_.finish(playbackRate, outputRemainder);
+	if (tail.empty()) return false;
+	const auto frames = static_cast<int>(tail.size() / channelCount_);
+	if (ring_.write(tail.data(), frames, endFrame, 0.0, -1, -1) != frames) return false;
+	inputEnded_.store(true, std::memory_order_release);
+	return true;
 }
 
 int PlaybackEngine::writeSpace() const {

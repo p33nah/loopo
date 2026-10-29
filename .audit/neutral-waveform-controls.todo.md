@@ -6,7 +6,7 @@
 - [x] Implement: render the white brand mark, neutralize generic UI/waveform colors, compact and right-align Fade, keep Loop label stable with a clear active state.
 - [x] Verify on the Android app surface; inspect layout and interaction affordances.
 - [x] Reconcile and review the final diff.
-- [ ] Open a PR into main and leave it open.
+- [x] Open PR #12 into main and leave it open.
 
 ## Throughput checkpoint
 - Blocking first steps: fetch origin/main, confirm the main checkout is clean and aligned, create the task branch in a new worktree. Done at 01128ef; branch codex/neutral-waveform-controls.

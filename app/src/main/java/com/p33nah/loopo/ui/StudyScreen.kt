@@ -43,6 +43,7 @@ import com.p33nah.loopo.domain.model.LoopRegion
 import com.p33nah.loopo.domain.model.PlaybackRate
 import com.p33nah.loopo.domain.audio.PlaybackError
 import com.p33nah.loopo.domain.audio.PlaybackSnapshot
+import com.p33nah.loopo.domain.waveform.WaveformViewport
 import com.p33nah.loopo.domain.waveform.WaveformPhase
 import com.p33nah.loopo.domain.waveform.WaveformState
 import com.p33nah.loopo.ui.theme.Accent
@@ -58,7 +59,9 @@ fun StudyScreen(
 	state: StudyUiState,
 	playback: PlaybackSnapshot,
 	waveform: WaveformState,
+	viewport: WaveformViewport?,
 	onOpenTrack: () -> Unit,
+	onViewportChange: (WaveformViewport) -> Unit,
 	onTogglePlayback: () -> Unit,
 	onSeekToFrame: (Long) -> Unit,
 	onSetLoopRegion: (LoopRegion) -> Unit,
@@ -72,10 +75,19 @@ fun StudyScreen(
 		when (state) {
 			StudyUiState.Empty -> EmptyStudy(onOpenTrack, Modifier.weight(1f))
 			is StudyUiState.Loading -> LoadingStudy(state.displayName, Modifier.weight(1f))
+			is StudyUiState.RecoveryRequired -> RecoveryStudy(
+				state.displayName,
+				state.message,
+				onOpenTrack,
+				Modifier.weight(1f),
+			)
 			is StudyUiState.Ready -> TrackStudy(
 				inspection = state.inspection,
+				sessionWarning = state.sessionWarning,
 				waveform = waveform,
 				playback = playback,
+				viewport = viewport,
+				onViewportChange = onViewportChange,
 				onOpenTrack = onOpenTrack,
 				onSeekToFrame = onSeekToFrame,
 				onSetLoopRegion = onSetLoopRegion,
@@ -125,11 +137,11 @@ private fun EmptyStudy(onOpenTrack: () -> Unit, modifier: Modifier = Modifier) {
 					Text("♪", color = Accent, fontSize = 26.sp, fontWeight = FontWeight.Bold)
 				}
 			}
-			Spacer(Modifier.height(12.dp))
+			Spacer(Modifier.height(8.dp))
 			Text("Pronto per studiare?", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
-			Spacer(Modifier.height(6.dp))
+			Spacer(Modifier.height(3.dp))
 			Text("Apri un file MP3, WAV o FLAC dal tuo dispositivo.", color = Muted, fontSize = 13.sp)
-			Spacer(Modifier.height(10.dp))
+			Spacer(Modifier.height(6.dp))
 			Button(
 				onClick = onOpenTrack,
 				shape = RoundedCornerShape(13.dp),
@@ -156,10 +168,33 @@ private fun LoadingStudy(displayName: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
+private fun RecoveryStudy(displayName: String, message: String, onOpenTrack: () -> Unit, modifier: Modifier = Modifier) {
+	Box(modifier.fillMaxWidth().background(Card, RoundedCornerShape(20.dp)), contentAlignment = Alignment.Center) {
+		Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(20.dp)) {
+			Text("Riprendi lo studio", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+			Spacer(Modifier.height(8.dp))
+			Text(displayName, color = TextPrimary, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+			Text(message, color = Muted, fontSize = 13.sp, textAlign = TextAlign.Center)
+			Spacer(Modifier.height(12.dp))
+			Button(
+				onClick = onOpenTrack,
+				shape = RoundedCornerShape(13.dp),
+				colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Background),
+			) {
+				Text("Seleziona di nuovo il brano")
+			}
+		}
+	}
+}
+
+@Composable
 private fun TrackStudy(
 	inspection: TrackInspection.Ready,
+	sessionWarning: String?,
 	waveform: WaveformState,
 	playback: PlaybackSnapshot,
+	viewport: WaveformViewport?,
+	onViewportChange: (WaveformViewport) -> Unit,
 	onOpenTrack: () -> Unit,
 	onSeekToFrame: (Long) -> Unit,
 	onSetLoopRegion: (LoopRegion) -> Unit,
@@ -186,6 +221,8 @@ private fun TrackStudy(
 					waveform = waveform,
 					playback = playback,
 					loopRegion = draftLoop,
+					viewport = viewport ?: WaveformViewport.full(track.durationFrames),
+					onViewportChange = onViewportChange,
 					onLoopRegionChange = { draftLoop = it },
 					onLoopRegionChangeFinished = onSetLoopRegion,
 					onSeekToFrame = onSeekToFrame,
@@ -218,6 +255,9 @@ private fun TrackStudy(
 		)
 		if (!inspection.hasPersistedAccess) {
 			Text("Il file potrebbe dover essere riaperto dopo la chiusura dell'app.", color = Accent, fontSize = 11.sp)
+		}
+		sessionWarning?.let {
+			Text(it, color = Accent, fontSize = 11.sp)
 		}
 	}
 }
@@ -441,5 +481,6 @@ private fun TrackInspection.Reason.message(): String = when (this) {
 	TrackInspection.Reason.INVALID_METADATA -> "Non riesco a leggere durata o formato del brano."
 	TrackInspection.Reason.DECODER_UNAVAILABLE -> "Questo dispositivo non riesce a decodificare il formato del brano."
 	TrackInspection.Reason.AUDIO_OUTPUT_UNAVAILABLE -> "Non riesco ad aprire l'uscita audio del dispositivo."
+	TrackInspection.Reason.ACCESS_DENIED -> "L’accesso al file è scaduto. Riaprilo dal selettore."
 	TrackInspection.Reason.READ_FAILED -> "Non riesco ad accedere al file. Riaprilo dal selettore."
 }

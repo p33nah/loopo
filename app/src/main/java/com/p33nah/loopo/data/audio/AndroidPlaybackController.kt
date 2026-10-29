@@ -13,6 +13,7 @@ import com.p33nah.loopo.domain.audio.PcmReadResult
 import com.p33nah.loopo.domain.audio.PcmSeekResult
 import com.p33nah.loopo.domain.audio.PlaybackError
 import com.p33nah.loopo.domain.audio.PlaybackSnapshot
+import com.p33nah.loopo.domain.audio.PlaybackRestoreSettings
 import com.p33nah.loopo.domain.model.LoopRegion
 import com.p33nah.loopo.domain.model.PlaybackRate
 import com.p33nah.loopo.domain.model.TrackInfo
@@ -149,6 +150,21 @@ class AndroidPlaybackController(context: Context) {
 		playbackRate = rate
 		mutableState.update { it.copy(playbackRate = rate) }
 		seekUnsafe(position, resumeAfterSeek = wasPlaying)
+	}
+
+	suspend fun restorePaused(settings: PlaybackRestoreSettings): Boolean {
+		pauseForLifecycle()
+		val currentTrack = track ?: return false
+		val loop = settings.loop.copy(
+			aFrame = settings.loop.aFrame.coerceIn(0, currentTrack.durationFrames - 1),
+			bFrame = settings.loop.bFrame.coerceIn(1, currentTrack.durationFrames),
+		)
+		if (loop.aFrame >= loop.bFrame || !setLoopRegion(loop)) return false
+		setPlaybackRate(settings.playbackRate)
+		val maxPosition = currentTrack.durationFrames
+		val position = settings.positionFrame.coerceIn(0, maxPosition)
+		seekToFrame(position)
+		return mutableState.value.error == null && !mutableState.value.isPlaying
 	}
 
 	suspend fun togglePlayback() = transitionMutex.withLock {

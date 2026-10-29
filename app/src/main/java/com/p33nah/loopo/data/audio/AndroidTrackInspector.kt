@@ -6,6 +6,7 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.provider.DocumentsContract
 import com.p33nah.loopo.domain.model.TrackId
 import com.p33nah.loopo.domain.model.AudioContainer
 import com.p33nah.loopo.domain.model.TrackInfo
@@ -18,7 +19,8 @@ class AndroidTrackInspector(context: Context) {
 
 	fun inspect(uri: Uri, hasPersistedAccess: Boolean): TrackInspection {
 		return try {
-			val displayName = displayName(uri)
+			val sourceMetadata = sourceMetadata(uri)
+			val displayName = sourceMetadata.displayName
 			val extension = displayName.substringAfterLast('.', "").lowercase()
 			val resolverMimeType = resolver.getType(uri)
 			val container = containerFor(extension, resolverMimeType)
@@ -49,13 +51,15 @@ class AndroidTrackInspector(context: Context) {
 					sampleRate = metadata.sampleRate,
 					channelCount = metadata.channels,
 					sourceMimeType = metadata.mime,
+					sourceSizeBytes = sourceMetadata.sizeBytes,
+					sourceModifiedAtMillis = sourceMetadata.modifiedAtMillis,
 				),
 				hasPersistedAccess = hasPersistedAccess,
 			)
 		} catch (_: IOException) {
 			TrackInspection.Failed(TrackInspection.Reason.READ_FAILED)
 		} catch (_: SecurityException) {
-			TrackInspection.Failed(TrackInspection.Reason.READ_FAILED)
+			TrackInspection.Failed(TrackInspection.Reason.ACCESS_DENIED)
 		} catch (_: IllegalArgumentException) {
 			TrackInspection.Failed(TrackInspection.Reason.UNSUPPORTED)
 		}
@@ -101,15 +105,37 @@ class AndroidTrackInspector(context: Context) {
 		com.p33nah.loopo.domain.audio.PcmDecodeFailure.READ_FAILED -> TrackInspection.Reason.READ_FAILED
 	}
 
-	private fun displayName(uri: Uri): String = resolver.query(
-		uri,
-		arrayOf(OpenableColumns.DISPLAY_NAME),
-		null,
-		null,
-		null,
-	)?.use { cursor ->
-			if (cursor.moveToFirst()) cursor.getString(0) else null
-		} ?: uri.lastPathSegment ?: "Audio"
+	private fun sourceMetadata(uri: Uri): SourceMetadata {
+		val projection = arrayOf(
+			OpenableColumns.DISPLAY_NAME,
+			OpenableColumns.SIZE,
+			DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+		)
+		val cursor = try {
+			resolver.query(uri, projection, null, null, null)
+		} catch (_: IllegalArgumentException) {
+			try {
+				resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)
+			} catch (_: IllegalArgumentException) {
+				resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+			}
+		}
+		return cursor?.use {
+			if (!it.moveToFirst()) return@use SourceMetadata(uri.lastPathSegment ?: "Audio", null, null)
+			fun long(column: String): Long? {
+				val index = it.getColumnIndex(column)
+				return if (index >= 0 && !it.isNull(index)) it.getLong(index).takeIf { value -> value >= 0 } else null
+			}
+			val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+			SourceMetadata(
+				displayName = if (nameIndex >= 0) it.getString(nameIndex) ?: "Audio" else "Audio",
+				sizeBytes = long(OpenableColumns.SIZE),
+				modifiedAtMillis = long(DocumentsContract.Document.COLUMN_LAST_MODIFIED),
+			)
+		} ?: SourceMetadata(uri.lastPathSegment ?: "Audio", null, null)
+	}
+
+	private data class SourceMetadata(val displayName: String, val sizeBytes: Long?, val modifiedAtMillis: Long?)
 
 	private fun MediaFormat.longOrNull(key: String): Long? =
 		if (containsKey(key)) getLong(key) else null

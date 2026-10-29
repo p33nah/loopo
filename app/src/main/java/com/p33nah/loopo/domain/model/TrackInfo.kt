@@ -20,10 +20,14 @@ data class TrackInfo(
 	val sampleRate: Int,
 	val channelCount: Int,
 	val sourceMimeType: String,
+	val sourceSizeBytes: Long? = null,
+	val sourceModifiedAtMillis: Long? = null,
 ) {
 	init {
 		require(durationFrames > 0)
 		require(sampleRate > 0)
 		require(channelCount in 1..2)
+		require(sourceSizeBytes == null || sourceSizeBytes >= 0)
+		require(sourceModifiedAtMillis == null || sourceModifiedAtMillis >= 0)
 	}
 }

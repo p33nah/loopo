@@ -3,6 +3,12 @@ package com.p33nah.loopo.domain.audio
 import com.p33nah.loopo.domain.model.LoopRegion
 import com.p33nah.loopo.domain.model.PlaybackRate
 
+data class PlaybackRestoreSettings(
+	val positionFrame: Long,
+	val playbackRate: PlaybackRate,
+	val loop: LoopRegion,
+)
+
 data class PlaybackSnapshot(
 	val positionFrame: Long = 0,
 	val isPlaying: Boolean = false,

@@ -67,6 +67,7 @@ dependencies {
 	implementation(libs.androidx.lifecycle.runtime.ktx)
 	implementation(libs.androidx.lifecycle.runtime.compose)
 	implementation(libs.androidx.lifecycle.viewmodel.ktx)
+	implementation(libs.androidx.datastore.preferences)
 	implementation("com.google.oboe:oboe:1.11.0")
 
 	debugImplementation("androidx.compose.ui:ui-tooling")

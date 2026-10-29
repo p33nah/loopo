@@ -8,8 +8,10 @@ sealed interface TrackInspection {
 
 	enum class Reason {
 		UNSUPPORTED,
+		UNSUPPORTED_CHANNEL_LAYOUT,
 		NO_AUDIO_TRACK,
 		INVALID_METADATA,
+		DECODER_UNAVAILABLE,
 		READ_FAILED,
 	}
 }

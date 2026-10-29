@@ -192,7 +192,9 @@ private fun TrackInfo.formatSummary(): String {
 
 private fun TrackInspection.Reason.message(): String = when (this) {
 	TrackInspection.Reason.UNSUPPORTED -> "Formato non supportato. Scegli un MP3, WAV o FLAC."
+	TrackInspection.Reason.UNSUPPORTED_CHANNEL_LAYOUT -> "Il brano deve essere mono o stereo."
 	TrackInspection.Reason.NO_AUDIO_TRACK -> "Il file non contiene una traccia audio leggibile."
 	TrackInspection.Reason.INVALID_METADATA -> "Non riesco a leggere durata o formato del brano."
+	TrackInspection.Reason.DECODER_UNAVAILABLE -> "Questo dispositivo non riesce a decodificare il formato del brano."
 	TrackInspection.Reason.READ_FAILED -> "Non riesco ad accedere al file. Riaprilo dal selettore."
 }

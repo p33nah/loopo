@@ -41,14 +41,16 @@ fun WaveformCanvas(
 	waveform: WaveformState,
 	playback: PlaybackSnapshot,
 	loopRegion: LoopRegion,
+	viewport: WaveformViewport,
+	onViewportChange: (WaveformViewport) -> Unit,
 	modifier: Modifier = Modifier,
 	onSeekToFrame: (Long) -> Unit,
 	onLoopRegionChange: (LoopRegion) -> Unit,
 	onLoopRegionChangeFinished: (LoopRegion) -> Unit,
 ) {
-	val viewportState = remember(track.id) { mutableStateOf(WaveformViewport.full(track.durationFrames)) }
 	var activeLoopHandle by remember(track.id) { mutableStateOf<LoopHandle?>(null) }
-	val viewport by rememberUpdatedState(viewportState.value)
+	val viewportState by rememberUpdatedState(viewport)
+	val updateViewport by rememberUpdatedState(onViewportChange)
 	val currentLoop by rememberUpdatedState(loopRegion)
 	val seek by rememberUpdatedState(onSeekToFrame)
 	val updateLoop by rememberUpdatedState(onLoopRegionChange)
@@ -70,9 +72,9 @@ fun WaveformCanvas(
 				detectTransformGestures { centroid, pan, zoom, _ ->
 				if (activeLoopHandle == null) {
 					val width = size.width.toFloat().coerceAtLeast(1f)
-					viewportState.value = viewport
+					updateViewport(viewportState
 						.zoomAt(zoom, centroid.x / width, minVisibleFrames)
-						.panByPixels(pan.x, width)
+						.panByPixels(pan.x, width))
 				}
 				}
 			}

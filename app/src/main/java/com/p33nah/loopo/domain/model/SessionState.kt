@@ -1,5 +1,7 @@
 package com.p33nah.loopo.domain.model
 
+import com.p33nah.loopo.domain.waveform.WaveformViewport
+
 data class LoopRegion(
 	val aFrame: Long,
 	val bFrame: Long,
@@ -38,24 +40,89 @@ data class LoopRegion(
 	}
 }
 
-data class SessionState(
-	val trackId: TrackId,
+data class SessionSource(
+	val uri: String,
+	val displayName: String,
+	val sizeBytes: Long?,
+	val modifiedAtMillis: Long?,
 	val durationFrames: Long,
-	val positionFrame: Long,
-	val playbackRate: Float,
-	val loop: LoopRegion,
-	val viewStartFrame: Long,
-	val viewDurationFrames: Long,
-	val schemaVersion: Int = 1,
+	val sampleRate: Int,
+	val channelCount: Int,
+	val container: AudioContainer,
 ) {
 	init {
+		require(uri.isNotBlank())
 		require(durationFrames > 0)
-		require(positionFrame in 0..durationFrames)
-		require(playbackRate.isFinite() && playbackRate in 0.25f..2f)
-		require(loop.bFrame <= durationFrames)
-		require(viewStartFrame in 0 until durationFrames)
-		require(viewDurationFrames in 1..durationFrames)
-		require(viewStartFrame <= durationFrames - viewDurationFrames)
-		require(schemaVersion > 0)
+		require(sampleRate > 0)
+		require(channelCount in 1..2)
+		require(sizeBytes == null || sizeBytes >= 0)
+		require(modifiedAtMillis == null || modifiedAtMillis >= 0)
 	}
+
+	fun matches(candidate: TrackInfo): SourceMatch {
+		if (uri != candidate.uri.toString()) return SourceMatch.Different
+		if (durationFrames != candidate.durationFrames || sampleRate != candidate.sampleRate ||
+			channelCount != candidate.channelCount || container != candidate.container
+		) return SourceMatch.Different
+		if (sizeBytes != null && candidate.sourceSizeBytes != null && sizeBytes != candidate.sourceSizeBytes) {
+			return SourceMatch.Different
+		}
+		if (modifiedAtMillis != null && candidate.sourceModifiedAtMillis != null &&
+			modifiedAtMillis != candidate.sourceModifiedAtMillis
+		) return SourceMatch.Different
+		if (sizeBytes != null && candidate.sourceSizeBytes == null ||
+			modifiedAtMillis != null && candidate.sourceModifiedAtMillis == null
+		) return SourceMatch.Unverified
+		return SourceMatch.Same
+	}
+
+	companion object {
+		fun from(track: TrackInfo) = SessionSource(
+			uri = track.uri.toString(), displayName = track.displayName,
+			sizeBytes = track.sourceSizeBytes, modifiedAtMillis = track.sourceModifiedAtMillis,
+			durationFrames = track.durationFrames, sampleRate = track.sampleRate,
+			channelCount = track.channelCount, container = track.container,
+		)
+	}
+}
+
+enum class SourceMatch { Same, Different, Unverified }
+
+data class SessionState(
+	val source: SessionSource,
+	val positionFrame: Long,
+	val playbackRate: PlaybackRate,
+	val loop: LoopRegion,
+	val viewport: WaveformViewport,
+	val updatedAtMillis: Long,
+	val schemaVersion: Int = CURRENT_SCHEMA_VERSION,
+) {
+	init {
+		require(positionFrame in 0..source.durationFrames)
+		require(loop.bFrame <= source.durationFrames)
+		require(viewport.durationFrames == source.durationFrames)
+		require(updatedAtMillis >= 0)
+		require(schemaVersion == CURRENT_SCHEMA_VERSION)
+	}
+
+	companion object {
+		const val CURRENT_SCHEMA_VERSION = 1
+	}
+}
+
+sealed interface SessionLoadOutcome {
+	data object Empty : SessionLoadOutcome
+	data class Found(val session: SessionState) : SessionLoadOutcome
+	data object Corrupt : SessionLoadOutcome
+	data object StorageFailure : SessionLoadOutcome
+}
+
+sealed interface SessionSaveOutcome {
+	data object Saved : SessionSaveOutcome
+	data object StorageFailure : SessionSaveOutcome
+}
+
+interface SessionRepository {
+	suspend fun load(): SessionLoadOutcome
+	suspend fun save(session: SessionState): SessionSaveOutcome
 }

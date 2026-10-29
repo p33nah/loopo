@@ -7,13 +7,13 @@
 - Design the workflow before coding. **Done:** implement and build the cache/generator unit, then implement and build the screen/gesture unit. Keep the work on one branch and the decision log in `.audit/studio-musicale-v1.tsv`.
 - Run each unit as an experiment. **Complete.** The unchanged branch, waveform core, and UI integration each built successfully. No tests were added or run.
 - Keep the decision trail current. **Complete:** append one row per design fork and verified unit to `.audit/studio-musicale-v1.tsv`.
-- Verify M3 against the app and open a PR. **In progress:** APK packaging and diff checks passed; no device is attached. Push the branch and leave its PR open for the user to merge.
+- Verify M3 against the app and open a PR. **In progress:** APK packaging and diff checks passed. A connected phone rejected installation with `INSTALL_FAILED_USER_RESTRICTED`; runtime interaction is still unverified. Push the branch and leave its PR open for the user to merge.
 - `BLOCKED: independent review`. Session policy forbids spawning subagents, so neither parallel architecture runners nor the comment-sicko and cross-model trail reviews can run. Do not claim an independent review or merge readiness.
 
 ## Frame
 
 - **Definition of done.** The app shows a versioned, integrity-checked per-channel min/max pyramid; scans through a separate decoder and reports progress; lets the user zoom around the pinch center, pan, and seek by tapping; renders the playhead in source-frame time; and builds into the arm64 APK.
-- **Scope.** Two implementation units span the domain model, PCM scan, cache, ViewModel, Compose canvas, and app activity. Playback continues to own its decoder. A device, an audio corpus, and runtime performance measurements are unavailable here.
+- **Scope.** Two implementation units span the domain model, PCM scan, cache, ViewModel, Compose canvas, and app activity. Playback continues to own its decoder. A long audio corpus and runtime performance measurements are unavailable here; the connected device currently blocks installation.
 - **Rigor.** High for cache format, source identity, and frame mapping because corruption or time-coordinate errors silently show the wrong song position. Medium for reversible UI styling. The cache uses a schema version, CRC, atomic replacement, and bounded LRU cleanup.
 
 ## Design decisions
@@ -32,4 +32,4 @@
 1. **Baseline.** Build the merged M2 branch and record the result before code changes. **Verified:** `assembleDebug` passes on the unchanged branch.
 2. **Waveform model, generator, and cache.** Build, inspect the data bounds and cache validation paths, then commit this unit. **Committed as `3bd968d`; build and diff check passed.**
 3. **ViewModel and Compose interaction.** Build, inspect frame mapping and gesture state, then commit this unit. **Build passed; frame mapping and gesture state inspected.**
-4. **Hand back.** Inspect APK libraries, `git diff --check`, attach the PR, and list device checks that remain inconclusive. **APK packages arm64 native libraries; no device attached; PR pending.**
+4. **Hand back.** Inspect APK libraries, `git diff --check`, attach the PR, and list device checks that remain inconclusive. **APK packages arm64 native libraries; ADB sees the phone but installation is user-restricted; PR pending.**

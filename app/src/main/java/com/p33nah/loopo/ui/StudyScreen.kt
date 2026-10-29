@@ -20,7 +20,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.p33nah.loopo.data.audio.TrackInspection
 import com.p33nah.loopo.domain.model.TrackInfo
+import com.p33nah.loopo.domain.audio.PlaybackError
+import com.p33nah.loopo.domain.audio.PlaybackSnapshot
 import com.p33nah.loopo.ui.theme.Accent
 import com.p33nah.loopo.ui.theme.Background
 import com.p33nah.loopo.ui.theme.Card
@@ -38,7 +46,13 @@ import com.p33nah.loopo.ui.theme.Muted
 import com.p33nah.loopo.ui.theme.TextPrimary
 
 @Composable
-fun StudyScreen(state: StudyUiState, onOpenTrack: () -> Unit) {
+fun StudyScreen(
+	state: StudyUiState,
+	playback: PlaybackSnapshot,
+	onOpenTrack: () -> Unit,
+	onTogglePlayback: () -> Unit,
+	onSeekToFrame: (Long) -> Unit,
+) {
 	Column(
 		modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp, vertical = 18.dp),
 		verticalArrangement = Arrangement.spacedBy(18.dp),
@@ -50,7 +64,12 @@ fun StudyScreen(state: StudyUiState, onOpenTrack: () -> Unit) {
 			is StudyUiState.Ready -> TrackDetails(state.inspection, onOpenTrack, Modifier.weight(1f))
 			is StudyUiState.Error -> ErrorStudy(state.reason, onOpenTrack, Modifier.weight(1f))
 		}
-		TransportBar(state is StudyUiState.Ready)
+		TransportBar(
+			track = (state as? StudyUiState.Ready)?.inspection?.track,
+			playback = playback,
+			onTogglePlayback = onTogglePlayback,
+			onSeekToFrame = onSeekToFrame,
+		)
 	}
 }
 
@@ -135,7 +154,7 @@ private fun TrackDetails(
 				Spacer(Modifier.height(22.dp))
 				Box(Modifier.fillMaxWidth().height(1.dp).background(Line))
 				Spacer(Modifier.height(18.dp))
-				Text("Il motore audio e la forma d'onda verranno aggiunti nelle prossime fasi.", color = Muted, fontSize = 13.sp)
+				Text("Motore audio pronto", color = Muted, fontSize = 13.sp)
 				if (!inspection.hasPersistedAccess) {
 					Spacer(Modifier.height(7.dp))
 					Text("Il file potrebbe dover essere riaperto dopo la chiusura dell'app.", color = Accent, fontSize = 12.sp)
@@ -160,21 +179,62 @@ private fun ErrorStudy(reason: TrackInspection.Reason, onOpenTrack: () -> Unit, 
 }
 
 @Composable
-private fun TransportBar(trackReady: Boolean) {
-	Row(
-		modifier = Modifier.fillMaxWidth().height(64.dp).background(Card, RoundedCornerShape(16.dp)).padding(horizontal = 18.dp),
-		verticalAlignment = Alignment.CenterVertically,
+private fun TransportBar(
+	track: TrackInfo?,
+	playback: PlaybackSnapshot,
+	onTogglePlayback: () -> Unit,
+	onSeekToFrame: (Long) -> Unit,
+) {
+	val duration = track?.durationFrames ?: 0L
+	val position = playback.positionFrame.coerceIn(0, duration)
+	val progress = if (duration > 0) position.toFloat() / duration.toFloat() else 0f
+	var isSeeking by remember(track?.id) { mutableStateOf(false) }
+	var seekProgress by remember(track?.id) { mutableFloatStateOf(0f) }
+	Column(
+		modifier = Modifier.fillMaxWidth().height(72.dp).background(Card, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 7.dp),
+		verticalArrangement = Arrangement.Center,
 	) {
-		Text("A", color = Muted, fontSize = 12.sp)
-		Spacer(Modifier.width(11.dp))
-		Text("00:00", color = TextPrimary, fontSize = 13.sp)
-		Spacer(Modifier.weight(1f))
-		Text(if (trackReady) "Audio in preparazione" else "Nessun brano aperto", color = Muted, fontSize = 12.sp)
-		Spacer(Modifier.weight(1f))
-		Text("1.00x", color = if (trackReady) Accent else Muted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-		Spacer(Modifier.width(10.dp))
-		Box(Modifier.size(7.dp).background(if (trackReady) Accent else Line, CircleShape))
+		Row(verticalAlignment = Alignment.CenterVertically) {
+			Text(position.formatTime(track?.sampleRate ?: 1), color = TextPrimary, fontSize = 12.sp)
+			Slider(
+				value = if (isSeeking) seekProgress else progress,
+				onValueChange = {
+					isSeeking = true
+					seekProgress = it
+				},
+				onValueChangeFinished = {
+					if (track != null) onSeekToFrame((seekProgress * duration).toLong())
+					isSeeking = false
+				},
+				enabled = track != null,
+				modifier = Modifier.weight(1f).padding(horizontal = 10.dp),
+			)
+			Text(duration.formatTime(track?.sampleRate ?: 1), color = Muted, fontSize = 12.sp)
+			Spacer(Modifier.width(12.dp))
+			Button(
+				onClick = onTogglePlayback,
+				enabled = track != null,
+				shape = RoundedCornerShape(12.dp),
+				colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Background),
+			) {
+				Text(if (playback.isPlaying) "Pausa" else if (playback.isEnded) "Ripeti" else "Play", fontWeight = FontWeight.SemiBold)
+			}
+		}
+		val latency = playback.estimatedLatencyMillis?.let { "  ·  stima ${it.toInt()} ms" }.orEmpty()
+		val status = playback.error?.message() ?: if (track == null) "Nessun brano aperto" else "1.00x  ·  dropout ${playback.underrunCount}$latency"
+		Text(status, color = if (playback.error == null) Muted else Accent, fontSize = 10.sp, modifier = Modifier.align(Alignment.End))
 	}
+}
+
+private fun Long.formatTime(sampleRate: Int): String {
+	val totalSeconds = this / sampleRate.coerceAtLeast(1)
+	return "%d:%02d".format(totalSeconds / 60, totalSeconds % 60)
+}
+
+private fun PlaybackError.message(): String = when (this) {
+	PlaybackError.OUTPUT_UNAVAILABLE -> "Uscita audio non disponibile"
+	PlaybackError.AUDIO_FOCUS_DENIED -> "Audio in pausa: un'altra app sta usando l'audio"
+	PlaybackError.DECODER_READ_FAILED -> "Errore durante la decodifica del brano"
 }
 
 private fun TrackInfo.formatSummary(): String {
@@ -196,5 +256,6 @@ private fun TrackInspection.Reason.message(): String = when (this) {
 	TrackInspection.Reason.NO_AUDIO_TRACK -> "Il file non contiene una traccia audio leggibile."
 	TrackInspection.Reason.INVALID_METADATA -> "Non riesco a leggere durata o formato del brano."
 	TrackInspection.Reason.DECODER_UNAVAILABLE -> "Questo dispositivo non riesce a decodificare il formato del brano."
+	TrackInspection.Reason.AUDIO_OUTPUT_UNAVAILABLE -> "Non riesco ad aprire l'uscita audio del dispositivo."
 	TrackInspection.Reason.READ_FAILED -> "Non riesco ad accedere al file. Riaprilo dal selettore."
 }

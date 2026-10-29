@@ -21,6 +21,7 @@ android {
 		externalNativeBuild {
 			cmake {
 				cppFlags += listOf("-std=c++20", "-fvisibility=hidden")
+					arguments += "-DANDROID_STL=c++_shared"
 			}
 		}
 	}
@@ -44,6 +45,7 @@ android {
 
 	buildFeatures {
 		compose = true
+		prefab = true
 	}
 
 	externalNativeBuild {
@@ -65,6 +67,7 @@ dependencies {
 	implementation(libs.androidx.lifecycle.runtime.ktx)
 	implementation(libs.androidx.lifecycle.runtime.compose)
 	implementation(libs.androidx.lifecycle.viewmodel.ktx)
+	implementation("com.google.oboe:oboe:1.11.0")
 
 	debugImplementation("androidx.compose.ui:ui-tooling")
 }

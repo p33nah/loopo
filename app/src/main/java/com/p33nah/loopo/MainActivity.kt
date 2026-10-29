@@ -30,6 +30,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 		setContent {
 			val context = LocalContext.current
 			val state by viewModel.state.collectAsStateWithLifecycle()
+			val playback by viewModel.playbackState.collectAsStateWithLifecycle()
 			val openDocument = rememberLauncherForActivityResult(
 				contract = ActivityResultContracts.OpenDocument(),
 			) { uri ->
@@ -47,10 +48,18 @@ class MainActivity : androidx.activity.ComponentActivity() {
 			LoopoTheme {
 				StudyScreen(
 					state = state,
+					playback = playback,
 					onOpenTrack = { openDocument.launch(arrayOf("audio/*", "application/octet-stream")) },
+					onTogglePlayback = viewModel::togglePlayback,
+					onSeekToFrame = viewModel::seekToFrame,
 				)
 			}
 		}
+	}
+
+	override fun onStop() {
+		viewModel.pauseForLifecycle()
+		super.onStop()
 	}
 
 	private fun enterImmersiveMode() {

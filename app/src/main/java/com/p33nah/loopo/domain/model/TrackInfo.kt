@@ -1,0 +1,22 @@
+package com.p33nah.loopo.domain.model
+
+import android.net.Uri
+
+@JvmInline
+value class TrackId(val value: String)
+
+data class TrackInfo(
+	val id: TrackId,
+	val uri: Uri,
+	val displayName: String,
+	val durationFrames: Long,
+	val sampleRate: Int,
+	val channelCount: Int,
+	val sourceMimeType: String,
+) {
+	init {
+		require(durationFrames > 0)
+		require(sampleRate > 0)
+		require(channelCount in 1..2)
+	}
+}

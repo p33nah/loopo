@@ -50,6 +50,8 @@ import com.p33nah.loopo.ui.theme.Accent
 import com.p33nah.loopo.ui.theme.Background
 import com.p33nah.loopo.ui.theme.Card
 import com.p33nah.loopo.ui.theme.Line
+import com.p33nah.loopo.ui.theme.LoopA
+import com.p33nah.loopo.ui.theme.LoopB
 import com.p33nah.loopo.ui.theme.Muted
 import com.p33nah.loopo.ui.theme.TextPrimary
 import kotlin.math.roundToInt
@@ -286,6 +288,7 @@ private fun LoopControls(
 				onCommit(next)
 			},
 			enabled = enabled,
+			colors = ButtonDefaults.outlinedButtonColors(contentColor = LoopA),
 		) { Text("A · ${region.aFrame.formatLoopTime(track.sampleRate)}") }
 		OutlinedButton(
 			onClick = {
@@ -294,6 +297,7 @@ private fun LoopControls(
 				onCommit(next)
 		},
 			enabled = enabled,
+			colors = ButtonDefaults.outlinedButtonColors(contentColor = LoopB),
 		) { Text("B · ${region.bFrame.formatLoopTime(track.sampleRate)}") }
 		OutlinedButton(
 			onClick = {

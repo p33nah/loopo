@@ -5,10 +5,17 @@ import android.net.Uri
 @JvmInline
 value class TrackId(val value: String)
 
+enum class AudioContainer {
+	MP3,
+	WAV,
+	FLAC,
+}
+
 data class TrackInfo(
 	val id: TrackId,
 	val uri: Uri,
 	val displayName: String,
+	val container: AudioContainer,
 	val durationFrames: Long,
 	val sampleRate: Int,
 	val channelCount: Int,

@@ -13,6 +13,6 @@
 - [ ] Optionally test device playback at 0.50x, 0.75x and 1.50x. No long stress run is planned unless requested.
 - [ ] Investigate the implausible ~96-second Oboe latency estimate observed after a loop reset. Ordinary playback showed 86–98 ms.
 - [x] Review the full diff and build the final release variant.
-- [ ] Open a PR for the user to merge.
+- [x] Open PR #7 for the user to merge.
 
 The decoder position, stretcher delay, output ring and source-frame tags form one ordered stream, so this branch has one implementation owner.

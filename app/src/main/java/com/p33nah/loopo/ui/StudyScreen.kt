@@ -24,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.p33nah.loopo.data.audio.TrackInspection
 import com.p33nah.loopo.domain.model.TrackInfo
+import com.p33nah.loopo.domain.model.LoopRegion
 import com.p33nah.loopo.domain.audio.PlaybackError
 import com.p33nah.loopo.domain.audio.PlaybackSnapshot
 import com.p33nah.loopo.domain.waveform.WaveformPhase
@@ -56,10 +58,11 @@ fun StudyScreen(
 	onOpenTrack: () -> Unit,
 	onTogglePlayback: () -> Unit,
 	onSeekToFrame: (Long) -> Unit,
+	onSetLoopRegion: (LoopRegion) -> Unit,
 ) {
 	Column(
-		modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp, vertical = 18.dp),
-		verticalArrangement = Arrangement.spacedBy(18.dp),
+		modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp, vertical = 12.dp),
+		verticalArrangement = Arrangement.spacedBy(12.dp),
 	) {
 		TopBar(onOpenTrack)
 		when (state) {
@@ -71,6 +74,7 @@ fun StudyScreen(
 				playback = playback,
 				onOpenTrack = onOpenTrack,
 				onSeekToFrame = onSeekToFrame,
+				onSetLoopRegion = onSetLoopRegion,
 				modifier = Modifier.weight(1f),
 			)
 			is StudyUiState.Error -> ErrorStudy(state.reason, onOpenTrack, Modifier.weight(1f))
@@ -153,9 +157,15 @@ private fun TrackStudy(
 	playback: PlaybackSnapshot,
 	onOpenTrack: () -> Unit,
 	onSeekToFrame: (Long) -> Unit,
+	onSetLoopRegion: (LoopRegion) -> Unit,
 	modifier: Modifier = Modifier,
 ) {
 	val track = inspection.track
+	val defaultLoop = LoopRegion(0, track.durationFrames, enabled = false, crossfadeMs = 20)
+	var draftLoop by remember(track.id) { mutableStateOf(playback.loopRegion ?: defaultLoop) }
+	LaunchedEffect(track.id, playback.loopRegion, playback.isLoopCommandPending) {
+		if (!playback.isLoopCommandPending) draftLoop = playback.loopRegion ?: defaultLoop
+	}
 	Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
 			Column(modifier = Modifier.weight(1f)) {
@@ -170,6 +180,9 @@ private fun TrackStudy(
 					track = track,
 					waveform = waveform,
 					playback = playback,
+					loopRegion = draftLoop,
+					onLoopRegionChange = { draftLoop = it },
+					onLoopRegionChangeFinished = onSetLoopRegion,
 					onSeekToFrame = onSeekToFrame,
 				)
 				when (waveform) {
@@ -189,9 +202,83 @@ private fun TrackStudy(
 				}
 			}
 		}
+		LoopControls(
+			track = track,
+			region = draftLoop,
+			positionFrame = playback.positionFrame,
+			effectiveCrossfadeFrames = draftLoop.effectiveCrossfadeFrames(track.sampleRate),
+			enabled = !playback.isLoopCommandPending,
+			onRegionChange = { draftLoop = it },
+			onCommit = onSetLoopRegion,
+		)
 		if (!inspection.hasPersistedAccess) {
 			Text("Il file potrebbe dover essere riaperto dopo la chiusura dell'app.", color = Accent, fontSize = 11.sp)
 		}
+	}
+}
+
+@Composable
+private fun LoopControls(
+	track: TrackInfo,
+	region: LoopRegion,
+	positionFrame: Long,
+	effectiveCrossfadeFrames: Long,
+	enabled: Boolean,
+	onRegionChange: (LoopRegion) -> Unit,
+	onCommit: (LoopRegion) -> Unit,
+) {
+	var fadeDraft by remember(track.id) { mutableFloatStateOf(region.crossfadeMs.toFloat()) }
+	LaunchedEffect(track.id, region.crossfadeMs) { fadeDraft = region.crossfadeMs.toFloat() }
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		verticalAlignment = Alignment.CenterVertically,
+		horizontalArrangement = Arrangement.spacedBy(8.dp),
+	) {
+		OutlinedButton(
+			onClick = {
+				val next = region.moveATo(positionFrame, track.durationFrames, track.sampleRate)
+				onRegionChange(next)
+				onCommit(next)
+			},
+			enabled = enabled,
+		) { Text("A · ${region.aFrame.formatLoopTime(track.sampleRate)}") }
+		OutlinedButton(
+			onClick = {
+				val next = region.moveBTo(positionFrame, track.durationFrames, track.sampleRate)
+				onRegionChange(next)
+				onCommit(next)
+		},
+			enabled = enabled,
+		) { Text("B · ${region.bFrame.formatLoopTime(track.sampleRate)}") }
+		OutlinedButton(
+			onClick = {
+				val next = region.copy(enabled = !region.enabled)
+				onRegionChange(next)
+				onCommit(next)
+			},
+			enabled = enabled,
+		) { Text(if (enabled && region.enabled) "Loop attivo" else if (!enabled) "Applico…" else "Loop") }
+		val appliedMs = effectiveCrossfadeFrames * 1_000 / track.sampleRate.coerceAtLeast(1)
+		Text(
+			if (appliedMs < region.crossfadeMs) "${appliedMs} ms" else "Fade ${region.crossfadeMs} ms",
+			color = Muted,
+			fontSize = 11.sp,
+		)
+		Slider(
+			value = fadeDraft,
+			onValueChange = {
+				fadeDraft = it
+				onRegionChange(region.copy(crossfadeMs = it.toInt().coerceIn(0, 100)))
+			},
+			onValueChangeFinished = {
+				val next = region.copy(crossfadeMs = fadeDraft.toInt().coerceIn(0, 100))
+				onRegionChange(next)
+				onCommit(next)
+			},
+			valueRange = 0f..100f,
+			enabled = enabled,
+			modifier = Modifier.weight(1f),
+		)
 	}
 }
 
@@ -264,6 +351,14 @@ private fun TransportBar(
 private fun Long.formatTime(sampleRate: Int): String {
 	val totalSeconds = this / sampleRate.coerceAtLeast(1)
 	return "%d:%02d".format(totalSeconds / 60, totalSeconds % 60)
+}
+
+private fun Long.formatLoopTime(sampleRate: Int): String {
+	val totalMillis = this * 1_000 / sampleRate.coerceAtLeast(1)
+	val minutes = totalMillis / 60_000
+	val seconds = totalMillis / 1_000 % 60
+	val centiseconds = totalMillis / 10 % 100
+	return "%d:%02d.%02d".format(minutes, seconds, centiseconds)
 }
 
 private fun PlaybackError.message(): String = when (this) {

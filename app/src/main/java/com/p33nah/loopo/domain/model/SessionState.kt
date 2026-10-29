@@ -11,6 +11,31 @@ data class LoopRegion(
 		require(aFrame < bFrame)
 		require(crossfadeMs in 0..100)
 	}
+
+	fun moveATo(frame: Long, durationFrames: Long, sampleRate: Int): LoopRegion {
+		val minSpan = minSpanFrames(durationFrames, sampleRate)
+		return copy(aFrame = frame.coerceIn(0, (bFrame - minSpan).coerceAtLeast(0)))
+	}
+
+	fun moveBTo(frame: Long, durationFrames: Long, sampleRate: Int): LoopRegion {
+		val minSpan = minSpanFrames(durationFrames, sampleRate)
+		val minB = (aFrame + minSpan).coerceAtMost(durationFrames)
+		return copy(bFrame = frame.coerceIn(minB, durationFrames))
+	}
+
+	fun effectiveCrossfadeFrames(sampleRate: Int): Long = minOf(
+		crossfadeMs.toLong() * sampleRate.coerceAtLeast(1) / 1_000,
+		(bFrame - aFrame) / MAX_CROSSFADE_LOOP_DIVISOR,
+	)
+
+	private fun minSpanFrames(durationFrames: Long, sampleRate: Int): Long = minOf(
+		durationFrames.coerceAtLeast(1),
+		(sampleRate / 100).coerceAtLeast(1).toLong(),
+	)
+
+	companion object {
+		private const val MAX_CROSSFADE_LOOP_DIVISOR = 4
+	}
 }
 
 data class SessionState(

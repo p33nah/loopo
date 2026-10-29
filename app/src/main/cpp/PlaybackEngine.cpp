@@ -5,7 +5,8 @@
 #include <cmath>
 
 PlaybackEngine::PlaybackEngine(int sampleRate, int channelCount, int capacityFrames)
-		: sampleRate_(sampleRate), channelCount_(channelCount), ring_(channelCount, capacityFrames) {}
+		: sampleRate_(sampleRate), channelCount_(channelCount), ring_(channelCount, capacityFrames),
+		  callbackSourceFrames_(capacityFrames), audiblePositionHistory_(capacityFrames) {}
 
 PlaybackEngine::~PlaybackEngine() {
 	close();
@@ -75,14 +76,15 @@ bool PlaybackEngine::resetAtFrame(int64_t sourceFrame) {
 	ring_.clear();
 	sourcePosition_.store(sourceFrame, std::memory_order_release);
 	basePosition_.store(sourceFrame, std::memory_order_release);
+	renderedOutputFrames_.store(0, std::memory_order_release);
 	inputEnded_.store(false, std::memory_order_release);
 	ended_.store(false, std::memory_order_release);
 	return true;
 }
 
-int PlaybackEngine::write(const float* samples, int frames) {
+int PlaybackEngine::write(const float* samples, int frames, int64_t sourceStartFrame) {
 	if (!samples || frames <= 0 || inputEnded_.load(std::memory_order_acquire)) return 0;
-	return ring_.write(samples, frames);
+	return ring_.write(samples, frames, sourceStartFrame);
 }
 
 int PlaybackEngine::writeSpace() const {
@@ -102,11 +104,17 @@ int PlaybackEngine::queuedFrames() const {
 }
 
 int64_t PlaybackEngine::positionFrame() const {
-	const auto renderedFrame = sourcePosition_.load(std::memory_order_acquire);
+	const auto renderedOutputFrames = renderedOutputFrames_.load(std::memory_order_acquire);
+	if (renderedOutputFrames <= 0) return basePosition_.load(std::memory_order_acquire);
 	const auto latencyMillis = estimatedLatencyMillis_.load(std::memory_order_acquire);
-	if (latencyMillis < 0.0) return renderedFrame;
-	const auto latencyFrames = static_cast<int64_t>(std::llround(latencyMillis * sampleRate_ / 1000.0));
-	return std::max(basePosition_.load(std::memory_order_acquire), renderedFrame - latencyFrames);
+	if (latencyMillis < 0.0) return sourcePosition_.load(std::memory_order_acquire);
+	const auto latencyFrames = std::min<int64_t>(
+		static_cast<int64_t>(std::llround(latencyMillis * sampleRate_ / 1000.0)),
+		static_cast<int64_t>(audiblePositionHistory_.size() - 1));
+	if (renderedOutputFrames <= latencyFrames) return basePosition_.load(std::memory_order_acquire);
+	const auto outputFrame = renderedOutputFrames - latencyFrames - 1;
+	const auto position = audiblePositionHistory_[outputFrame % audiblePositionHistory_.size()].load(std::memory_order_acquire);
+	return position >= 0 ? position : sourcePosition_.load(std::memory_order_acquire);
 }
 
 double PlaybackEngine::estimatedLatencyMillis() {
@@ -138,9 +146,21 @@ oboe::DataCallbackResult PlaybackEngine::onAudioReady(oboe::AudioStream* stream,
 	const auto sampleCount = static_cast<size_t>(numFrames) * outputChannels;
 	std::fill_n(output, sampleCount, 0.0f);
 	if (!playing_.load(std::memory_order_acquire)) return oboe::DataCallbackResult::Continue;
+	if (static_cast<size_t>(numFrames) > callbackSourceFrames_.size()) {
+		underruns_.fetch_add(1, std::memory_order_relaxed);
+		return oboe::DataCallbackResult::Continue;
+	}
 
-	const auto framesRead = ring_.read(output, numFrames, outputChannels);
-	sourcePosition_.fetch_add(framesRead, std::memory_order_relaxed);
+	const auto framesRead = ring_.read(output, numFrames, outputChannels, callbackSourceFrames_.data());
+	const auto outputStartFrame = renderedOutputFrames_.load(std::memory_order_relaxed);
+	auto sourcePosition = sourcePosition_.load(std::memory_order_relaxed);
+	for (int32_t frame = 0; frame < numFrames; ++frame) {
+		if (frame < framesRead) sourcePosition = callbackSourceFrames_[frame] + 1;
+		audiblePositionHistory_[(outputStartFrame + frame) % audiblePositionHistory_.size()].store(
+			sourcePosition, std::memory_order_relaxed);
+	}
+	sourcePosition_.store(sourcePosition, std::memory_order_release);
+	renderedOutputFrames_.store(outputStartFrame + numFrames, std::memory_order_release);
 	if (framesRead < numFrames) {
 		if (inputEnded_.load(std::memory_order_acquire) && ring_.availableToRead() == 0) {
 			playing_.store(false, std::memory_order_release);

@@ -54,6 +54,8 @@ import com.p33nah.loopo.ui.theme.Accent
 import com.p33nah.loopo.ui.theme.Background
 import com.p33nah.loopo.ui.theme.Card
 import com.p33nah.loopo.ui.theme.Line
+import com.p33nah.loopo.ui.theme.LoopA
+import com.p33nah.loopo.ui.theme.LoopB
 import com.p33nah.loopo.ui.theme.Muted
 import com.p33nah.loopo.ui.theme.TextPrimary
 import kotlin.math.roundToInt
@@ -303,7 +305,7 @@ private fun LoopControls(
 			},
 			enabled = enabled,
 			shape = RoundedCornerShape(10.dp),
-			colors = ButtonDefaults.textButtonColors(containerColor = Card, contentColor = TextPrimary),
+			colors = ButtonDefaults.textButtonColors(containerColor = Card, contentColor = LoopA),
 			contentPadding = PaddingValues(horizontal = 8.dp),
 			modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 104.dp),
 		) { Text("A · ${region.aFrame.formatLoopTime(track.sampleRate)}", maxLines = 1, softWrap = false) }
@@ -315,7 +317,7 @@ private fun LoopControls(
 			},
 			enabled = enabled,
 			shape = RoundedCornerShape(10.dp),
-			colors = ButtonDefaults.textButtonColors(containerColor = Card, contentColor = TextPrimary),
+			colors = ButtonDefaults.textButtonColors(containerColor = Card, contentColor = LoopB),
 			contentPadding = PaddingValues(horizontal = 8.dp),
 			modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 104.dp),
 		) { Text("B · ${region.bFrame.formatLoopTime(track.sampleRate)}", maxLines = 1, softWrap = false) }

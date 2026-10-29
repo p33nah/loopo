@@ -8,13 +8,17 @@ import com.p33nah.loopo.data.audio.AndroidTrackInspector
 import com.p33nah.loopo.data.audio.AndroidPcmDecoderFactory
 import com.p33nah.loopo.data.audio.AndroidPlaybackController
 import com.p33nah.loopo.data.audio.TrackInspection
+import com.p33nah.loopo.data.waveform.AndroidWaveformRepository
 import com.p33nah.loopo.domain.audio.PcmDecodeFailure
 import com.p33nah.loopo.domain.audio.PcmDecoderResult
 import com.p33nah.loopo.domain.audio.PcmReadResult
 import com.p33nah.loopo.domain.audio.PlaybackError
+import com.p33nah.loopo.domain.waveform.WaveformState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -22,11 +26,17 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 	private val inspector = AndroidTrackInspector(application)
 	private val decoderFactory = AndroidPcmDecoderFactory(application)
 	private val playbackController = AndroidPlaybackController(application)
+	private val waveformRepository = AndroidWaveformRepository(application)
 	private val mutableState = MutableStateFlow<StudyUiState>(StudyUiState.Empty)
+	private val mutableWaveformState = MutableStateFlow<WaveformState>(WaveformState.Empty)
+	private var waveformJob: Job? = null
 	val state = mutableState.asStateFlow()
 	val playbackState = playbackController.state
+	val waveformState = mutableWaveformState.asStateFlow()
 
 	fun openTrack(uri: Uri, hasPersistedAccess: Boolean) {
+		waveformJob?.cancel()
+		mutableWaveformState.value = WaveformState.Empty
 		mutableState.value = StudyUiState.Loading(uri.lastPathSegment ?: "Audio")
 		viewModelScope.launch {
 			playbackController.unload()
@@ -39,7 +49,10 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 			mutableState.value = when (inspection) {
 				is TrackInspection.Ready -> {
 					when (playbackController.load(inspection.track)) {
-						null -> StudyUiState.Ready(inspection)
+						null -> {
+							startWaveformScan(inspection.track)
+							StudyUiState.Ready(inspection)
+						}
 						PlaybackError.OUTPUT_UNAVAILABLE -> StudyUiState.Error(TrackInspection.Reason.AUDIO_OUTPUT_UNAVAILABLE)
 						PlaybackError.AUDIO_FOCUS_DENIED,
 						PlaybackError.DECODER_READ_FAILED -> StudyUiState.Error(TrackInspection.Reason.READ_FAILED)
@@ -47,6 +60,16 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 				}
 				is TrackInspection.Failed -> StudyUiState.Error(inspection.reason)
 			}
+		}
+	}
+
+	private fun startWaveformScan(track: com.p33nah.loopo.domain.model.TrackInfo) {
+		waveformJob = viewModelScope.launch {
+			waveformRepository.observe(track)
+				.flowOn(Dispatchers.IO)
+				.collect { state ->
+					mutableWaveformState.value = state
+				}
 		}
 	}
 
@@ -63,6 +86,7 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	override fun onCleared() {
+		waveformJob?.cancel()
 		playbackController.release()
 		super.onCleared()
 	}

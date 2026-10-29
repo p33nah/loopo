@@ -31,6 +31,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 			val context = LocalContext.current
 			val state by viewModel.state.collectAsStateWithLifecycle()
 			val playback by viewModel.playbackState.collectAsStateWithLifecycle()
+			val waveform by viewModel.waveformState.collectAsStateWithLifecycle()
 			val openDocument = rememberLauncherForActivityResult(
 				contract = ActivityResultContracts.OpenDocument(),
 			) { uri ->
@@ -49,6 +50,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 				StudyScreen(
 					state = state,
 					playback = playback,
+					waveform = waveform,
 					onOpenTrack = { openDocument.launch(arrayOf("audio/*", "application/octet-stream")) },
 					onTogglePlayback = viewModel::togglePlayback,
 					onSeekToFrame = viewModel::seekToFrame,

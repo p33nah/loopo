@@ -3,6 +3,7 @@ package com.p33nah.loopo.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +39,8 @@ import com.p33nah.loopo.data.audio.TrackInspection
 import com.p33nah.loopo.domain.model.TrackInfo
 import com.p33nah.loopo.domain.audio.PlaybackError
 import com.p33nah.loopo.domain.audio.PlaybackSnapshot
+import com.p33nah.loopo.domain.waveform.WaveformPhase
+import com.p33nah.loopo.domain.waveform.WaveformState
 import com.p33nah.loopo.ui.theme.Accent
 import com.p33nah.loopo.ui.theme.Background
 import com.p33nah.loopo.ui.theme.Card
@@ -49,6 +52,7 @@ import com.p33nah.loopo.ui.theme.TextPrimary
 fun StudyScreen(
 	state: StudyUiState,
 	playback: PlaybackSnapshot,
+	waveform: WaveformState,
 	onOpenTrack: () -> Unit,
 	onTogglePlayback: () -> Unit,
 	onSeekToFrame: (Long) -> Unit,
@@ -61,7 +65,14 @@ fun StudyScreen(
 		when (state) {
 			StudyUiState.Empty -> EmptyStudy(onOpenTrack, Modifier.weight(1f))
 			is StudyUiState.Loading -> LoadingStudy(state.displayName, Modifier.weight(1f))
-			is StudyUiState.Ready -> TrackDetails(state.inspection, onOpenTrack, Modifier.weight(1f))
+			is StudyUiState.Ready -> TrackStudy(
+				inspection = state.inspection,
+				waveform = waveform,
+				playback = playback,
+				onOpenTrack = onOpenTrack,
+				onSeekToFrame = onSeekToFrame,
+				modifier = Modifier.weight(1f),
+			)
 			is StudyUiState.Error -> ErrorStudy(state.reason, onOpenTrack, Modifier.weight(1f))
 		}
 		TransportBar(
@@ -136,33 +147,57 @@ private fun LoadingStudy(displayName: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TrackDetails(
+private fun TrackStudy(
 	inspection: TrackInspection.Ready,
+	waveform: WaveformState,
+	playback: PlaybackSnapshot,
 	onOpenTrack: () -> Unit,
+	onSeekToFrame: (Long) -> Unit,
 	modifier: Modifier = Modifier,
 ) {
 	val track = inspection.track
-	Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+	Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+		Row(verticalAlignment = Alignment.CenterVertically) {
+			Column(modifier = Modifier.weight(1f)) {
+				Text(track.displayName, color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+				Text(track.formatSummary(), color = Muted, fontSize = 12.sp)
+			}
+			OutlinedButton(onClick = onOpenTrack) { Text("Cambia brano") }
+		}
 		Surface(color = Card, shape = RoundedCornerShape(17.dp), modifier = Modifier.fillMaxWidth().weight(1f)) {
-			Column(
-				modifier = Modifier.fillMaxSize().padding(22.dp),
-				verticalArrangement = Arrangement.Center,
-			) {
-				Text(track.displayName, color = TextPrimary, fontSize = 21.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-				Spacer(Modifier.height(9.dp))
-				Text(track.formatSummary(), color = Muted, fontSize = 13.sp)
-				Spacer(Modifier.height(22.dp))
-				Box(Modifier.fillMaxWidth().height(1.dp).background(Line))
-				Spacer(Modifier.height(18.dp))
-				Text("Motore audio pronto", color = Muted, fontSize = 13.sp)
-				if (!inspection.hasPersistedAccess) {
-					Spacer(Modifier.height(7.dp))
-					Text("Il file potrebbe dover essere riaperto dopo la chiusura dell'app.", color = Accent, fontSize = 12.sp)
+			Box(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
+				WaveformCanvas(
+					track = track,
+					waveform = waveform,
+					playback = playback,
+					onSeekToFrame = onSeekToFrame,
+				)
+				when (waveform) {
+					WaveformState.Empty -> WaveformStatus("Preparazione waveform…")
+					is WaveformState.Loading -> {
+						val progress = if (waveform.totalFrames > 0) {
+							(waveform.processedFrames.toFloat() / waveform.totalFrames).coerceIn(0f, 1f)
+						} else 0f
+						if (waveform.preview == null) {
+							WaveformStatus(if (waveform.phase == WaveformPhase.VERIFYING_SOURCE) "Verifica file audio…" else "Analisi audio…")
+						} else {
+							Text("Analisi ${(progress * 100).toInt()}%", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.BottomEnd))
+						}
+					}
+					is WaveformState.Failed -> WaveformStatus("Waveform non disponibile")
+					is WaveformState.Ready -> Unit
 				}
 			}
 		}
-		OutlinedButton(onClick = onOpenTrack, modifier = Modifier.align(Alignment.End)) { Text("Cambia brano") }
+		if (!inspection.hasPersistedAccess) {
+			Text("Il file potrebbe dover essere riaperto dopo la chiusura dell'app.", color = Accent, fontSize = 11.sp)
+		}
 	}
+}
+
+@Composable
+private fun BoxScope.WaveformStatus(message: String) {
+	Text(message, color = Muted, fontSize = 13.sp, modifier = Modifier.align(Alignment.Center))
 }
 
 @Composable

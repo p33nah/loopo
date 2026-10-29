@@ -28,12 +28,13 @@ class MediaCodecPcmDecoder private constructor(
 	private var seekTargetFrame: Long? = null
 	private var pendingSamples = FloatArray(0)
 	private var pendingOffset = 0
+	private var pendingCount = 0
 	private var closed = false
 
 	override fun readFrames(maxFrames: Int): PcmReadResult {
 		if (closed || maxFrames <= 0) return PcmReadResult.Failed(PcmDecodeFailure.READ_FAILED)
 		val wantedSamples = maxFrames * format.channelCount
-		while (pendingSamples.size - pendingOffset < wantedSamples && !outputEnded) {
+		while (pendingCount < wantedSamples && !outputEnded) {
 			when (val result = decodeNextOutput()) {
 				is DecodeResult.Samples -> append(result.samples)
 				DecodeResult.End -> outputEnded = true
@@ -41,15 +42,16 @@ class MediaCodecPcmDecoder private constructor(
 				DecodeResult.NoOutput -> Unit
 			}
 		}
-		val available = pendingSamples.size - pendingOffset
+		val available = pendingCount
 		if (available == 0) return PcmReadResult.EndOfStream
 		val frameCount = minOf(maxFrames, available / format.channelCount)
 		if (frameCount <= 0) return PcmReadResult.Failed(PcmDecodeFailure.READ_FAILED)
 		val sampleCount = frameCount * format.channelCount
-		val samples = pendingSamples.copyOfRange(pendingOffset, pendingOffset + sampleCount)
+		val samples = FloatArray(sampleCount)
+		System.arraycopy(pendingSamples, pendingOffset, samples, 0, sampleCount)
 		pendingOffset += sampleCount
-		if (pendingOffset == pendingSamples.size) {
-			pendingSamples = FloatArray(0)
+		pendingCount -= sampleCount
+		if (pendingCount == 0) {
 			pendingOffset = 0
 		}
 		return PcmReadResult.Frames(PcmBlock(format, frameCount, samples))
@@ -63,8 +65,8 @@ class MediaCodecPcmDecoder private constructor(
 			codec.flush()
 			inputEnded = false
 			outputEnded = false
-			pendingSamples = FloatArray(0)
 			pendingOffset = 0
+			pendingCount = 0
 			seekTargetFrame = frame
 			PcmSeekResult.Seeked(frame)
 		} catch (_: IllegalStateException) {
@@ -149,7 +151,10 @@ class MediaCodecPcmDecoder private constructor(
 						codec.releaseOutputBuffer(outputIndex, false)
 					}
 					if (samples.size % format.channelCount != 0) return DecodeResult.Failed(PcmDecodeFailure.READ_FAILED)
-					if (isEos) inputEnded = true
+					if (isEos) {
+						inputEnded = true
+						outputEnded = true
+					}
 					if (samples.isNotEmpty()) return DecodeResult.Samples(samples)
 					if (isEos) return DecodeResult.End
 				}
@@ -160,9 +165,19 @@ class MediaCodecPcmDecoder private constructor(
 
 	private fun append(samples: FloatArray) {
 		if (samples.isEmpty()) return
-		val remaining = pendingSamples.copyOfRange(pendingOffset, pendingSamples.size)
-		pendingSamples = remaining + samples
-		pendingOffset = 0
+		if (pendingOffset + pendingCount + samples.size > pendingSamples.size) {
+			if (pendingOffset > 0) {
+				System.arraycopy(pendingSamples, pendingOffset, pendingSamples, 0, pendingCount)
+				pendingOffset = 0
+			}
+			val requiredCapacity = pendingCount + samples.size
+			if (requiredCapacity > pendingSamples.size) {
+				val doubledCapacity = (pendingSamples.size * 2).coerceAtLeast(MIN_PENDING_SAMPLES)
+				pendingSamples = pendingSamples.copyOf(maxOf(requiredCapacity, doubledCapacity))
+			}
+		}
+		System.arraycopy(samples, 0, pendingSamples, pendingOffset + pendingCount, samples.size)
+		pendingCount += samples.size
 	}
 
 	override fun close() {
@@ -188,6 +203,7 @@ class MediaCodecPcmDecoder private constructor(
 	companion object {
 		private const val TIMEOUT_US = 10_000L
 		private const val MAX_IDLE_CYCLES = 500
+		private const val MIN_PENDING_SAMPLES = 4_096
 
 		fun open(context: Context, uri: Uri): PcmDecoderResult {
 			val extractor = MediaExtractor()

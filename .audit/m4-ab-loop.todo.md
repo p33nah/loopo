@@ -14,7 +14,7 @@ Deliver an editable A/B source-frame loop with real-time repetition, equal-power
 - [x] Add A/B handles and loop/crossfade controls with acknowledged controller state.
 - [x] Build and exercise short loops, near-EOF loops, edits during playback, and track replacement on the Redmi.
 - [x] Update `.audit/studio-musicale-v1.tsv and inspect the diff.
-- [ ] Commit, push the branch, and open a PR to `main`.
+- [x] Commit, push the branch, and open PR #6 to `main`.
 
 ## Scope and constraints
 

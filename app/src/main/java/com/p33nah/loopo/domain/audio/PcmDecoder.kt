@@ -34,6 +34,11 @@ sealed interface PcmDecoderResult {
 	data class Failed(val reason: PcmDecodeFailure) : PcmDecoderResult
 }
 
+sealed interface PcmSeekResult {
+	data class Seeked(val frame: Long) : PcmSeekResult
+	data class Failed(val reason: PcmDecodeFailure) : PcmSeekResult
+}
+
 enum class PcmDecodeFailure {
 	UNSUPPORTED_FORMAT,
 	UNSUPPORTED_CHANNEL_LAYOUT,
@@ -46,4 +51,5 @@ enum class PcmDecodeFailure {
 interface PcmDecoder : Closeable {
 	val format: PcmFormat
 	fun readFrames(maxFrames: Int): PcmReadResult
+	fun seekToFrame(frame: Long): PcmSeekResult
 }

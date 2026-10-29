@@ -12,6 +12,7 @@ import com.p33nah.loopo.domain.audio.PcmDecoder
 import com.p33nah.loopo.domain.audio.PcmDecoderResult
 import com.p33nah.loopo.domain.audio.PcmFormat
 import com.p33nah.loopo.domain.audio.PcmReadResult
+import com.p33nah.loopo.domain.audio.PcmSeekResult
 import java.io.IOException
 import java.nio.ByteOrder
 
@@ -24,6 +25,7 @@ class MediaCodecPcmDecoder private constructor(
 	private val info = MediaCodec.BufferInfo()
 	private var inputEnded = false
 	private var outputEnded = false
+	private var seekTargetFrame: Long? = null
 	private var pendingSamples = FloatArray(0)
 	private var pendingOffset = 0
 	private var closed = false
@@ -51,6 +53,25 @@ class MediaCodecPcmDecoder private constructor(
 			pendingOffset = 0
 		}
 		return PcmReadResult.Frames(PcmBlock(format, frameCount, samples))
+	}
+
+	override fun seekToFrame(frame: Long): PcmSeekResult {
+		if (closed || frame < 0) return PcmSeekResult.Failed(PcmDecodeFailure.INVALID_FILE)
+		return try {
+			val timeUs = (frame * 1_000_000L) / format.sampleRate
+			extractor.seekTo(timeUs, MediaExtractor.SEEK_TO_PREVIOUS_SYNC)
+			codec.flush()
+			inputEnded = false
+			outputEnded = false
+			pendingSamples = FloatArray(0)
+			pendingOffset = 0
+			seekTargetFrame = frame
+			PcmSeekResult.Seeked(frame)
+		} catch (_: IllegalStateException) {
+			PcmSeekResult.Failed(PcmDecodeFailure.READ_FAILED)
+		} catch (_: IllegalArgumentException) {
+			PcmSeekResult.Failed(PcmDecodeFailure.INVALID_FILE)
+		}
 	}
 
 	private fun decodeNextOutput(): DecodeResult {
@@ -94,15 +115,34 @@ class MediaCodecPcmDecoder private constructor(
 						if (info.size == 0) FloatArray(0) else {
 							val buffer = codec.getOutputBuffer(outputIndex)
 								?: return DecodeResult.Failed(PcmDecodeFailure.READ_FAILED)
-							buffer.position(info.offset)
-							buffer.limit(info.offset + info.size)
-							buffer.order(ByteOrder.LITTLE_ENDIAN)
-							when (pcmEncoding) {
-								AudioFormat.ENCODING_PCM_16BIT -> FloatArray(info.size / 2) { buffer.short / 32768f }
-								AudioFormat.ENCODING_PCM_FLOAT -> FloatArray(info.size / 4) {
+							val bytesPerSample = when (pcmEncoding) {
+								AudioFormat.ENCODING_PCM_16BIT -> 2
+								AudioFormat.ENCODING_PCM_FLOAT -> 4
+								else -> return DecodeResult.Failed(PcmDecodeFailure.UNSUPPORTED_PCM_ENCODING)
+							}
+							val bytesPerFrame = bytesPerSample * format.channelCount
+							if (info.size % bytesPerFrame != 0) return DecodeResult.Failed(PcmDecodeFailure.READ_FAILED)
+							val totalFrames = info.size / bytesPerFrame
+							val targetFrame = seekTargetFrame
+							val outputStartFrame = ((info.presentationTimeUs * format.sampleRate) + 500_000) / 1_000_000
+							val framesToDrop = if (targetFrame == null) 0 else
+								(targetFrame - outputStartFrame).coerceIn(0, totalFrames.toLong()).toInt()
+							if (targetFrame != null && outputStartFrame + totalFrames <= targetFrame) {
+								FloatArray(0)
+							} else {
+								val remainingFrames = totalFrames - framesToDrop
+								buffer.position(info.offset + framesToDrop * bytesPerFrame)
+								buffer.limit(info.offset + info.size)
+								buffer.order(ByteOrder.LITTLE_ENDIAN)
+								val samples = when (pcmEncoding) {
+									AudioFormat.ENCODING_PCM_16BIT -> FloatArray(remainingFrames * format.channelCount) { buffer.short / 32768f }
+									AudioFormat.ENCODING_PCM_FLOAT -> FloatArray(remainingFrames * format.channelCount) {
 									buffer.float.let { sample -> if (sample.isFinite()) sample.coerceIn(-1f, 1f) else 0f }
 								}
-								else -> return DecodeResult.Failed(PcmDecodeFailure.UNSUPPORTED_PCM_ENCODING)
+									else -> error("PCM encoding checked above")
+								}
+								if (targetFrame != null) seekTargetFrame = null
+								samples
 							}
 						}
 					} finally {

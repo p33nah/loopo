@@ -6,10 +6,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.p33nah.loopo.data.audio.AndroidTrackInspector
 import com.p33nah.loopo.data.audio.AndroidPcmDecoderFactory
+import com.p33nah.loopo.data.audio.AndroidPlaybackController
 import com.p33nah.loopo.data.audio.TrackInspection
 import com.p33nah.loopo.domain.audio.PcmDecodeFailure
 import com.p33nah.loopo.domain.audio.PcmDecoderResult
 import com.p33nah.loopo.domain.audio.PcmReadResult
+import com.p33nah.loopo.domain.audio.PlaybackError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +21,15 @@ import kotlinx.coroutines.withContext
 class StudyViewModel(application: Application) : AndroidViewModel(application) {
 	private val inspector = AndroidTrackInspector(application)
 	private val decoderFactory = AndroidPcmDecoderFactory(application)
+	private val playbackController = AndroidPlaybackController(application)
 	private val mutableState = MutableStateFlow<StudyUiState>(StudyUiState.Empty)
 	val state = mutableState.asStateFlow()
+	val playbackState = playbackController.state
 
 	fun openTrack(uri: Uri, hasPersistedAccess: Boolean) {
 		mutableState.value = StudyUiState.Loading(uri.lastPathSegment ?: "Audio")
 		viewModelScope.launch {
+			playbackController.unload()
 			val inspection = withContext(Dispatchers.IO) {
 				when (val inspected = inspector.inspect(uri, hasPersistedAccess)) {
 					is TrackInspection.Failed -> inspected
@@ -32,10 +37,34 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 				}
 			}
 			mutableState.value = when (inspection) {
-				is TrackInspection.Ready -> StudyUiState.Ready(inspection)
+				is TrackInspection.Ready -> {
+					when (playbackController.load(inspection.track)) {
+						null -> StudyUiState.Ready(inspection)
+						PlaybackError.OUTPUT_UNAVAILABLE -> StudyUiState.Error(TrackInspection.Reason.AUDIO_OUTPUT_UNAVAILABLE)
+						PlaybackError.AUDIO_FOCUS_DENIED,
+						PlaybackError.DECODER_READ_FAILED -> StudyUiState.Error(TrackInspection.Reason.READ_FAILED)
+					}
+				}
 				is TrackInspection.Failed -> StudyUiState.Error(inspection.reason)
 			}
 		}
+	}
+
+	fun togglePlayback() {
+		viewModelScope.launch { playbackController.togglePlayback() }
+	}
+
+	fun seekToFrame(frame: Long) {
+		viewModelScope.launch { playbackController.seekToFrame(frame) }
+	}
+
+	fun pauseForLifecycle() {
+		viewModelScope.launch { playbackController.pauseForLifecycle() }
+	}
+
+	override fun onCleared() {
+		playbackController.release()
+		super.onCleared()
 	}
 
 	private fun probeDecoder(inspection: TrackInspection.Ready): TrackInspection =

@@ -8,6 +8,7 @@ import com.p33nah.loopo.domain.audio.PcmDecoder
 import com.p33nah.loopo.domain.audio.PcmDecoderResult
 import com.p33nah.loopo.domain.audio.PcmFormat
 import com.p33nah.loopo.domain.audio.PcmReadResult
+import com.p33nah.loopo.domain.audio.PcmSeekResult
 import java.io.EOFException
 import java.io.IOException
 import java.io.InputStream
@@ -15,11 +16,14 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class WavPcmDecoder private constructor(
-	private val input: InputStream,
+	private val resolver: ContentResolver,
+	private val uri: Uri,
+	private var input: CountingInputStream,
 	private val encoding: Int,
 	private val bitsPerSample: Int,
 	private val blockAlign: Int,
 	private val dataBytes: Long,
+	private val dataOffset: Long,
 	override val format: PcmFormat,
 ) : PcmDecoder {
 	private var bytesRemaining = dataBytes
@@ -71,6 +75,33 @@ class WavPcmDecoder private constructor(
 		}
 	}
 
+	override fun seekToFrame(frame: Long): PcmSeekResult {
+		if (closed || frame < 0) return PcmSeekResult.Failed(PcmDecodeFailure.INVALID_FILE)
+		val byteOffset = try {
+			Math.multiplyExact(frame, blockAlign.toLong())
+		} catch (_: ArithmeticException) {
+			return PcmSeekResult.Failed(PcmDecodeFailure.INVALID_FILE)
+		}
+		if (byteOffset > dataBytes) return PcmSeekResult.Failed(PcmDecodeFailure.INVALID_FILE)
+		val replacement = try {
+			CountingInputStream(resolver.openInputStream(uri) ?: return PcmSeekResult.Failed(PcmDecodeFailure.READ_FAILED))
+		} catch (_: SecurityException) {
+			return PcmSeekResult.Failed(PcmDecodeFailure.READ_FAILED)
+		} catch (_: IOException) {
+			return PcmSeekResult.Failed(PcmDecodeFailure.READ_FAILED)
+		}
+		return try {
+			replacement.skipFully(dataOffset + byteOffset)
+			input.close()
+			input = replacement
+			bytesRemaining = dataBytes - byteOffset
+			PcmSeekResult.Seeked(frame)
+		} catch (_: IOException) {
+			replacement.close()
+			PcmSeekResult.Failed(PcmDecodeFailure.READ_FAILED)
+		}
+	}
+
 	companion object {
 		private const val PCM = 1
 		private const val IEEE_FLOAT = 3
@@ -79,14 +110,14 @@ class WavPcmDecoder private constructor(
 
 		fun open(resolver: ContentResolver, uri: Uri): PcmDecoderResult {
 			val input = try {
-				resolver.openInputStream(uri) ?: return PcmDecoderResult.Failed(PcmDecodeFailure.READ_FAILED)
+				CountingInputStream(resolver.openInputStream(uri) ?: return PcmDecoderResult.Failed(PcmDecodeFailure.READ_FAILED))
 			} catch (_: SecurityException) {
 				return PcmDecoderResult.Failed(PcmDecodeFailure.READ_FAILED)
 			} catch (_: IOException) {
 				return PcmDecoderResult.Failed(PcmDecodeFailure.READ_FAILED)
 			}
 			return try {
-				val result = parse(input)
+				val result = parse(input, resolver, uri)
 				result
 			} catch (_: EOFException) {
 				input.close()
@@ -100,7 +131,7 @@ class WavPcmDecoder private constructor(
 			}
 		}
 
-		private fun parse(input: InputStream): PcmDecoderResult {
+		private fun parse(input: CountingInputStream, resolver: ContentResolver, uri: Uri): PcmDecoderResult {
 			val header = ByteArray(12)
 			input.readFully(header)
 			if (header.ascii(0, 4) != "RIFF" || header.ascii(8, 4) != "WAVE") {
@@ -147,7 +178,17 @@ class WavPcmDecoder private constructor(
 						return failAndClose(input, PcmDecodeFailure.INVALID_FILE)
 					}
 					return PcmDecoderResult.Ready(
-						WavPcmDecoder(input, encoding, bitsPerSample, blockAlign, size, PcmFormat(sampleRate, channels)),
+						WavPcmDecoder(
+							resolver = resolver,
+							uri = uri,
+							input = input,
+							encoding = encoding,
+							bitsPerSample = bitsPerSample,
+							blockAlign = blockAlign,
+							dataBytes = size,
+							dataOffset = input.bytesRead,
+							format = PcmFormat(sampleRate, channels),
+						),
 					)
 				}
 				else -> input.skipFully(size + (size and 1L))
@@ -194,4 +235,18 @@ class WavPcmDecoder private constructor(
 			}
 		}
 	}
+}
+
+private class CountingInputStream(private val source: InputStream) : InputStream() {
+	var bytesRead: Long = 0
+		private set
+
+	override fun read(): Int = source.read().also { if (it >= 0) bytesRead++ }
+
+	override fun read(buffer: ByteArray, offset: Int, length: Int): Int =
+		source.read(buffer, offset, length).also { if (it > 0) bytesRead += it }
+
+	override fun skip(count: Long): Long = source.skip(count).also { bytesRead += it }
+
+	override fun close() = source.close()
 }

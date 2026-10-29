@@ -5,14 +5,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -23,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
@@ -67,11 +71,17 @@ fun StudyScreen(
 	onSetLoopRegion: (LoopRegion) -> Unit,
 	onSetPlaybackRate: (PlaybackRate) -> Unit,
 ) {
+	val readyTrack = (state as? StudyUiState.Ready)?.inspection?.track
+	val trackActionLabel = when (state) {
+		is StudyUiState.Ready -> "Cambia brano"
+		is StudyUiState.Loading -> "Apri brano"
+		else -> null
+	}
 	Column(
 		modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp, vertical = 12.dp),
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 	) {
-		TopBar(onOpenTrack)
+		TopBar(readyTrack, trackActionLabel, onOpenTrack)
 		when (state) {
 			StudyUiState.Empty -> EmptyStudy(onOpenTrack, Modifier.weight(1f))
 			is StudyUiState.Loading -> LoadingStudy(state.displayName, Modifier.weight(1f))
@@ -88,7 +98,6 @@ fun StudyScreen(
 				playback = playback,
 				viewport = viewport,
 				onViewportChange = onViewportChange,
-				onOpenTrack = onOpenTrack,
 				onSeekToFrame = onSeekToFrame,
 				onSetLoopRegion = onSetLoopRegion,
 				modifier = Modifier.weight(1f),
@@ -106,21 +115,36 @@ fun StudyScreen(
 }
 
 @Composable
-private fun TopBar(onOpenTrack: () -> Unit) {
+private fun TopBar(track: TrackInfo?, actionLabel: String?, onOpenTrack: () -> Unit) {
 	Row(
-		modifier = Modifier.fillMaxWidth().height(44.dp),
+		modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
 		verticalAlignment = Alignment.CenterVertically,
 	) {
 		Text("LOOPO", color = TextPrimary, fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
-		Spacer(Modifier.width(14.dp))
-		Text("MUSIC PRACTICE", color = Muted, fontSize = 10.sp, letterSpacing = 1.6.sp)
-		Spacer(Modifier.weight(1f))
-		OutlinedButton(
-			onClick = onOpenTrack,
-			shape = RoundedCornerShape(12.dp),
-			colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-		) {
-			Text("Apri brano")
+		Spacer(Modifier.width(12.dp))
+		Column(Modifier.weight(1f)) {
+			Text(
+				track?.displayName ?: "MUSIC PRACTICE",
+				color = if (track == null) Muted else TextPrimary,
+				fontSize = if (track == null) 10.sp else 15.sp,
+				fontWeight = if (track == null) FontWeight.Normal else FontWeight.SemiBold,
+				letterSpacing = if (track == null) 1.6.sp else 0.sp,
+				maxLines = 1,
+				overflow = TextOverflow.Ellipsis,
+			)
+			track?.let {
+				Text(it.formatSummary(), color = Muted, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+			}
+		}
+		if (actionLabel != null) {
+			OutlinedButton(
+				onClick = onOpenTrack,
+				shape = RoundedCornerShape(12.dp),
+				colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+				modifier = Modifier.heightIn(min = 48.dp),
+			) {
+				Text(actionLabel)
+			}
 		}
 	}
 }
@@ -195,7 +219,6 @@ private fun TrackStudy(
 	playback: PlaybackSnapshot,
 	viewport: WaveformViewport?,
 	onViewportChange: (WaveformViewport) -> Unit,
-	onOpenTrack: () -> Unit,
 	onSeekToFrame: (Long) -> Unit,
 	onSetLoopRegion: (LoopRegion) -> Unit,
 	modifier: Modifier = Modifier,
@@ -207,13 +230,6 @@ private fun TrackStudy(
 		if (!playback.isLoopCommandPending) draftLoop = playback.loopRegion ?: defaultLoop
 	}
 	Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-		Row(verticalAlignment = Alignment.CenterVertically) {
-			Column(modifier = Modifier.weight(1f)) {
-				Text(track.displayName, color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-				Text(track.formatSummary(), color = Muted, fontSize = 12.sp)
-			}
-			OutlinedButton(onClick = onOpenTrack) { Text("Cambia brano") }
-		}
 		Surface(color = Card, shape = RoundedCornerShape(17.dp), modifier = Modifier.fillMaxWidth().weight(1f)) {
 			Box(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
 				WaveformCanvas(
@@ -277,24 +293,32 @@ private fun LoopControls(
 	Row(
 		modifier = Modifier.fillMaxWidth(),
 		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.spacedBy(8.dp),
+		horizontalArrangement = Arrangement.spacedBy(4.dp),
 	) {
-		OutlinedButton(
+		TextButton(
 			onClick = {
 				val next = region.moveATo(positionFrame, track.durationFrames, track.sampleRate)
 				onRegionChange(next)
 				onCommit(next)
 			},
 			enabled = enabled,
-		) { Text("A · ${region.aFrame.formatLoopTime(track.sampleRate)}") }
-		OutlinedButton(
+			shape = RoundedCornerShape(10.dp),
+			colors = ButtonDefaults.textButtonColors(containerColor = Card, contentColor = TextPrimary),
+			contentPadding = PaddingValues(horizontal = 8.dp),
+			modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 104.dp),
+		) { Text("A · ${region.aFrame.formatLoopTime(track.sampleRate)}", maxLines = 1, softWrap = false) }
+		TextButton(
 			onClick = {
 				val next = region.moveBTo(positionFrame, track.durationFrames, track.sampleRate)
 				onRegionChange(next)
 				onCommit(next)
-		},
+			},
 			enabled = enabled,
-		) { Text("B · ${region.bFrame.formatLoopTime(track.sampleRate)}") }
+			shape = RoundedCornerShape(10.dp),
+			colors = ButtonDefaults.textButtonColors(containerColor = Card, contentColor = TextPrimary),
+			contentPadding = PaddingValues(horizontal = 8.dp),
+			modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 104.dp),
+		) { Text("B · ${region.bFrame.formatLoopTime(track.sampleRate)}", maxLines = 1, softWrap = false) }
 		OutlinedButton(
 			onClick = {
 				val next = region.copy(enabled = !region.enabled)
@@ -302,12 +326,21 @@ private fun LoopControls(
 				onCommit(next)
 			},
 			enabled = enabled,
+			shape = RoundedCornerShape(12.dp),
+			colors = ButtonDefaults.outlinedButtonColors(
+				containerColor = if (region.enabled) Accent.copy(alpha = 0.14f) else Card,
+				contentColor = if (region.enabled) Accent else TextPrimary,
+			),
+			contentPadding = PaddingValues(horizontal = 9.dp),
+			modifier = Modifier.heightIn(min = 48.dp),
 		) { Text(if (enabled && region.enabled) "Loop attivo" else if (!enabled) "Applico…" else "Loop") }
 		val appliedMs = effectiveCrossfadeFrames * 1_000 / track.sampleRate.coerceAtLeast(1)
 		Text(
 			if (appliedMs < region.crossfadeMs) "${appliedMs} ms" else "Fade ${region.crossfadeMs} ms",
 			color = Muted,
 			fontSize = 11.sp,
+			maxLines = 1,
+			modifier = Modifier.widthIn(min = 64.dp),
 		)
 		Slider(
 			value = fadeDraft,
@@ -322,7 +355,7 @@ private fun LoopControls(
 			},
 			valueRange = 0f..100f,
 			enabled = enabled,
-			modifier = Modifier.weight(1f),
+			modifier = Modifier.weight(1f).heightIn(min = 48.dp),
 		)
 	}
 }

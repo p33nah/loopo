@@ -17,7 +17,7 @@
 - [ ] M1 streaming decoders for MP3, WAV, and FLAC.
 - [ ] M2 Oboe playback and audio focus.
 - [ ] Independent review of the remaining diff.
-- [ ] Prepare a reviewable pull request after pushing the feature branch.
+- [x] Prepare and verify PR #1 from the feature branch into main.
 
 ## Phase A: Frame
 

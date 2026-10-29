@@ -1,5 +1,7 @@
 package com.p33nah.loopo.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,10 +23,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
@@ -36,11 +38,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.p33nah.loopo.R
 import com.p33nah.loopo.data.audio.TrackInspection
 import com.p33nah.loopo.domain.model.TrackInfo
 import com.p33nah.loopo.domain.model.LoopRegion
@@ -123,6 +129,12 @@ private fun TopBar(track: TrackInfo?, actionLabel: String?, onOpenTrack: () -> U
 		verticalAlignment = Alignment.CenterVertically,
 	) {
 		Text("LOOPO", color = TextPrimary, fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+		Spacer(Modifier.width(6.dp))
+		Image(
+			painter = painterResource(R.drawable.ic_brand_mark),
+			contentDescription = null,
+			modifier = Modifier.size(24.dp),
+		)
 		Spacer(Modifier.width(12.dp))
 		Column(Modifier.weight(1f)) {
 			Text(
@@ -330,12 +342,20 @@ private fun LoopControls(
 			enabled = enabled,
 			shape = RoundedCornerShape(12.dp),
 			colors = ButtonDefaults.outlinedButtonColors(
-				containerColor = if (region.enabled) Accent.copy(alpha = 0.14f) else Card,
-				contentColor = if (region.enabled) Accent else TextPrimary,
+				containerColor = if (region.enabled) TextPrimary.copy(alpha = 0.08f) else Card,
+				contentColor = if (region.enabled) TextPrimary else Muted,
 			),
+			border = BorderStroke(1.dp, if (region.enabled) TextPrimary.copy(alpha = 0.72f) else Line),
 			contentPadding = PaddingValues(horizontal = 9.dp),
-			modifier = Modifier.heightIn(min = 48.dp),
-		) { Text(if (enabled && region.enabled) "Loop attivo" else if (!enabled) "Applico…" else "Loop") }
+			modifier = Modifier.heightIn(min = 48.dp).semantics {
+				stateDescription = when {
+					!enabled -> "Applicazione loop in corso"
+					region.enabled -> "Loop attivo"
+					else -> "Loop disattivo"
+				}
+			},
+		) { Text("Loop") }
+		Spacer(Modifier.weight(1f))
 		val appliedMs = effectiveCrossfadeFrames * 1_000 / track.sampleRate.coerceAtLeast(1)
 		Text(
 			if (appliedMs < region.crossfadeMs) "${appliedMs} ms" else "Fade ${region.crossfadeMs} ms",
@@ -357,7 +377,12 @@ private fun LoopControls(
 			},
 			valueRange = 0f..100f,
 			enabled = enabled,
-			modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+			colors = SliderDefaults.colors(
+				thumbColor = Accent,
+				activeTrackColor = Accent,
+				inactiveTrackColor = Line,
+			),
+			modifier = Modifier.widthIn(max = 220.dp).fillMaxWidth().heightIn(min = 48.dp),
 		)
 	}
 }
@@ -419,6 +444,11 @@ private fun TransportBar(
 					isSeeking = false
 				},
 				enabled = track != null,
+				colors = SliderDefaults.colors(
+					thumbColor = Accent,
+					activeTrackColor = Accent,
+					inactiveTrackColor = Line,
+				),
 				modifier = Modifier.weight(1f).padding(horizontal = 10.dp),
 			)
 			Text(duration.formatTime(track?.sampleRate ?: 1), color = Muted, fontSize = 12.sp)
@@ -453,6 +483,11 @@ private fun TransportBar(
 				valueRange = PlaybackRate.MIN_PERCENT.toFloat()..PlaybackRate.MAX_PERCENT.toFloat(),
 				steps = 0,
 				enabled = track != null,
+				colors = SliderDefaults.colors(
+					thumbColor = Accent,
+					activeTrackColor = Accent,
+					inactiveTrackColor = Line,
+				),
 				modifier = Modifier.weight(1f),
 			)
 			Text(

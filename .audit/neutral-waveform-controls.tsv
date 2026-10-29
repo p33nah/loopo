@@ -1,0 +1,9 @@
+time	phase	decision	evidence
+2026-10-29T17:00:00+02:00	ground	new worktree based on latest origin/main	head 01128ef and clean main checkout
+
+2026-10-29T17:04:00+02:00	arena	selected candidate B	keeps charcoal, exact transparent logo, stable state and right-aligned group; no other-family judge configured
+
+2026-10-29T17:21:00+02:00	implement	neutral UI implementation committed	0235407 touches StudyScreen.kt, Color.kt and centered transparent icon mark
+2026-10-29T17:23:00+02:00	verify	assembleDebug passed and Xiaomi 24116RACCG inspected	Logo seamless; neutral controls/waveform; Loop label stable; Fade 20→77→20 ms; Loop off/on preserved layout
+2026-10-29T17:23:00+02:00	review	no comments found; diff check passed	no-comments audit clean; no API/model changes
+2026-10-29T17:26:00+02:00	pr	opened PR #12	gh fallback after GitHub connector returned 403; PR is OPEN and CLEAN, no checks configured

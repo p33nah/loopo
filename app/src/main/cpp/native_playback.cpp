@@ -32,14 +32,14 @@ Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_destroy(JNIEnv*, jobje
 extern "C" JNIEXPORT jint JNICALL
 Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_write(JNIEnv* env, jobject, jlong handle,
 																	  jfloatArray samples, jint offsetFrames,
-																	  jint frames, jint channels) {
+													  jint frames, jint channels, jlong sourceStartFrame) {
 	auto* engine = engineFrom(handle);
 	if (!engine || !samples || frames <= 0 || offsetFrames < 0 || channels != (*engine)->channelCount()) return 0;
 	const auto requiredSamples = (offsetFrames + frames) * channels;
 	if (env->GetArrayLength(samples) < requiredSamples) return 0;
 	auto* values = env->GetFloatArrayElements(samples, nullptr);
 	if (!values) return 0;
-	const auto written = (*engine)->write(values + offsetFrames * channels, frames);
+	const auto written = (*engine)->write(values + offsetFrames * channels, frames, sourceStartFrame);
 	env->ReleaseFloatArrayElements(samples, values, JNI_ABORT);
 	return written;
 }

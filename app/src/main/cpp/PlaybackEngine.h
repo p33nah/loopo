@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <memory>
+#include <vector>
 
 #include <oboe/Oboe.h>
 
@@ -18,7 +19,7 @@ public:
 	bool play();
 	bool pauseAndWait();
 	bool resetAtFrame(int64_t sourceFrame);
-	int write(const float* samples, int frames);
+	int write(const float* samples, int frames, int64_t sourceStartFrame);
 	int writeSpace() const;
 	int channelCount() const;
 	void setEndOfStream(bool ended);
@@ -36,12 +37,15 @@ private:
 	const int sampleRate_;
 	const int channelCount_;
 	PcmRingBuffer ring_;
+	std::vector<int64_t> callbackSourceFrames_;
+	std::vector<std::atomic<int64_t>> audiblePositionHistory_;
 	std::shared_ptr<oboe::AudioStream> stream_;
 	std::atomic<bool> playing_{false};
 	std::atomic<bool> inputEnded_{false};
 	std::atomic<bool> ended_{false};
 	std::atomic<int64_t> sourcePosition_{0};
 	std::atomic<int64_t> basePosition_{0};
+	std::atomic<int64_t> renderedOutputFrames_{0};
 	std::atomic<int64_t> underruns_{0};
 	std::atomic<double> estimatedLatencyMillis_{-1.0};
 };

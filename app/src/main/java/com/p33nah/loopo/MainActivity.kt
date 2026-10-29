@@ -54,6 +54,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 					onOpenTrack = { openDocument.launch(arrayOf("audio/*", "application/octet-stream")) },
 					onTogglePlayback = viewModel::togglePlayback,
 					onSeekToFrame = viewModel::seekToFrame,
+					onSetLoopRegion = viewModel::setLoopRegion,
 				)
 			}
 		}

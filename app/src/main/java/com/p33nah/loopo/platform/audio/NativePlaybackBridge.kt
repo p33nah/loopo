@@ -7,7 +7,14 @@ internal object NativePlaybackBridge {
 
 	external fun create(sampleRate: Int, channelCount: Int, capacityFrames: Int): Long
 	external fun destroy(handle: Long)
-	external fun write(handle: Long, samples: FloatArray, offsetFrames: Int, frameCount: Int, channelCount: Int): Int
+	external fun write(
+		handle: Long,
+		samples: FloatArray,
+		offsetFrames: Int,
+		frameCount: Int,
+		channelCount: Int,
+		sourceStartFrame: Long,
+	): Int
 	external fun writeSpace(handle: Long): Int
 	external fun queuedFrames(handle: Long): Int
 	external fun resetAtFrame(handle: Long, sourceFrame: Long): Boolean

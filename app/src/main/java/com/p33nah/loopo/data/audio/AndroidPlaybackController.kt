@@ -14,6 +14,7 @@ import com.p33nah.loopo.domain.audio.PcmSeekResult
 import com.p33nah.loopo.domain.audio.PlaybackError
 import com.p33nah.loopo.domain.audio.PlaybackSnapshot
 import com.p33nah.loopo.domain.model.LoopRegion
+import com.p33nah.loopo.domain.model.PlaybackRate
 import com.p33nah.loopo.domain.model.TrackInfo
 import com.p33nah.loopo.platform.audio.NativePlaybackBridge
 import kotlinx.coroutines.CoroutineScope
@@ -51,6 +52,10 @@ class AndroidPlaybackController(context: Context) {
 	private var track: TrackInfo? = null
 	private var decoder: PcmDecoder? = null
 	private var decoderPositionFrame = 0L
+	private var playbackRate = PlaybackRate.NORMAL
+	private var stretcherNeedsPrime = true
+	private var stretchedOutputRemainder = 0.0
+	private var stretchedOutputSourceFrame = 0L
 	private var engineHandle = 0L
 	private var pumpJob: Job? = null
 	private var monitorJob: Job? = null
@@ -122,14 +127,28 @@ class AndroidPlaybackController(context: Context) {
 		track = newTrack
 		decoder = newDecoder
 		decoderPositionFrame = 0
+		playbackRate = PlaybackRate.NORMAL
+		stretcherNeedsPrime = true
+		stretchedOutputRemainder = 0.0
+		stretchedOutputSourceFrame = 0L
 		engineHandle = handle
 		val loopRegion = LoopRegion(0, newTrack.durationFrames, enabled = false, crossfadeMs = DEFAULT_CROSSFADE_MS)
 		mutableState.value = PlaybackSnapshot(
 			loopRegion = loopRegion,
 			effectiveCrossfadeFrames = loopRegion.effectiveCrossfadeFrames(newTrack.sampleRate),
+			playbackRate = playbackRate,
 		)
 		pumpJob = scope.launch { pumpDecoder() }
 		null
+	}
+
+	suspend fun setPlaybackRate(rate: PlaybackRate) = transitionMutex.withLock {
+		if (rate == playbackRate || track == null) return@withLock
+		val wasPlaying = mutableState.value.isPlaying
+		val position = if (engineHandle != 0L) NativePlaybackBridge.positionFrame(engineHandle) else mutableState.value.positionFrame
+		playbackRate = rate
+		mutableState.update { it.copy(playbackRate = rate) }
+		seekUnsafe(position, resumeAfterSeek = wasPlaying)
 	}
 
 	suspend fun togglePlayback() = transitionMutex.withLock {
@@ -199,11 +218,17 @@ class AndroidPlaybackController(context: Context) {
 				withContext(Dispatchers.IO) {
 					if (!NativePlaybackBridge.resetAtFrame(handle, nextPosition)) return@withContext null
 					nativeStateReset = true
+					stretcherNeedsPrime = true
+					stretchedOutputRemainder = 0.0
+					stretchedOutputSourceFrame = nextPosition
 					activeDecoder.seekToFrame(nextPosition)
 				}
 			}
 			val seeked = seekResult as? PcmSeekResult.Seeked ?: return@withLock false
 			decoderPositionFrame = seeked.frame
+			stretcherNeedsPrime = true
+			stretchedOutputRemainder = 0.0
+			stretchedOutputSourceFrame = nextPosition
 			seekGeneration.incrementAndGet()
 			mutableState.update {
 				it.copy(
@@ -303,6 +328,9 @@ class AndroidPlaybackController(context: Context) {
 			is PcmSeekResult.Seeked -> {
 				seekGeneration.incrementAndGet()
 				decoderPositionFrame = result.frame
+				stretcherNeedsPrime = true
+				stretchedOutputRemainder = 0.0
+				stretchedOutputSourceFrame = result.frame
 				mutableState.update {
 					it.copy(positionFrame = result.frame, isEnded = false, error = null)
 				}
@@ -378,6 +406,10 @@ class AndroidPlaybackController(context: Context) {
 		}
 		track = null
 		decoderPositionFrame = 0
+		playbackRate = PlaybackRate.NORMAL
+		stretcherNeedsPrime = true
+		stretchedOutputRemainder = 0.0
+		stretchedOutputSourceFrame = 0L
 		mutableState.value = PlaybackSnapshot()
 	}
 
@@ -398,13 +430,53 @@ class AndroidPlaybackController(context: Context) {
 			val queued = NativePlaybackBridge.queuedFrames(handle)
 			val targetQueue = (currentTrack.sampleRate / PREFILL_DIVISOR).coerceAtLeast(MIN_PREFILL_FRAMES)
 			if (!reachedEnd && queued < targetQueue) {
+				val outputCapacity = minOf(
+					NativePlaybackBridge.writeSpace(handle),
+					targetQueue - queued,
+				)
+				val frameLimit = maxInputFrames(outputCapacity, playbackRate)
+				if (frameLimit <= 0) {
+					delay(PUMP_DELAY_MS)
+					continue
+				}
 				val activeDecoder = decoder ?: return
 				val shouldStop = decoderMutex.withLock {
 					val loop = mutableState.value.loopRegion?.takeIf { it.enabled }
 					val fadeFrames = loop?.effectiveCrossfadeFrames(currentTrack.sampleRate)?.toInt() ?: 0
-					val writable = NativePlaybackBridge.writeSpace(handle)
-					val frameLimit = minOf(MAX_DECODE_BLOCK_FRAMES, writable, targetQueue - queued)
 					val loopFrames = loop?.let { it.bFrame - it.aFrame }
+					if (stretcherNeedsPrime) {
+						val prerollFrames = NativePlaybackBridge.prerollFrames(handle, playbackRate.factor)
+						val isShortLoop = loop != null && loopFrames != null &&
+								loopFrames <= currentTrack.sampleRate.toLong() * SHORT_LOOP_CACHE_MAX_SECONDS
+						val cycle = if (isShortLoop) cachedLoop?.takeIf { it.region == loop } ?: prepareCachedLoopCycle(
+							activeDecoder,
+							currentTrack,
+							loop,
+							fadeFrames,
+						) else null
+						val preroll = if (cycle == null) {
+							readPrerollFrames(activeDecoder, currentTrack, prerollFrames, loop)
+						} else {
+							loopCycleFrames(cycle, prerollFrames)
+						}
+						if (preroll == null || !NativePlaybackBridge.prime(
+							handle,
+							preroll,
+							prerollFrames,
+							currentTrack.channelCount,
+							playbackRate.factor,
+						)) {
+							mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
+							NativePlaybackBridge.setEndOfStream(handle)
+							return@withLock true
+						}
+						if (cycle != null) {
+							cachedLoop = cycle
+							cachedLoopOffset = prerollFrames % cycle.frameCount
+							stretchedOutputSourceFrame = cycle.region.aFrame + cycle.fadeFrames
+						}
+						stretcherNeedsPrime = false
+					}
 					if (loop != null && loopFrames != null && loopFrames <= currentTrack.sampleRate.toLong() * SHORT_LOOP_CACHE_MAX_SECONDS) {
 						val cycle = cachedLoop?.takeIf { it.region == loop } ?: prepareCachedLoopCycle(
 							activeDecoder,
@@ -419,26 +491,20 @@ class AndroidPlaybackController(context: Context) {
 						} else {
 							if (cycle !== cachedLoop) cachedLoopOffset = 0
 							cachedLoop = cycle
-							if (frameLimit <= 0) {
-								false
-							} else {
-								val write = writeCachedLoopFrames(
-									handle,
-									cycle,
-									cachedLoopOffset,
-									frameLimit,
-									currentTrack.channelCount,
-								)
-								cachedLoopOffset = write.nextOffset
-								if (write.framesWritten == frameLimit) false else {
-									mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
-									NativePlaybackBridge.setEndOfStream(handle)
-									true
-								}
+							val write = writeCachedLoopFrames(
+								handle,
+								cycle,
+								cachedLoopOffset,
+								frameLimit,
+								currentTrack.channelCount,
+							)
+							cachedLoopOffset = write.nextOffset
+							if (write.framesWritten == frameLimit) false else {
+								mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
+								NativePlaybackBridge.setEndOfStream(handle)
+								true
 							}
 						}
-					} else if (frameLimit <= 0) {
-						false
 					} else if (loop != null && decoderPositionFrame >= loop.bFrame) {
 						val seeked = activeDecoder.seekToFrame(loop.aFrame) as? PcmSeekResult.Seeked
 						if (seeked == null) {
@@ -450,9 +516,10 @@ class AndroidPlaybackController(context: Context) {
 							false
 						}
 					} else if (loop != null && fadeFrames > 0 && decoderPositionFrame >= loop.bFrame - fadeFrames) {
-						val tail = readExactFrames(activeDecoder, currentTrack, fadeFrames)
+						val tail = readExactFrames(activeDecoder, currentTrack, fadeFrames, loop)
 						val headSeek = activeDecoder.seekToFrame(loop.aFrame) as? PcmSeekResult.Seeked
-						val head = if (headSeek != null) readExactFrames(activeDecoder, currentTrack, fadeFrames) else null
+						if (headSeek != null) decoderPositionFrame = headSeek.frame
+						val head = if (headSeek != null) readExactFrames(activeDecoder, currentTrack, fadeFrames, loop) else null
 						if (tail == null || headSeek == null || head == null) {
 							mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
 							NativePlaybackBridge.setEndOfStream(handle)
@@ -460,13 +527,14 @@ class AndroidPlaybackController(context: Context) {
 						} else {
 							val mixed = equalPowerCrossfade(tail, head, fadeFrames, currentTrack.channelCount)
 							val fadeStart = loop.bFrame - fadeFrames
-							val written = NativePlaybackBridge.write(
+							val written = writeStretched(
 								handle,
 								mixed,
 								0,
 								fadeFrames,
-								currentTrack.channelCount,
 								fadeStart,
+								loop,
+								currentTrack.channelCount,
 							)
 							if (written != fadeFrames) {
 								mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
@@ -474,6 +542,7 @@ class AndroidPlaybackController(context: Context) {
 								true
 							} else {
 								decoderPositionFrame = headSeek.frame + fadeFrames
+								stretchedOutputSourceFrame = headSeek.frame + fadeFrames
 								false
 							}
 						}
@@ -496,16 +565,23 @@ class AndroidPlaybackController(context: Context) {
 									NativePlaybackBridge.setEndOfStream(handle)
 									true
 								} else {
-									val written = NativePlaybackBridge.write(
+									val written = writeStretched(
 										handle,
 										block.samples,
 										0,
 										block.frameCount,
+										stretchedOutputSourceFrame,
+										loop,
 										block.format.channelCount,
-										decoderPositionFrame,
 									)
 									if (written == block.frameCount) {
 										decoderPositionFrame += block.frameCount
+										stretchedOutputSourceFrame = advanceSourceFrame(
+											stretchedOutputSourceFrame,
+											block.frameCount,
+											loop,
+											currentTrack.durationFrames,
+										)
 										false
 									} else {
 										mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
@@ -515,7 +591,15 @@ class AndroidPlaybackController(context: Context) {
 								}
 							}
 							PcmReadResult.EndOfStream -> {
-								NativePlaybackBridge.setEndOfStream(handle)
+								if (!NativePlaybackBridge.finish(
+									handle,
+									playbackRate.factor,
+									stretchedOutputRemainder,
+									currentTrack.durationFrames,
+								)) {
+									mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
+									NativePlaybackBridge.setEndOfStream(handle)
+								}
 								true
 							}
 							is PcmReadResult.Failed -> {
@@ -558,9 +642,106 @@ class AndroidPlaybackController(context: Context) {
 		}
 	}
 
-	private suspend fun readExactFrames(activeDecoder: PcmDecoder, currentTrack: TrackInfo, frameCount: Int): FloatArray? {
+	private fun maxInputFrames(outputCapacity: Int, rate: PlaybackRate): Int {
+		if (outputCapacity <= 1) return 0
+		val availableOutput = outputCapacity - 1 - stretchedOutputRemainder
+		return minOf(MAX_DECODE_BLOCK_FRAMES, (availableOutput * rate.factor).toInt()).coerceAtLeast(0)
+	}
+
+	private fun writeStretched(
+		handle: Long,
+		samples: FloatArray,
+		offsetFrames: Int,
+		inputFrames: Int,
+		sourceStartFrame: Long,
+		loop: LoopRegion?,
+		channelCount: Int,
+	): Int {
+		val requestedOutput = inputFrames / playbackRate.factor + stretchedOutputRemainder
+		val outputFrames = requestedOutput.toInt()
+		if (outputFrames <= 0) return 0
+		val remainder = requestedOutput - outputFrames
+		val written = NativePlaybackBridge.write(
+			handle,
+			samples,
+			offsetFrames,
+			inputFrames,
+			outputFrames,
+			channelCount,
+			sourceStartFrame,
+			inputFrames.toDouble() / outputFrames,
+			loop?.aFrame ?: -1L,
+			loop?.bFrame ?: -1L,
+		)
+		if (written == inputFrames) stretchedOutputRemainder = remainder
+		return written
+	}
+
+	private fun advanceSourceFrame(position: Long, inputFrames: Int, loop: LoopRegion?, durationFrames: Long): Long {
+		val next = position + inputFrames
+		if (loop == null) return next.coerceAtMost(durationFrames)
+		return loop.aFrame + (next - loop.aFrame).coerceAtLeast(0) % (loop.bFrame - loop.aFrame)
+	}
+
+	private suspend fun readPrerollFrames(
+		activeDecoder: PcmDecoder,
+		currentTrack: TrackInfo,
+		frameCount: Int,
+		loop: LoopRegion?,
+	): FloatArray? {
 		val samples = FloatArray(frameCount * currentTrack.channelCount)
 		var framesRead = 0
+		while (framesRead < frameCount) {
+			if (loop != null && decoderPositionFrame >= loop.bFrame) {
+				val seeked = activeDecoder.seekToFrame(loop.aFrame) as? PcmSeekResult.Seeked ?: return null
+				decoderPositionFrame = seeked.frame
+			}
+			val boundary = loop?.bFrame ?: currentTrack.durationFrames
+			if (decoderPositionFrame >= boundary) break
+			val blockLimit = minOf(
+				MAX_DECODE_BLOCK_FRAMES,
+				frameCount - framesRead,
+				(boundary - decoderPositionFrame).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+			)
+			when (val result = activeDecoder.readFrames(blockLimit)) {
+				is PcmReadResult.Frames -> {
+					val block = result.block
+					if (block.format.sampleRate != currentTrack.sampleRate || block.format.channelCount != currentTrack.channelCount) return null
+					block.samples.copyInto(samples, framesRead * currentTrack.channelCount)
+					framesRead += block.frameCount
+					decoderPositionFrame += block.frameCount
+				}
+				PcmReadResult.EndOfStream -> {
+					if (loop == null) return samples
+					if (framesRead == 0 && decoderPositionFrame <= loop.aFrame) return null
+					val seeked = activeDecoder.seekToFrame(loop.aFrame) as? PcmSeekResult.Seeked ?: return null
+					decoderPositionFrame = seeked.frame
+				}
+				is PcmReadResult.Failed -> return null
+			}
+		}
+		return samples
+	}
+
+	private fun loopCycleFrames(cycle: CachedLoopCycle, frameCount: Int): FloatArray {
+		val samples = FloatArray(frameCount * cycle.samples.size / cycle.frameCount)
+		val channels = cycle.samples.size / cycle.frameCount
+		for (frame in 0 until frameCount) {
+			val sourceFrame = frame % cycle.frameCount
+			cycle.samples.copyInto(samples, frame * channels, sourceFrame * channels, (sourceFrame + 1) * channels)
+		}
+		return samples
+	}
+
+	private suspend fun readExactFrames(
+		activeDecoder: PcmDecoder,
+		currentTrack: TrackInfo,
+		frameCount: Int,
+		loop: LoopRegion? = null,
+	): FloatArray? {
+		val samples = FloatArray(frameCount * currentTrack.channelCount)
+		var framesRead = 0
+		var decoderCursorFrame = decoderPositionFrame
 		while (framesRead < frameCount) {
 			val result = try {
 				activeDecoder.readFrames(minOf(MAX_DECODE_BLOCK_FRAMES, frameCount - framesRead))
@@ -570,12 +751,21 @@ class AndroidPlaybackController(context: Context) {
 			when (result) {
 				is PcmReadResult.Frames -> {
 					val block = result.block
-					if (block.format.sampleRate != currentTrack.sampleRate || block.format.channelCount != currentTrack.channelCount) return null
+					if (block.format.sampleRate != currentTrack.sampleRate || block.format.channelCount != currentTrack.channelCount) {
+						return null
+					}
 					block.samples.copyInto(samples, framesRead * currentTrack.channelCount)
 					framesRead += block.frameCount
+					decoderCursorFrame += block.frameCount
 				}
-				PcmReadResult.EndOfStream,
-				is PcmReadResult.Failed -> return null
+				PcmReadResult.EndOfStream -> {
+					if (loop == null || (framesRead == 0 && decoderCursorFrame <= loop.aFrame)) return null
+					val seeked = activeDecoder.seekToFrame(loop.aFrame) as? PcmSeekResult.Seeked ?: return null
+					decoderCursorFrame = seeked.frame
+				}
+				is PcmReadResult.Failed -> {
+					return null
+				}
 			}
 		}
 		return samples
@@ -590,7 +780,7 @@ class AndroidPlaybackController(context: Context) {
 		val sourceFrames = (region.bFrame - region.aFrame).toInt()
 		val seeked = activeDecoder.seekToFrame(region.aFrame) as? PcmSeekResult.Seeked ?: return null
 		decoderPositionFrame = seeked.frame
-		val source = readExactFrames(activeDecoder, currentTrack, sourceFrames) ?: return null
+		val source = readExactFrames(activeDecoder, currentTrack, sourceFrames, region) ?: return null
 		val prefixFrames = sourceFrames - fadeFrames * 2
 		val cycleFrames = prefixFrames + fadeFrames
 		val cycleSamples = FloatArray(cycleFrames * currentTrack.channelCount)
@@ -630,13 +820,14 @@ class AndroidPlaybackController(context: Context) {
 			} else {
 				cycle.region.bFrame - cycle.fadeFrames + offset - cycle.prefixFrames
 			}
-			val written = NativePlaybackBridge.write(
+			val written = writeStretched(
 				handle,
 				cycle.samples,
 				offset,
 				chunkFrames,
-				channelCount,
 				sourceStartFrame,
+				cycle.region.takeIf { it.enabled },
+				channelCount,
 			)
 			writtenFrames += written
 			remaining -= written
@@ -666,7 +857,9 @@ class AndroidPlaybackController(context: Context) {
 		val remainingFrames = (currentTrack.durationFrames - startFrame).coerceAtLeast(0)
 		val targetFrames = minOf(
 			currentTrack.sampleRate / PREFILL_DIVISOR,
-			if (mutableState.value.loopRegion?.enabled == true) Int.MAX_VALUE else remainingFrames.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+			if (mutableState.value.loopRegion?.enabled == true) Int.MAX_VALUE else {
+				(remainingFrames / playbackRate.factor).toLong().coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+			},
 		)
 		if (targetFrames <= 0) return
 		withTimeoutOrNull(PREFILL_TIMEOUT_MS) {

@@ -55,6 +55,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 					onTogglePlayback = viewModel::togglePlayback,
 					onSeekToFrame = viewModel::seekToFrame,
 					onSetLoopRegion = viewModel::setLoopRegion,
+					onSetPlaybackRate = viewModel::setPlaybackRate,
 				)
 			}
 		}

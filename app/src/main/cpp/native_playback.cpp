@@ -1,5 +1,6 @@
 #include <jni.h>
 
+#include <cmath>
 #include <memory>
 
 #include "PlaybackEngine.h"
@@ -21,6 +22,27 @@ Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_create(JNIEnv*, jobjec
 	return reinterpret_cast<jlong>(new EngineHandle(std::move(engine)));
 }
 
+extern "C" JNIEXPORT jint JNICALL
+Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_prerollFrames(JNIEnv*, jobject, jlong handle,
+																				 jfloat playbackRate) {
+	if (auto* engine = engineFrom(handle)) return (*engine)->prerollFrames(playbackRate);
+	return 0;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_prime(JNIEnv* env, jobject, jlong handle,
+																				 jfloatArray samples, jint frames,
+																				 jint channels, jfloat playbackRate) {
+	auto* engine = engineFrom(handle);
+	if (!engine || !samples || frames <= 0 || channels != (*engine)->channelCount() ||
+			env->GetArrayLength(samples) < frames * channels) return JNI_FALSE;
+	auto* values = env->GetFloatArrayElements(samples, nullptr);
+	if (!values) return JNI_FALSE;
+	const auto primed = (*engine)->prime(values, frames, playbackRate);
+	env->ReleaseFloatArrayElements(samples, values, JNI_ABORT);
+	return primed ? JNI_TRUE : JNI_FALSE;
+}
+
 extern "C" JNIEXPORT void JNICALL
 Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_destroy(JNIEnv*, jobject, jlong handle) {
 	auto* engine = engineFrom(handle);
@@ -32,16 +54,31 @@ Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_destroy(JNIEnv*, jobje
 extern "C" JNIEXPORT jint JNICALL
 Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_write(JNIEnv* env, jobject, jlong handle,
 																	  jfloatArray samples, jint offsetFrames,
-													  jint frames, jint channels, jlong sourceStartFrame) {
+													  jint inputFrames, jint outputFrames, jint channels,
+													  jlong sourceStartFrame, jdouble sourceFramesPerOutputFrame,
+													  jlong loopStartFrame, jlong loopEndFrame) {
 	auto* engine = engineFrom(handle);
-	if (!engine || !samples || frames <= 0 || offsetFrames < 0 || channels != (*engine)->channelCount()) return 0;
-	const auto requiredSamples = (offsetFrames + frames) * channels;
+	if (!engine || !samples || inputFrames <= 0 || outputFrames <= 0 || offsetFrames < 0 ||
+			channels != (*engine)->channelCount() || !std::isfinite(sourceFramesPerOutputFrame) ||
+			sourceFramesPerOutputFrame <= 0.0) return 0;
+	const auto requiredSamples = (offsetFrames + inputFrames) * channels;
 	if (env->GetArrayLength(samples) < requiredSamples) return 0;
 	auto* values = env->GetFloatArrayElements(samples, nullptr);
 	if (!values) return 0;
-	const auto written = (*engine)->write(values + offsetFrames * channels, frames, sourceStartFrame);
+	const auto written = (*engine)->write(values + offsetFrames * channels, inputFrames, outputFrames,
+			sourceStartFrame, sourceFramesPerOutputFrame, loopStartFrame, loopEndFrame);
 	env->ReleaseFloatArrayElements(samples, values, JNI_ABORT);
 	return written;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_finish(JNIEnv*, jobject, jlong handle,
+																			 jfloat playbackRate, jdouble outputRemainder,
+																			 jlong endFrame) {
+	if (auto* engine = engineFrom(handle)) {
+		return (*engine)->finish(playbackRate, outputRemainder, endFrame) ? JNI_TRUE : JNI_FALSE;
+	}
+	return JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

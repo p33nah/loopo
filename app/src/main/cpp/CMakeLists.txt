@@ -3,5 +3,6 @@ project(loopo_native LANGUAGES CXX)
 
 add_library(loopo_native SHARED native_bootstrap.cpp native_playback.cpp PlaybackEngine.cpp)
 target_compile_features(loopo_native PRIVATE cxx_std_20)
+target_include_directories(loopo_native PRIVATE third_party/signalsmith-linear/include)
 find_package(oboe REQUIRED CONFIG)
 target_link_libraries(loopo_native PRIVATE oboe::oboe android log)

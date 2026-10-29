@@ -12,16 +12,28 @@ import kotlin.math.min
 internal class WaveformPyramidBuilder(
 	private val track: TrackInfo,
 	private val bucketFrames: Long = baseBucketFrames(track),
+	private val previewBucketFrames: Long? = null,
 ) {
+	init {
+		require(previewBucketFrames == null || previewBucketFrames >= bucketFrames)
+	}
+
 	private val channels = track.channelCount
 	private var capacityLimit = expectedBucketCount(track.durationFrames, bucketFrames).coerceAtLeast(1)
 	private val maxBucketCapacity = maxBucketCapacity(channels)
 	private val minima = Array(channels) { FloatArray(capacityLimit) }
 	private val maxima = Array(channels) { FloatArray(capacityLimit) }
+	private val previewCapacityLimit = previewBucketFrames?.let { expectedBucketCount(track.durationFrames, it).coerceAtLeast(1) } ?: 0
+	private val previewMinima = Array(channels) { FloatArray(previewCapacityLimit) }
+	private val previewMaxima = Array(channels) { FloatArray(previewCapacityLimit) }
 	private val currentMinimum = FloatArray(channels) { Float.POSITIVE_INFINITY }
 	private val currentMaximum = FloatArray(channels) { Float.NEGATIVE_INFINITY }
+	private val previewCurrentMinimum = FloatArray(channels) { Float.POSITIVE_INFINITY }
+	private val previewCurrentMaximum = FloatArray(channels) { Float.NEGATIVE_INFINITY }
 	private var completedBuckets = 0
 	private var framesInBucket = 0L
+	private var previewCompletedBuckets = 0
+	private var previewFramesInBucket = 0L
 	var processedFrames = 0L
 		private set
 
@@ -31,29 +43,75 @@ internal class WaveformPyramidBuilder(
 		for (frame in 0 until frameLimit) {
 			val sampleOffset = frame * channels
 			for (channel in 0 until channels) {
-				val sample = block.samples[sampleOffset + channel].takeIf(Float::isFinite)?.coerceIn(-1f, 1f) ?: 0f
+				val rawSample = block.samples[sampleOffset + channel]
+				val sample = if (rawSample.isFinite()) rawSample.coerceIn(-1f, 1f) else 0f
 				currentMinimum[channel] = min(currentMinimum[channel], sample)
 				currentMaximum[channel] = max(currentMaximum[channel], sample)
+				if (previewBucketFrames != null) {
+					previewCurrentMinimum[channel] = min(previewCurrentMinimum[channel], sample)
+					previewCurrentMaximum[channel] = max(previewCurrentMaximum[channel], sample)
+				}
 			}
 			framesInBucket++
 			processedFrames++
 			if (framesInBucket == bucketFrames) appendBucket()
+			if (previewBucketFrames != null && ++previewFramesInBucket == previewBucketFrames) appendPreviewBucket()
 		}
 	}
 
 	fun snapshot(includePartialBucket: Boolean = false): WaveformData {
 		val count = completedBuckets + if (includePartialBucket && framesInBucket > 0) 1 else 0
+		return snapshotFrom(
+			baseFrames = bucketFrames,
+			baseMinima = minima,
+			baseMaxima = maxima,
+			count = count,
+			completed = completedBuckets,
+			partialMinimum = currentMinimum,
+			partialMaximum = currentMaximum,
+			coveredFrames = processedFrames,
+			isComplete = includePartialBucket,
+		)
+	}
+
+	fun previewSnapshot(): WaveformData? {
+		val framesPerBucket = previewBucketFrames ?: return null
+		if (previewCompletedBuckets == 0) return null
+		return snapshotFrom(
+			baseFrames = framesPerBucket,
+			baseMinima = previewMinima,
+			baseMaxima = previewMaxima,
+			count = previewCompletedBuckets,
+			completed = previewCompletedBuckets,
+			partialMinimum = null,
+			partialMaximum = null,
+			coveredFrames = processedFrames,
+			isComplete = false,
+		)
+	}
+
+	private fun snapshotFrom(
+		baseFrames: Long,
+		baseMinima: Array<FloatArray>,
+		baseMaxima: Array<FloatArray>,
+		count: Int,
+		completed: Int,
+		partialMinimum: FloatArray?,
+		partialMaximum: FloatArray?,
+		coveredFrames: Long,
+		isComplete: Boolean,
+	): WaveformData {
 		val levels = ArrayList<WaveformLevel>()
-		var levelFrames = bucketFrames
 		var levelChannels = Array(channels) { channel ->
-			val minimum = minima[channel].copyOf(count)
-			val maximum = maxima[channel].copyOf(count)
-			if (count > completedBuckets) {
-				minimum[completedBuckets] = currentMinimum[channel]
-				maximum[completedBuckets] = currentMaximum[channel]
+			val minimum = baseMinima[channel].copyOf(count)
+			val maximum = baseMaxima[channel].copyOf(count)
+			if (count > completed) {
+				minimum[completed] = partialMinimum!![channel]
+				maximum[completed] = partialMaximum!![channel]
 			}
 			WaveformChannelPeaks(minimum, maximum)
 		}
+		var levelFrames = baseFrames
 		var levelCount = count
 		levels += WaveformLevel(levelFrames, levelChannels.toList())
 		while (levelCount > 1) {
@@ -77,11 +135,11 @@ internal class WaveformPyramidBuilder(
 		return WaveformData(
 			trackId = track.id,
 			durationFrames = track.durationFrames,
-			coveredFrames = processedFrames.coerceAtMost(track.durationFrames),
+			coveredFrames = coveredFrames.coerceAtMost(track.durationFrames),
 			sampleRate = track.sampleRate,
 			channelCount = channels,
 			levels = levels,
-			isComplete = includePartialBucket,
+			isComplete = isComplete,
 		)
 	}
 
@@ -102,6 +160,18 @@ internal class WaveformPyramidBuilder(
 		}
 		completedBuckets++
 		framesInBucket = 0
+	}
+
+	private fun appendPreviewBucket() {
+		check(previewCompletedBuckets < previewCapacityLimit)
+		for (channel in 0 until channels) {
+			previewMinima[channel][previewCompletedBuckets] = previewCurrentMinimum[channel]
+			previewMaxima[channel][previewCompletedBuckets] = previewCurrentMaximum[channel]
+			previewCurrentMinimum[channel] = Float.POSITIVE_INFINITY
+			previewCurrentMaximum[channel] = Float.NEGATIVE_INFINITY
+		}
+		previewCompletedBuckets++
+		previewFramesInBucket = 0
 	}
 
 	companion object {

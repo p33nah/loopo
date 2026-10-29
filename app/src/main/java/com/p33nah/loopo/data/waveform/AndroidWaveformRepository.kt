@@ -49,8 +49,7 @@ class AndroidWaveformRepository(context: Context) : WaveformRepository {
 		}
 		val bucketFrames = WaveformPyramidBuilder.baseBucketFrames(track)
 		val previewBucketFrames = max(bucketFrames * PREVIEW_BUCKET_MULTIPLIER, MIN_PREVIEW_BUCKET_FRAMES)
-		val pyramid = WaveformPyramidBuilder(track, bucketFrames)
-		val previewPyramid = WaveformPyramidBuilder(track, previewBucketFrames)
+		val pyramid = WaveformPyramidBuilder(track, bucketFrames, previewBucketFrames)
 		var nextProgressFrame = max(1, track.sampleRate / PROGRESS_INTERVAL_DIVISOR).toLong()
 		try {
 			while (true) {
@@ -66,9 +65,8 @@ class AndroidWaveformRepository(context: Context) : WaveformRepository {
 						val framesToAdd = minOf(block.frameCount.toLong(), framesRemaining).toInt()
 						if (framesToAdd == 0) break
 						pyramid.add(block, framesToAdd)
-						previewPyramid.add(block, framesToAdd)
 						if (pyramid.processedFrames >= nextProgressFrame) {
-							val preview = previewPyramid.snapshot().takeIf { it.levels.first().bucketCount > 0 }
+							val preview = pyramid.previewSnapshot()
 							emit(
 								WaveformState.Loading(
 									trackId = track.id,

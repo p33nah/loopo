@@ -111,16 +111,16 @@ private fun EmptyStudy(onOpenTrack: () -> Unit, modifier: Modifier = Modifier) {
 		contentAlignment = Alignment.Center,
 	) {
 		Column(horizontalAlignment = Alignment.CenterHorizontally) {
-			Surface(shape = CircleShape, color = Accent.copy(alpha = 0.12f), modifier = Modifier.size(64.dp)) {
+			Surface(shape = CircleShape, color = Accent.copy(alpha = 0.12f), modifier = Modifier.size(52.dp)) {
 				Box(contentAlignment = Alignment.Center) {
-					Text("♪", color = Accent, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+					Text("♪", color = Accent, fontSize = 26.sp, fontWeight = FontWeight.Bold)
 				}
 			}
-			Spacer(Modifier.height(18.dp))
-			Text("Pronto per studiare?", color = TextPrimary, fontSize = 23.sp, fontWeight = FontWeight.SemiBold)
-			Spacer(Modifier.height(7.dp))
-			Text("Apri un file MP3, WAV o FLAC dal tuo dispositivo.", color = Muted, fontSize = 14.sp)
-			Spacer(Modifier.height(19.dp))
+			Spacer(Modifier.height(12.dp))
+			Text("Pronto per studiare?", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
+			Spacer(Modifier.height(6.dp))
+			Text("Apri un file MP3, WAV o FLAC dal tuo dispositivo.", color = Muted, fontSize = 13.sp)
+			Spacer(Modifier.height(10.dp))
 			Button(
 				onClick = onOpenTrack,
 				shape = RoundedCornerShape(13.dp),
@@ -226,7 +226,7 @@ private fun TransportBar(
 	var isSeeking by remember(track?.id) { mutableStateOf(false) }
 	var seekProgress by remember(track?.id) { mutableFloatStateOf(0f) }
 	Column(
-		modifier = Modifier.fillMaxWidth().height(72.dp).background(Card, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 7.dp),
+		modifier = Modifier.fillMaxWidth().height(84.dp).background(Card, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 6.dp),
 		verticalArrangement = Arrangement.Center,
 	) {
 		Row(verticalAlignment = Alignment.CenterVertically) {

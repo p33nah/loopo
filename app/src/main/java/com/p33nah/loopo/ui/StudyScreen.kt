@@ -128,12 +128,11 @@ private fun TopBar(track: TrackInfo?, actionLabel: String?, onOpenTrack: () -> U
 		modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
 		verticalAlignment = Alignment.CenterVertically,
 	) {
-		Text("LOOPO", color = TextPrimary, fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
-		Spacer(Modifier.width(6.dp))
+		Text("LOOP", color = TextPrimary, fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
 		Image(
 			painter = painterResource(R.drawable.ic_brand_mark),
 			contentDescription = null,
-			modifier = Modifier.size(24.dp),
+			modifier = Modifier.size(18.dp),
 		)
 		Spacer(Modifier.width(12.dp))
 		Column(Modifier.weight(1f)) {

@@ -143,7 +143,7 @@ class AndroidPlaybackController(context: Context) {
 	suspend fun setPlaybackRate(rate: PlaybackRate) = transitionMutex.withLock {
 		if (rate == playbackRate || track == null) return@withLock
 		val wasPlaying = mutableState.value.isPlaying
-		val position = if (engineHandle != 0L) NativePlaybackBridge.positionFrame(engineHandle) else mutableState.value.positionFrame
+		val position = if (engineHandle != 0L) currentPlaybackPositionFrame(engineHandle) else mutableState.value.positionFrame
 		seekUnsafe(position, resumeAfterSeek = wasPlaying, nextPlaybackRate = rate)
 	}
 
@@ -218,7 +218,7 @@ class AndroidPlaybackController(context: Context) {
 		var applied = false
 		try {
 			if (!withContext(Dispatchers.IO) { NativePlaybackBridge.pause(handle) }) return@withLock false
-			previousPosition = NativePlaybackBridge.positionFrame(handle).coerceIn(0, currentTrack.durationFrames)
+			previousPosition = currentPlaybackPositionFrame(handle).coerceIn(0, currentTrack.durationFrames)
 			val nextPosition = if (region.enabled && previousPosition !in region.aFrame until region.bFrame) region.aFrame else previousPosition
 			monitorJob?.cancelAndJoin()
 			monitorJob = null
@@ -381,7 +381,7 @@ class AndroidPlaybackController(context: Context) {
 
 	private suspend fun pauseUnsafe(abandonFocus: Boolean) {
 		val paused = engineHandle == 0L || withContext(Dispatchers.IO) { NativePlaybackBridge.pause(engineHandle) }
-		val position = if (engineHandle != 0L) NativePlaybackBridge.positionFrame(engineHandle) else mutableState.value.positionFrame
+		val position = if (engineHandle != 0L) currentPlaybackPositionFrame(engineHandle) else mutableState.value.positionFrame
 		mutableState.update {
 			it.copy(
 				positionFrame = position,
@@ -669,7 +669,7 @@ class AndroidPlaybackController(context: Context) {
 				val ended = NativePlaybackBridge.isEnded(handle)
 				mutableState.update { current ->
 					current.copy(
-						positionFrame = if (ended) currentTrack.durationFrames else NativePlaybackBridge.positionFrame(handle),
+						positionFrame = if (ended) currentTrack.durationFrames else currentPlaybackPositionFrame(handle),
 						isPlaying = NativePlaybackBridge.isPlaying(handle),
 						isEnded = ended,
 						underrunCount = NativePlaybackBridge.underrunCount(handle),
@@ -691,6 +691,13 @@ class AndroidPlaybackController(context: Context) {
 			stretchedOutputRemainderUnits,
 			MAX_DECODE_BLOCK_FRAMES,
 		)
+	}
+
+	private fun currentPlaybackPositionFrame(handle: Long): Long {
+		val positionFrame = NativePlaybackBridge.positionFrame(handle)
+		val currentTrack = track ?: return positionFrame
+		return mutableState.value.loopRegion?.normalizePlaybackPosition(positionFrame, currentTrack.sampleRate)
+			?: positionFrame
 	}
 
 	private fun writeStretched(

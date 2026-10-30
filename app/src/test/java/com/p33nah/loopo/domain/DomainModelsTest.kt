@@ -40,6 +40,38 @@ class DomainModelsTest {
 	}
 
 	@Test
+	fun loopPlaybackPositionWrapsAtTheCrossfadeCycleBoundary() {
+		val loop = LoopRegion(100, 200, enabled = true, crossfadeMs = 20)
+
+		assertEquals(100L, loop.normalizePlaybackPosition(99, sampleRate = 1_000))
+		assertEquals(100L, loop.normalizePlaybackPosition(100, sampleRate = 1_000))
+		assertEquals(199L, loop.normalizePlaybackPosition(199, sampleRate = 1_000))
+		assertEquals(120L, loop.normalizePlaybackPosition(200, sampleRate = 1_000))
+		assertEquals(199L, loop.normalizePlaybackPosition(279, sampleRate = 1_000))
+		assertEquals(120L, loop.normalizePlaybackPosition(280, sampleRate = 1_000))
+		assertEquals(125L, loop.normalizePlaybackPosition(525, sampleRate = 1_000))
+	}
+
+	@Test
+	fun loopPlaybackPositionWrapsOneFrameAndOddZeroFadeLoopsWithoutLosingFrames() {
+		val oneFrameLoop = LoopRegion(4, 5, enabled = true, crossfadeMs = 100)
+		val oddLoop = LoopRegion(24_001, 24_008, enabled = true, crossfadeMs = 0)
+
+		assertEquals(4L, oneFrameLoop.normalizePlaybackPosition(5, sampleRate = 48_000))
+		assertEquals(4L, oneFrameLoop.normalizePlaybackPosition(12, sampleRate = 48_000))
+		assertEquals(24_001L, oddLoop.normalizePlaybackPosition(24_008, sampleRate = 48_000))
+		assertEquals(24_005L, oddLoop.normalizePlaybackPosition(24_012, sampleRate = 48_000))
+	}
+
+	@Test
+	fun disabledLoopPlaybackPositionRemainsLinear() {
+		val loop = LoopRegion(100, 200, enabled = false, crossfadeMs = 20)
+
+		assertEquals(50L, loop.normalizePlaybackPosition(50, sampleRate = 1_000))
+		assertEquals(250L, loop.normalizePlaybackPosition(250, sampleRate = 1_000))
+	}
+
+	@Test
 	fun sessionSourceMatchesIdentityAndReportsMissingStoredMetadataAsUnverified() {
 		val stored = SessionSource(
 			uri = "content://audio/item/1",

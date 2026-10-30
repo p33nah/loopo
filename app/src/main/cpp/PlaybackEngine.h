@@ -53,5 +53,5 @@ private:
 	std::atomic<int64_t> basePosition_{0};
 	std::atomic<int64_t> renderedOutputFrames_{0};
 	std::atomic<int64_t> underruns_{0};
-	std::atomic<double> estimatedLatencyMillis_{-1.0};
+	std::atomic<int64_t> outputLatencyFrames_{-1};
 };

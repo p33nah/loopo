@@ -2,7 +2,22 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cmath>
+
+#if !defined(NDEBUG)
+#include <android/log.h>
+#endif
+
+namespace {
+
+int64_t outputLatencyFrames(oboe::AudioStream& stream) {
+	const auto bufferFrames = stream.getBufferSizeInFrames();
+	const auto burstFrames = stream.getFramesPerBurst();
+	const auto sampleRate = stream.getSampleRate();
+	if (bufferFrames <= 0 || burstFrames <= 0 || sampleRate <= 0) return -1;
+	return static_cast<int64_t>(bufferFrames) + burstFrames;
+}
+
+}
 
 PlaybackEngine::PlaybackEngine(int sampleRate, int channelCount, int capacityFrames)
 		: sampleRate_(sampleRate), channelCount_(channelCount), ring_(channelCount, capacityFrames),
@@ -14,6 +29,7 @@ PlaybackEngine::~PlaybackEngine() {
 }
 
 bool PlaybackEngine::open() {
+	outputLatencyFrames_.store(-1, std::memory_order_release);
 	oboe::AudioStreamBuilder builder;
 	builder.setDirection(oboe::Direction::Output);
 	builder.setPerformanceMode(oboe::PerformanceMode::LowLatency);
@@ -30,10 +46,18 @@ bool PlaybackEngine::open() {
 		stream_.reset();
 		return false;
 	}
+	outputLatencyFrames_.store(outputLatencyFrames(*stream_), std::memory_order_release);
+#if !defined(NDEBUG)
+	__android_log_print(ANDROID_LOG_DEBUG, "LoopoLatency",
+			"sampleRate=%d bufferFrames=%d burstFrames=%d latencyFrames=%lld",
+			stream_->getSampleRate(), stream_->getBufferSizeInFrames(), stream_->getFramesPerBurst(),
+			static_cast<long long>(outputLatencyFrames_.load(std::memory_order_acquire)));
+#endif
 	return true;
 }
 
 void PlaybackEngine::close() {
+	outputLatencyFrames_.store(-1, std::memory_order_release);
 	if (!stream_) return;
 	playing_.store(false, std::memory_order_release);
 	stream_->requestStop();
@@ -132,10 +156,10 @@ int PlaybackEngine::queuedFrames() const {
 int64_t PlaybackEngine::positionFrame() const {
 	const auto renderedOutputFrames = renderedOutputFrames_.load(std::memory_order_acquire);
 	if (renderedOutputFrames <= 0) return basePosition_.load(std::memory_order_acquire);
-	const auto latencyMillis = estimatedLatencyMillis_.load(std::memory_order_acquire);
-	if (latencyMillis < 0.0) return sourcePosition_.load(std::memory_order_acquire);
+	const auto estimatedLatencyFrames = outputLatencyFrames_.load(std::memory_order_acquire);
+	if (estimatedLatencyFrames < 0) return sourcePosition_.load(std::memory_order_acquire);
 	const auto latencyFrames = std::min<int64_t>(
-		static_cast<int64_t>(std::llround(latencyMillis * sampleRate_ / 1000.0)),
+		estimatedLatencyFrames,
 		static_cast<int64_t>(audiblePositionHistory_.size() - 1));
 	if (renderedOutputFrames <= latencyFrames) return basePosition_.load(std::memory_order_acquire);
 	const auto outputFrame = renderedOutputFrames - latencyFrames - 1;
@@ -145,11 +169,11 @@ int64_t PlaybackEngine::positionFrame() const {
 
 double PlaybackEngine::estimatedLatencyMillis() {
 	if (!stream_) return -1.0;
-	const auto latency = stream_->calculateLatencyMillis();
-	if (latency && std::isfinite(latency.value()) && latency.value() >= 0.0) {
-		estimatedLatencyMillis_.store(latency.value(), std::memory_order_release);
-	}
-	return estimatedLatencyMillis_.load(std::memory_order_acquire);
+	const auto latencyFrames = outputLatencyFrames(*stream_);
+	outputLatencyFrames_.store(latencyFrames, std::memory_order_release);
+	const auto sampleRate = stream_->getSampleRate();
+	if (latencyFrames < 0 || sampleRate <= 0) return -1.0;
+	return static_cast<double>(latencyFrames) * 1000.0 / sampleRate;
 }
 
 int64_t PlaybackEngine::underrunCount() const {

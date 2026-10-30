@@ -17,8 +17,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
@@ -37,11 +35,7 @@ internal class WaveformCache(
 	fun sourceKey(track: TrackInfo): String? {
 		val normalizedUri = track.uri.normalizeScheme().toString()
 		val metadata = documentMetadata(track.uri)
-		val sourceHash = if (metadata != null) {
-			endpointHash(track.uri, metadata.first) ?: fullContentHash(track.uri)
-		} else {
-			fullContentHash(track.uri)
-		} ?: return null
+		val sourceHash = fullContentHash(track.uri) ?: return null
 		val identity = listOf(
 			normalizedUri,
 			track.durationFrames,
@@ -119,41 +113,6 @@ internal class WaveformCache(
 		}
 	} catch (_: RuntimeException) {
 		null
-	}
-
-	private fun endpointHash(uri: Uri, size: Long): String? {
-		val descriptor = try {
-			resolver.openFileDescriptor(uri, "r") ?: return null
-		} catch (_: RuntimeException) {
-			return null
-		}
-		return try {
-			descriptor.use { parcelFile ->
-				FileInputStream(parcelFile.fileDescriptor).use { stream ->
-					val channel = stream.channel
-					val windowBytes = minOf(size, FINGERPRINT_WINDOW_BYTES.toLong()).toInt()
-					val first = readAt(channel, 0, windowBytes) ?: return null
-					val last = readAt(channel, (size - windowBytes).coerceAtLeast(0), windowBytes) ?: return null
-					val digest = MessageDigest.getInstance("SHA-256")
-					digest.update(first)
-					digest.update(last)
-					digest.digest().toHex()
-				}
-			}
-		} catch (_: IOException) {
-			null
-		} catch (_: RuntimeException) {
-			null
-		}
-	}
-
-	private fun readAt(channel: FileChannel, position: Long, size: Int): ByteArray? {
-		val bytes = ByteBuffer.allocate(size)
-		channel.position(position)
-		while (bytes.hasRemaining()) {
-			if (channel.read(bytes) <= 0) return null
-		}
-		return bytes.array()
 	}
 
 	private fun fullContentHash(uri: Uri): String? = try {
@@ -292,7 +251,6 @@ internal class WaveformCache(
 		const val SCHEMA_VERSION = 1
 		const val CACHE_EXTENSION = "wfm"
 		const val TEMP_EXTENSION = "tmp"
-		const val FINGERPRINT_WINDOW_BYTES = 32 * 1024
 		const val HASH_BUFFER_BYTES = 64 * 1024
 		const val MAX_BUCKET_COUNT = 16 * 1024 * 1024
 		const val MAX_PEAK_MEMORY_BYTES = 64L * 1024 * 1024

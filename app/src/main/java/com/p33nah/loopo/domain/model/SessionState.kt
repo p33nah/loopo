@@ -30,6 +30,16 @@ data class LoopRegion(
 		(bFrame - aFrame) / MAX_CROSSFADE_LOOP_DIVISOR,
 	)
 
+	fun normalizePlaybackPosition(positionFrame: Long, sampleRate: Int): Long {
+		if (!enabled) return positionFrame
+		if (positionFrame < aFrame) return aFrame
+		if (positionFrame < bFrame) return positionFrame
+
+		val cycleStart = aFrame + effectiveCrossfadeFrames(sampleRate)
+		val cycleFrames = bFrame - cycleStart
+		return cycleStart + (positionFrame - bFrame) % cycleFrames
+	}
+
 	private fun minSpanFrames(durationFrames: Long, sampleRate: Int): Long = minOf(
 		durationFrames.coerceAtLeast(1),
 		(sampleRate / 100).coerceAtLeast(1).toLong(),

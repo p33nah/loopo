@@ -17,11 +17,11 @@ internal object NativePlaybackBridge {
 		outputFrames: Int,
 		channelCount: Int,
 		sourceStartFrame: Long,
-		sourceFramesPerOutputFrame: Double,
+		playbackRatePercent: Int,
 		loopStartFrame: Long,
 		loopEndFrame: Long,
 	): Int
-	external fun finish(handle: Long, playbackRate: Float, outputRemainder: Double, endFrame: Long): Boolean
+	external fun finish(handle: Long, playbackRatePercent: Int, outputRemainderUnits: Int, endFrame: Long): Boolean
 	external fun writeSpace(handle: Long): Int
 	external fun queuedFrames(handle: Long): Int
 	external fun resetAtFrame(handle: Long, sourceFrame: Long): Boolean

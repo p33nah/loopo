@@ -24,13 +24,14 @@ internal fun equalPowerCrossfade(tail: FloatArray, head: FloatArray, frameCount:
 
 internal class CachedLoopCycle private constructor(
 	val region: LoopRegion,
-	val channelCount: Int,
+	private val channelCount: Int,
 	val frameCount: Int,
-	private val prefixFrames: Int,
-	val fadeFrames: Int,
+	private val fadeFrames: Int,
 	private val samples: FloatArray,
 ) {
-	class Cursor internal constructor(internal val offset: Int)
+	private val sourceFrameCount = samples.size / channelCount
+
+	class Cursor internal constructor(internal val inputOffset: Int, internal val outputOffset: Int)
 
 	class Segment internal constructor(
 		val sampleOffsetFrames: Int,
@@ -52,17 +53,10 @@ internal class CachedLoopCycle private constructor(
 		val segments: List<Segment>,
 	)
 
-	/** Maps a source position to the equivalent phase in the crossfaded cycle. */
 	fun cursorAt(sourceFrame: Long): Cursor {
 		require(sourceFrame in region.aFrame until region.bFrame)
-		val fadeStart = region.aFrame + fadeFrames
-		val fadeEnd = region.bFrame - fadeFrames
-		val offset = when {
-			sourceFrame < fadeStart -> prefixFrames + (sourceFrame - region.aFrame).toInt()
-			sourceFrame < fadeEnd -> (sourceFrame - fadeStart).toInt()
-			else -> prefixFrames + (sourceFrame - fadeEnd).toInt()
-		}
-		return Cursor(offset % frameCount)
+		val offset = (sourceFrame - region.aFrame).toInt()
+		return Cursor(offset, offset)
 	}
 
 	fun samplesFrom(sourceFrame: Long, frameCount: Int): FloatArray =
@@ -71,50 +65,56 @@ internal class CachedLoopCycle private constructor(
 	fun primeAt(sourceFrame: Long, frameCount: Int): Prime {
 		val cursor = cursorAt(sourceFrame)
 		val window = take(cursor, frameCount)
-		return Prime(window.samples, sourceFrame, window.next)
+		return Prime(window.samples, sourceFrame, Cursor(window.next.inputOffset, cursor.outputOffset))
 	}
 
 	fun take(cursor: Cursor, requestedFrames: Int): Window {
-		require(cursor.offset in 0 until frameCount)
+		require(cursor.inputOffset in 0 until sourceFrameCount && cursor.outputOffset in 0 until sourceFrameCount)
 		require(requestedFrames >= 0)
 		val output = FloatArray(Math.multiplyExact(requestedFrames, channelCount))
 		val segments = ArrayList<Segment>()
-		var sourceOffset = cursor.offset
+		var sourceOffset = cursor.inputOffset
 		var copiedFrames = 0
 		while (copiedFrames < requestedFrames) {
-			val contiguousFrames = if (sourceOffset < prefixFrames) {
-				prefixFrames - sourceOffset
-			} else {
-				frameCount - sourceOffset
-			}
-			val chunkFrames = minOf(requestedFrames - copiedFrames, contiguousFrames)
+			val chunkFrames = minOf(requestedFrames - copiedFrames, sourceFrameCount - sourceOffset)
 			samples.copyInto(
 				output,
 				destinationOffset = copiedFrames * channelCount,
 				startIndex = sourceOffset * channelCount,
 				endIndex = (sourceOffset + chunkFrames) * channelCount,
 			)
-			segments += Segment(copiedFrames, sourceFrameAt(Cursor(sourceOffset)), chunkFrames)
 			copiedFrames += chunkFrames
 			sourceOffset += chunkFrames
-			if (sourceOffset == frameCount) sourceOffset = 0
+			if (sourceOffset == sourceFrameCount) sourceOffset = fadeFrames
+		}
+		var outputOffset = cursor.outputOffset
+		var mappedFrames = 0
+		while (mappedFrames < requestedFrames) {
+			val chunkFrames = minOf(requestedFrames - mappedFrames, sourceFrameCount - outputOffset)
+			segments += Segment(mappedFrames, region.aFrame + outputOffset, chunkFrames)
+			mappedFrames += chunkFrames
+			outputOffset += chunkFrames
+			if (outputOffset == sourceFrameCount) outputOffset = fadeFrames
 		}
 		return Window(output, sourceFrameAt(cursor), requestedFrames, advance(cursor, requestedFrames), segments)
 	}
 
 	fun advance(cursor: Cursor, frameCount: Int): Cursor {
-		require(cursor.offset in 0 until this.frameCount)
+		require(cursor.inputOffset in 0 until sourceFrameCount && cursor.outputOffset in 0 until sourceFrameCount)
 		require(frameCount >= 0)
-		return Cursor(((cursor.offset.toLong() + frameCount) % this.frameCount).toInt())
+		return Cursor(advanceOffset(cursor.inputOffset, frameCount), advanceOffset(cursor.outputOffset, frameCount))
+	}
+
+	private fun advanceOffset(offset: Int, frames: Int): Int {
+		val next = offset.toLong() + frames
+		return if (next < sourceFrameCount) next.toInt() else {
+			fadeFrames + ((next - sourceFrameCount) % frameCount).toInt()
+		}
 	}
 
 	fun sourceFrameAt(cursor: Cursor): Long {
-		require(cursor.offset in 0 until frameCount)
-		return if (cursor.offset < prefixFrames) {
-			region.aFrame + fadeFrames + cursor.offset
-		} else {
-			region.bFrame - fadeFrames + cursor.offset - prefixFrames
-		}
+		require(cursor.outputOffset in 0 until sourceFrameCount)
+		return region.aFrame + cursor.outputOffset
 	}
 
 	companion object {
@@ -131,26 +131,16 @@ internal class CachedLoopCycle private constructor(
 			if (expectedSamples != sourceSamples.size.toLong()) return null
 
 			val sourceFrames = sourceFrameCount.toInt()
-			val prefixFrames = sourceFrames - fadeFrames * 2
-			val cycleFrames = prefixFrames + fadeFrames
-			if (prefixFrames < 0 || cycleFrames <= 0) return null
-			val cycleSamples = FloatArray(cycleFrames * channelCount)
-			val prefixSamples = prefixFrames * channelCount
-			if (prefixSamples > 0) {
-				sourceSamples.copyInto(
-					cycleSamples,
-					endIndex = (fadeFrames + prefixFrames) * channelCount,
-					startIndex = fadeFrames * channelCount,
-				)
-			}
+			val cycleFrames = sourceFrames - fadeFrames
+			val cycleSamples = sourceSamples.copyOf()
 			if (fadeFrames > 0) {
 				val tailStart = (sourceFrames - fadeFrames) * channelCount
 				val tail = sourceSamples.copyOfRange(tailStart, sourceSamples.size)
 				val head = sourceSamples.copyOfRange(0, fadeFrames * channelCount)
 				equalPowerCrossfade(tail, head, fadeFrames, channelCount)
-					.copyInto(cycleSamples, prefixSamples)
+					.copyInto(cycleSamples, tailStart)
 			}
-			return CachedLoopCycle(region, channelCount, cycleFrames, prefixFrames, fadeFrames, cycleSamples)
+			return CachedLoopCycle(region, channelCount, cycleFrames, fadeFrames, cycleSamples)
 		}
 	}
 }

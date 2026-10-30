@@ -2,7 +2,7 @@
 
 Open an issue describing the behavior before a large change. Include the Android version, device model, app version, audio format, and steps to reproduce a bug. Use generated or redistributable audio fixtures. Do not attach private music or document URIs.
 
-Start implementation from current `origin/main` on a `codex/<task>` branch. Keep changes in a pull request and leave merging to the owner. Add a behavior test for a fix. Keep audio callback work bounded, allocation-free, and independent of file access or DSP processing.
+Follow the issue and branch workflow in [AGENTS.md](AGENTS.md). It is the shared entry point for contributors and fresh agent chats. Add a behavior test for a fix. Keep audio callback work bounded, allocation-free, and independent of file access or DSP processing.
 
 Run the checks in [Testing](docs/testing.md) before opening the pull request. Describe what changed, the executed checks, and any unverified device behavior. Changes to DSP need signal-based tests and a device listening check. Changes to storage need malformed-source, cancellation, and resource-lifetime checks.
 

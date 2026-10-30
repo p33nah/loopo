@@ -37,7 +37,10 @@ class MediaCodecPcmDecoderTest {
 					when (val result = it.readFrames(2_048)) {
 						is PcmReadResult.Frames -> {
 							totalFrames += result.block.frameCount
-							result.block.samples.forEach { sample -> peak = max(peak, abs(sample)) }
+							result.block.samples.forEach { sample ->
+								assertTrue("$assetName contains a non-finite decoded sample", sample.isFinite())
+								peak = max(peak, abs(sample))
+							}
 						}
 						PcmReadResult.EndOfStream -> break
 						is PcmReadResult.Failed -> error("$assetName decode failed: ${result.reason}")

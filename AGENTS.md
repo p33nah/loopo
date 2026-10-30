@@ -5,7 +5,7 @@ Loopo is an offline Android music-study app. Kotlin and Compose own study state 
 ## Start every chat
 
 1. Read `README.md` and `docs/release-readiness.md`. Inspect the current branch, worktree status, remotes, and recent commits before changing files.
-2. Read the requested GitHub issue and its comments, linked issues, and existing pull requests. Use their current state rather than an earlier chat's summary. If the user asks for the next task, select one actionable release blocker not already covered by an open PR, then explain the selection and proceed.
+2. Read the requested GitHub issue and its comments, linked issues, and existing pull requests. Use their current state rather than an earlier chat's summary. For an implementation request without an issue number, find a matching issue or create one with acceptance criteria before starting the branch. Read-only questions do not need a new issue. If the user asks for the next task, select one actionable release blocker not already covered by an open PR, then explain the selection and proceed.
 3. Before application changes, read `docs/architecture.md`. Before choosing or running checks, read `docs/testing.md`. For tagging, signing, or release workflow changes, also read `docs/releasing.md` and `THIRD_PARTY_NOTICES.md`.
 
 This file is the persistent entry point. Other Markdown files are references reached through these instructions; they are not assumed to load automatically. Keep workflow rules here, commands in `docs/testing.md`, architecture decisions in `docs/architecture.md`, and current release evidence in `docs/release-readiness.md`.

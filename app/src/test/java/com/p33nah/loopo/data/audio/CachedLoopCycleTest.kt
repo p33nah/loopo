@@ -25,9 +25,12 @@ class CachedLoopCycleTest {
 
 		assertArrayEquals(floatArrayOf(3f, 4f, 5f).map { it / 16f }.toFloatArray(), priming.samples, 0f)
 		assertEquals(requestedFrame, priming.sourceStartFrame)
-		assertEquals(106L, cycle.sourceFrameAt(priming.next))
+		assertEquals(requestedFrame, cycle.sourceFrameAt(priming.next))
 		assertArrayEquals(floatArrayOf(6f, 7f, 8f, 9f).map { it / 16f }.toFloatArray(), nextWrite.samples, 0f)
-		assertEquals(106L, nextWrite.sourceStartFrame)
+		assertEquals(requestedFrame, nextWrite.sourceStartFrame)
+		assertEquals(listOf(103L, 104L, 105L, 106L), nextWrite.segments.flatMap { segment ->
+			(segment.sourceStartFrame until segment.sourceStartFrame + segment.frameCount).toList()
+		})
 	}
 
 	@Test
@@ -36,21 +39,21 @@ class CachedLoopCycleTest {
 		val window = cycle.take(cycle.cursorAt(108), 6)
 
 		assertArrayEquals(floatArrayOf(8f, 9f, 10f, 1f, 2f, 3f).map { it / 16f }.toFloatArray(), window.samples, 0.00001f)
-		assertEquals(3, window.segments.size)
-		assertEquals(108L, window.segments[0].sourceStartFrame)
-		assertEquals(110L, window.segments[1].sourceStartFrame)
-		assertEquals(102L, window.segments[2].sourceStartFrame)
-		assertEquals(listOf(2, 2, 2), window.segments.map { it.frameCount })
-		assertEquals(listOf(0, 2, 4), window.segments.map { it.sampleOffsetFrames })
+		assertEquals(listOf(108L, 109L, 110L, 111L, 102L, 103L), window.segments.flatMap { segment ->
+			(segment.sourceStartFrame until segment.sourceStartFrame + segment.frameCount).toList()
+		})
+		assertEquals(window.samples.toList(), window.segments.flatMap { segment ->
+			window.samples.slice(segment.sampleOffsetFrames until segment.sampleOffsetFrames + segment.frameCount)
+		})
 	}
 
 	@Test
-	fun seekInsideSkippedHeadUsesMatchingCrossfadeSamplesAndWrapsToCycleStart() {
+	fun seekInsideHeadReturnsTheRequestedSamplesBeforeSteadyLoopWrap() {
 		val cycle = cycle(region = LoopRegion(100, 112, true, 0), fadeFrames = 2)
 		val window = cycle.take(cycle.cursorAt(100), 4)
 
-		assertArrayEquals(floatArrayOf(10f, 1f, 2f, 3f).map { it / 16f }.toFloatArray(), window.samples, 0.00001f)
-		assertEquals(110L, window.sourceStartFrame)
+		assertArrayEquals(floatArrayOf(0f, 1f, 2f, 3f).map { it / 16f }.toFloatArray(), window.samples, 0.00001f)
+		assertEquals(100L, window.sourceStartFrame)
 		assertEquals(104L, cycle.sourceFrameAt(window.next))
 	}
 

@@ -55,6 +55,10 @@ android {
 	testOptions {
 		unitTests.isIncludeAndroidResources = true
 		unitTests.all {
+			it.extensions.configure<org.gradle.testing.jacoco.plugins.JacocoTaskExtension> {
+				isIncludeNoLocationClasses = true
+				includes = listOf("com.p33nah.loopo.*")
+			}
 			it.jvmArgs(
 				"--add-opens=java.base/java.lang=ALL-UNNAMED",
 				"--add-opens=java.base/java.util=ALL-UNNAMED",

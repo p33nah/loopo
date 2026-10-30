@@ -31,6 +31,8 @@ CI runs x86_64 Android emulators at API 26 and API 36. Device integration tests 
 
 Generate the JVM coverage report with `:app:createDebugUnitTestCoverageReport`. Generate the connected-device report with `:app:createDebugAndroidTestCoverageReport`. Reports live under `app/build/reports/coverage/`. [AGP coverage reporting](https://developer.android.com/studio/test/coverage-report) measures Kotlin and Java execution. It does not measure C++ coverage or prove assertions are sufficient. Do not report a combined application coverage percentage from only the JVM report.
 
+Run `python scripts/check_coverage.py app/build/reports/coverage/test/debug/report.xml` to check that pure JVM and Robolectric classes both contribute execution data. The unit-test agent includes classes without a code-source location, restricted to the application package. Without that setting, Robolectric tests can pass while their application classes appear unexecuted in the report. This check validates measurement, not a release-coverage target.
+
 The feature matrix identifies the required evidence for the release:
 
 | Feature | Automated evidence | Additional release evidence |

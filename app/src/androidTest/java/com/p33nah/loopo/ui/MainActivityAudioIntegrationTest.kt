@@ -85,7 +85,9 @@ class MainActivityAudioIntegrationTest {
 			viewModel.togglePlayback()
 			waitFor("native playback pause") { !viewModel.playbackState.value.isPlaying }
 			viewModel.seekToFrame(55_000)
-			waitFor("seek position") { viewModel.playbackState.value.positionFrame == 55_000L }
+			waitFor("seek position", diagnostic = { viewModel.playbackState.value.toString() }) {
+				viewModel.playbackState.value.positionFrame == 55_000L
+			}
 
 			scenario.moveToState(Lifecycle.State.CREATED)
 			waitFor("lifecycle pause") { !viewModel.playbackState.value.isPlaying }
@@ -118,11 +120,11 @@ class MainActivityAudioIntegrationTest {
 		}
 	}
 
-	private fun waitFor(description: String, condition: () -> Boolean) {
-		waitForValue(description) { Unit.takeIf { condition() } }
+	private fun waitFor(description: String, diagnostic: () -> String = { "" }, condition: () -> Boolean) {
+		waitForValue(description, diagnostic) { Unit.takeIf { condition() } }
 	}
 
-	private fun <T : Any> waitForValue(description: String, condition: () -> T?): T {
+	private fun <T : Any> waitForValue(description: String, diagnostic: () -> String = { "" }, condition: () -> T?): T {
 		val instrumentation = InstrumentationRegistry.getInstrumentation()
 		val deadline = SystemClock.uptimeMillis() + 30_000
 		while (SystemClock.uptimeMillis() < deadline) {
@@ -130,6 +132,6 @@ class MainActivityAudioIntegrationTest {
 			condition()?.let { return it }
 			SystemClock.sleep(20)
 		}
-		throw AssertionError("Timed out waiting for $description")
+		throw AssertionError("Timed out waiting for $description. ${diagnostic()}")
 	}
 }

@@ -5,7 +5,7 @@ The first planned version is `0.0.1`, with Android `versionCode` 1. Do not publi
 1. Merge reviewed pull requests through the repository owner. Keep application changes off direct pushes to `main`.
 2. Run CI at the exact intended commit and complete the physical-device matrix in [Testing](testing.md).
 3. Keep the distribution signing key offline with a separate encrypted backup. Use the same key for future updates. Never commit a keystore or put passwords in a Gradle file.
-4. Configure the GitHub `release` environment with an owner approval rule. Store `LOOPO_KEYSTORE_BASE64`, `LOOPO_KEYSTORE_PASSWORD`, `LOOPO_KEY_ALIAS`, and `LOOPO_KEY_PASSWORD` as environment secrets. The workflow does not create a key or choose one for the owner.
+4. Verify the GitHub `release` environment still requires approval from `p33nah` and only accepts protected branches. That rule was configured on 2026-10-30. Store `LOOPO_KEYSTORE_BASE64`, `LOOPO_KEYSTORE_PASSWORD`, `LOOPO_KEY_ALIAS`, and `LOOPO_KEY_PASSWORD` as environment secrets. The workflow does not create a key or choose one for the owner.
 5. Create an annotated `v0.0.1` tag at the verified `main` commit. Push the tag after reviewing its target.
 6. Run **Prepare signed release draft** on `main`, supplying that existing tag. The workflow repeats verification, checks that tag and version match the dispatched commit, signs the APK, verifies signature and native packaging, and creates a draft GitHub release with SHA-256 checksums.
 7. Review the draft APK, install it on physical devices, test an update signed by the same key, and record the signing-certificate fingerprint. Publish the draft manually only after owner approval.

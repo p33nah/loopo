@@ -40,6 +40,6 @@ Read back issue and PR updates. Keep reproduction steps, acceptance criteria, ev
 - Preserve Kotlin and native frame/rate units across JNI. Test source-frame mapping as well as samples around seek, preroll, crossfade, and loop wrap.
 - Use generated audio fixtures or recordings with clear redistribution rights. Preserve upstream dependency notices.
 - A green CI run permits code review, not a release claim. Release-blocker issues, physical-device evidence, signing identity, and signed update checks are separate gates. The owner publishes releases after reviewing the draft.
-- Keep keystores and passwords outside Git. Read signing secrets only in the release workflow. Repository protection and the `release` environment require owner configuration, documented in `docs/releasing.md`.
+- Keep keystores and passwords outside Git. Read signing secrets only in the release workflow. Verify repository protection and the owner-approved `release` environment when changing CI. Signing-key setup is documented in `docs/releasing.md`.
 
 When a task changes this workflow, update this file and the affected reference in the same PR. Avoid duplicating instructions across new files. Verify every referenced path and command before handing the task back.

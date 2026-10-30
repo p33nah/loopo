@@ -52,6 +52,8 @@ public:
 	}
 
 	std::vector<float> finish(float playbackRate, double outputRemainder) {
+		if (!primed_ || !std::isfinite(playbackRate) || playbackRate < 0.25f || playbackRate > 2.0f ||
+				!std::isfinite(outputRemainder) || outputRemainder < 0.0 || outputRemainder >= 1.0) return {};
 		std::vector<float> tail;
 		const int inputFrames = stretcher_.inputLatency();
 		tail.reserve(static_cast<size_t>(inputFrames / playbackRate + stretcher_.outputLatency()) * channelCount_);

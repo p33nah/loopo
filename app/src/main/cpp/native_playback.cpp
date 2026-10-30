@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "PlaybackEngine.h"
+#include "NativeArrayBounds.h"
 
 namespace {
 using EngineHandle = std::shared_ptr<PlaybackEngine>;
@@ -35,7 +36,7 @@ Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_prime(JNIEnv* env, job
 																				 jint channels, jfloat playbackRate) {
 	auto* engine = engineFrom(handle);
 	if (!engine || !samples || frames <= 0 || channels != (*engine)->channelCount() ||
-			env->GetArrayLength(samples) < frames * channels) return JNI_FALSE;
+			!containsInterleavedFrames(0, frames, channels, env->GetArrayLength(samples))) return JNI_FALSE;
 	auto* values = env->GetFloatArrayElements(samples, nullptr);
 	if (!values) return JNI_FALSE;
 	const auto primed = (*engine)->prime(values, frames, playbackRate);
@@ -61,8 +62,7 @@ Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_write(JNIEnv* env, job
 	if (!engine || !samples || inputFrames <= 0 || outputFrames <= 0 || offsetFrames < 0 ||
 			channels != (*engine)->channelCount() || !std::isfinite(sourceFramesPerOutputFrame) ||
 			sourceFramesPerOutputFrame <= 0.0) return 0;
-	const auto requiredSamples = (offsetFrames + inputFrames) * channels;
-	if (env->GetArrayLength(samples) < requiredSamples) return 0;
+	if (!containsInterleavedFrames(offsetFrames, inputFrames, channels, env->GetArrayLength(samples))) return 0;
 	auto* values = env->GetFloatArrayElements(samples, nullptr);
 	if (!values) return 0;
 	const auto written = (*engine)->write(values + offsetFrames * channels, inputFrames, outputFrames,

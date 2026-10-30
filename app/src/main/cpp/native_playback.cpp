@@ -1,10 +1,12 @@
 #include <jni.h>
 
 #include <cmath>
+#include <exception>
 #include <memory>
 
 #include "PlaybackEngine.h"
 #include "NativeArrayBounds.h"
+#include "NativeAudioLimits.h"
 
 namespace {
 using EngineHandle = std::shared_ptr<PlaybackEngine>;
@@ -17,10 +19,14 @@ EngineHandle* engineFrom(jlong handle) {
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_create(JNIEnv*, jobject, jint sampleRate,
 																				 jint channels, jint capacityFrames) {
-	if (sampleRate <= 0 || channels < 1 || channels > 2 || capacityFrames < 1) return 0;
-	auto engine = std::make_shared<PlaybackEngine>(sampleRate, channels, capacityFrames);
-	if (!engine->open()) return 0;
-	return reinterpret_cast<jlong>(new EngineHandle(std::move(engine)));
+	if (!isSupportedEngineConfiguration(sampleRate, channels, capacityFrames)) return 0;
+	try {
+		auto engine = std::make_shared<PlaybackEngine>(sampleRate, channels, capacityFrames);
+		if (!engine->open()) return 0;
+		return reinterpret_cast<jlong>(new EngineHandle(std::move(engine)));
+	} catch (const std::exception&) {
+		return 0;
+	}
 }
 
 extern "C" JNIEXPORT jint JNICALL

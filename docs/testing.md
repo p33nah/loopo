@@ -1,6 +1,6 @@
 # Verify Loopo
 
-Use JDK 17, SDK Platform 36, Build Tools 35.0.0, NDK 27.0.12077973, and CMake 3.22.1. The Gradle wrapper pins Gradle 8.13. Test dependencies are pinned in `app/build.gradle.kts`.
+Use JDK 17, SDK Platform 36, Build Tools 35.0.0, NDK 27.0.12077973, and CMake 3.22.1. The Gradle wrapper pins Gradle 8.13 and verifies the distribution checksum. Test dependencies are pinned in `app/build.gradle.kts`. Playback accepts mono or stereo PCM at 8 to 192 kHz and rejects unsupported configurations before native allocation.
 
 Run the Android build, JVM tests, and lint on Windows:
 

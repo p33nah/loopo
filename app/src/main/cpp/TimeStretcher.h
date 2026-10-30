@@ -18,6 +18,7 @@ public:
 	}
 
 	int prerollFrames(float playbackRate) const {
+		if (!std::isfinite(playbackRate) || playbackRate < 0.25f || playbackRate > 2.0f) return 0;
 		return stretcher_.outputSeekLength(playbackRate);
 	}
 

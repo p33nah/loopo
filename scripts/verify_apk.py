@@ -23,6 +23,8 @@ def verify(apk: Path) -> None:
             assert data[4] in (1, 2), f"Invalid ELF class: {entry.filename}"
             abi = entry.filename.split("/")[1]
             assert is_64 == (abi != "armeabi-v7a"), f"ABI and ELF class disagree: {entry.filename}"
+            machine = struct.unpack_from("<H", data, 18)[0]
+            assert machine == {"armeabi-v7a": 40, "arm64-v8a": 183, "x86_64": 62}[abi], f"Wrong ELF machine for {abi}: {entry.filename}"
             required_alignment = 16384 if is_64 else 4096
             offset = struct.unpack_from("<Q" if is_64 else "<I", data, 32 if is_64 else 28)[0]
             stride, count = struct.unpack_from("<HH", data, 54 if is_64 else 42)

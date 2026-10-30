@@ -1,6 +1,7 @@
 #include "PcmRingBuffer.h"
 #include "TimeStretcher.h"
 #include "NativeArrayBounds.h"
+#include "NativeAudioLimits.h"
 
 #include <algorithm>
 #include <atomic>
@@ -210,6 +211,10 @@ void testStretcherRatePitchAndChannels() {
 void testStretcherValidationResetAndFinish() {
 	TimeStretcher stretcher(48'000, 1);
 	const float silence[4]{};
+	for (const auto rate : {0.0f, -1.0f, 0.24f, 2.01f,
+			std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity()}) {
+		require(stretcher.prerollFrames(rate) == 0, "preroll rejects invalid rates before floating-to-integer conversion");
+	}
 	require(stretcher.process(silence, 4, 4) == 0, "DSP rejects processing before priming");
 	require(!stretcher.prime(nullptr, 4, 1.0f), "DSP rejects null preroll");
 	require(!stretcher.prime(silence, 0, 1.0f), "DSP rejects empty preroll");
@@ -261,6 +266,21 @@ void testInterleavedArrayBounds() {
 	require(!containsInterleavedFrames(0, 0, 2, 8), "empty frame ranges are rejected");
 }
 
+void testEngineResourceLimits() {
+	for (const int rate : {8'000, 44'100, 48'000, 96'000, 192'000}) {
+		for (const int channels : {1, 2}) {
+			require(isSupportedEngineConfiguration(rate, channels, rate * 2), "supported PCM configurations accept a two-second buffer");
+		}
+	}
+	for (const int rate : {0, -1, 7'999, 192'001, 1'000'000'000, std::numeric_limits<int>::max()}) {
+		require(!isSupportedEngineConfiguration(rate, 2, 1), "untrusted sample rates are rejected before allocation");
+	}
+	require(!isSupportedEngineConfiguration(48'000, 3, 96'000), "unsupported channel layouts are rejected");
+	require(!isSupportedEngineConfiguration(48'000, 2, 0), "empty native ring capacity is rejected");
+	require(!isSupportedEngineConfiguration(48'000, 2, 96'001), "native ring capacity has a bounded allocation");
+	require(!isSupportedEngineConfiguration(48'000, 2, std::numeric_limits<int>::max()), "extreme capacity cannot overflow allocation sizing");
+}
+
 } // namespace
 
 int main() {
@@ -271,6 +291,7 @@ int main() {
 		{"DSP rate, pitch, and channels", testStretcherRatePitchAndChannels},
 		{"DSP validation, reset, and finish", testStretcherValidationResetAndFinish},
 		{"JNI interleaved array bounds", testInterleavedArrayBounds},
+		{"native resource limits", testEngineResourceLimits},
 	};
 	try {
 		for (const auto& [name, test] : cases) {

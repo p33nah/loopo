@@ -1,9 +1,12 @@
 #include <jni.h>
 
 #include <cmath>
+#include <exception>
 #include <memory>
 
 #include "PlaybackEngine.h"
+#include "NativeArrayBounds.h"
+#include "NativeAudioLimits.h"
 
 namespace {
 using EngineHandle = std::shared_ptr<PlaybackEngine>;
@@ -16,10 +19,14 @@ EngineHandle* engineFrom(jlong handle) {
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_create(JNIEnv*, jobject, jint sampleRate,
 																				 jint channels, jint capacityFrames) {
-	if (sampleRate <= 0 || channels < 1 || channels > 2 || capacityFrames < 1) return 0;
-	auto engine = std::make_shared<PlaybackEngine>(sampleRate, channels, capacityFrames);
-	if (!engine->open()) return 0;
-	return reinterpret_cast<jlong>(new EngineHandle(std::move(engine)));
+	if (!isSupportedEngineConfiguration(sampleRate, channels, capacityFrames)) return 0;
+	try {
+		auto engine = std::make_shared<PlaybackEngine>(sampleRate, channels, capacityFrames);
+		if (!engine->open()) return 0;
+		return reinterpret_cast<jlong>(new EngineHandle(std::move(engine)));
+	} catch (const std::exception&) {
+		return 0;
+	}
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -35,7 +42,7 @@ Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_prime(JNIEnv* env, job
 																				 jint channels, jfloat playbackRate) {
 	auto* engine = engineFrom(handle);
 	if (!engine || !samples || frames <= 0 || channels != (*engine)->channelCount() ||
-			env->GetArrayLength(samples) < frames * channels) return JNI_FALSE;
+			!containsInterleavedFrames(0, frames, channels, env->GetArrayLength(samples))) return JNI_FALSE;
 	auto* values = env->GetFloatArrayElements(samples, nullptr);
 	if (!values) return JNI_FALSE;
 	const auto primed = (*engine)->prime(values, frames, playbackRate);
@@ -61,8 +68,7 @@ Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_write(JNIEnv* env, job
 	if (!engine || !samples || inputFrames <= 0 || outputFrames <= 0 || offsetFrames < 0 ||
 			channels != (*engine)->channelCount() || !std::isfinite(sourceFramesPerOutputFrame) ||
 			sourceFramesPerOutputFrame <= 0.0) return 0;
-	const auto requiredSamples = (offsetFrames + inputFrames) * channels;
-	if (env->GetArrayLength(samples) < requiredSamples) return 0;
+	if (!containsInterleavedFrames(offsetFrames, inputFrames, channels, env->GetArrayLength(samples))) return 0;
 	auto* values = env->GetFloatArrayElements(samples, nullptr);
 	if (!values) return 0;
 	const auto written = (*engine)->write(values + offsetFrames * channels, inputFrames, outputFrames,

@@ -79,8 +79,7 @@ class AndroidTrackInspector(context: Context) {
 			val sampleRate = audioFormat.intOrNull(MediaFormat.KEY_SAMPLE_RATE) ?: return null
 			val channels = audioFormat.intOrNull(MediaFormat.KEY_CHANNEL_COUNT) ?: return null
 			if (durationUs <= 0 || sampleRate <= 0 || channels !in 1..2) return null
-			val frames = ((durationUs * sampleRate) + 500_000) / 1_000_000
-			if (frames <= 0) return null
+			val frames = framesFromDurationMicros(durationUs, sampleRate) ?: return null
 			TrackMetadata(mime, frames, sampleRate, channels)
 		} finally {
 			extractor.release()

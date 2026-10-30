@@ -1,0 +1,29 @@
+name: Bug report
+description: Report an observable Loopo failure
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use a generated or redistributable audio file. Do not attach private recordings or document URIs.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: APK version or commit
+    validations:
+      required: true
+  - type: textarea
+    id: device
+    attributes:
+      label: Device, Android version, and audio output
+      description: Include the audio format, sample rate, channels, speed, loop settings, and output route when relevant.
+    validations:
+      required: true

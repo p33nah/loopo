@@ -34,7 +34,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicLong
-import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.coroutines.coroutineContext
@@ -433,7 +432,7 @@ class AndroidPlaybackController(context: Context) {
 		var reachedEnd = false
 		var observedSeekGeneration = seekGeneration.get()
 		var cachedLoop: CachedLoopCycle? = null
-		var cachedLoopOffset = 0
+		var cachedLoopCursor: CachedLoopCycle.Cursor? = null
 		while (true) {
 			coroutineContext.ensureActive()
 			val currentSeekGeneration = seekGeneration.get()
@@ -470,10 +469,14 @@ class AndroidPlaybackController(context: Context) {
 							loop,
 							fadeFrames,
 						) else null
+						val requestedFrame = loop?.let {
+							mutableState.value.positionFrame.coerceIn(it.aFrame, (it.bFrame - 1).coerceAtLeast(it.aFrame))
+						} ?: mutableState.value.positionFrame
+						val priming = cycle?.primeAt(requestedFrame, prerollFrames)
 						val preroll = if (cycle == null) {
 							readPrerollFrames(activeDecoder, currentTrack, prerollFrames, loop)
 						} else {
-							loopCycleFrames(cycle, prerollFrames)
+							requireNotNull(priming).samples
 						}
 						if (preroll == null || !NativePlaybackBridge.prime(
 							handle,
@@ -488,8 +491,8 @@ class AndroidPlaybackController(context: Context) {
 						}
 						if (cycle != null) {
 							cachedLoop = cycle
-							cachedLoopOffset = prerollFrames % cycle.frameCount
-							stretchedOutputSourceFrame = cycle.region.aFrame + cycle.fadeFrames
+							cachedLoopCursor = requireNotNull(priming).next
+							stretchedOutputSourceFrame = requireNotNull(priming).sourceStartFrame
 						}
 						stretcherNeedsPrime = false
 					}
@@ -505,17 +508,33 @@ class AndroidPlaybackController(context: Context) {
 							NativePlaybackBridge.setEndOfStream(handle)
 							true
 						} else {
-							if (cycle !== cachedLoop) cachedLoopOffset = 0
+							if (cycle !== cachedLoop) {
+								val sourceFrame = mutableState.value.positionFrame
+									.coerceIn(loop.aFrame, (loop.bFrame - 1).coerceAtLeast(loop.aFrame))
+								cachedLoopCursor = cycle.cursorAt(sourceFrame)
+							}
 							cachedLoop = cycle
-							val write = writeCachedLoopFrames(
-								handle,
-								cycle,
-								cachedLoopOffset,
-								frameLimit,
-								currentTrack.channelCount,
-							)
-							cachedLoopOffset = write.nextOffset
-							if (write.framesWritten == frameLimit) false else {
+							val cursor = requireNotNull(cachedLoopCursor)
+							val window = cycle.take(cursor, frameLimit)
+							var writtenFrames = 0
+							for (segment in window.segments) {
+								val written = writeStretched(
+									handle,
+									window.samples,
+									segment.sampleOffsetFrames,
+									segment.frameCount,
+									segment.sourceStartFrame,
+									loop,
+									currentTrack.channelCount,
+								)
+								writtenFrames += written
+								if (written != segment.frameCount) break
+							}
+							if (writtenFrames == frameLimit) {
+								cachedLoopCursor = window.next
+								stretchedOutputSourceFrame = cycle.sourceFrameAt(window.next)
+								false
+							} else {
 								mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
 								NativePlaybackBridge.setEndOfStream(handle)
 								true
@@ -739,16 +758,6 @@ class AndroidPlaybackController(context: Context) {
 		return samples
 	}
 
-	private fun loopCycleFrames(cycle: CachedLoopCycle, frameCount: Int): FloatArray {
-		val samples = FloatArray(frameCount * cycle.samples.size / cycle.frameCount)
-		val channels = cycle.samples.size / cycle.frameCount
-		for (frame in 0 until frameCount) {
-			val sourceFrame = frame % cycle.frameCount
-			cycle.samples.copyInto(samples, frame * channels, sourceFrame * channels, (sourceFrame + 1) * channels)
-		}
-		return samples
-	}
-
 	private suspend fun readExactFrames(
 		activeDecoder: PcmDecoder,
 		currentTrack: TrackInfo,
@@ -793,79 +802,14 @@ class AndroidPlaybackController(context: Context) {
 		region: LoopRegion,
 		fadeFrames: Int,
 	): CachedLoopCycle? {
-		val sourceFrames = (region.bFrame - region.aFrame).toInt()
+		val sourceFrameCount = region.bFrame - region.aFrame
+		if (sourceFrameCount > Int.MAX_VALUE) return null
+		val sourceFrames = sourceFrameCount.toInt()
 		val seeked = activeDecoder.seekToFrame(region.aFrame) as? PcmSeekResult.Seeked ?: return null
 		decoderPositionFrame = seeked.frame
 		val source = readExactFrames(activeDecoder, currentTrack, sourceFrames, region) ?: return null
-		val prefixFrames = sourceFrames - fadeFrames * 2
-		val cycleFrames = prefixFrames + fadeFrames
-		val cycleSamples = FloatArray(cycleFrames * currentTrack.channelCount)
-		val prefixSamples = prefixFrames * currentTrack.channelCount
-		if (prefixSamples > 0) source.copyInto(
-			cycleSamples,
-			endIndex = prefixSamples,
-			startIndex = fadeFrames * currentTrack.channelCount,
-		)
-		if (fadeFrames > 0) {
-			val tailStart = (sourceFrames - fadeFrames) * currentTrack.channelCount
-			val tail = source.copyOfRange(tailStart, source.size)
-			val head = source.copyOfRange(0, fadeFrames * currentTrack.channelCount)
-			equalPowerCrossfade(tail, head, fadeFrames, currentTrack.channelCount)
-				.copyInto(cycleSamples, prefixSamples)
-		}
 		decoderPositionFrame = region.bFrame
-		return CachedLoopCycle(region, cycleSamples, prefixFrames, cycleFrames, fadeFrames)
-	}
-
-	private fun writeCachedLoopFrames(
-		handle: Long,
-		cycle: CachedLoopCycle,
-		startOffset: Int,
-		requestedFrames: Int,
-		channelCount: Int,
-	): CachedLoopWrite {
-		var offset = startOffset
-		var remaining = requestedFrames
-		var writtenFrames = 0
-		while (remaining > 0) {
-			val prefixRemaining = if (offset < cycle.prefixFrames) cycle.prefixFrames - offset else 0
-			val segmentFrames = if (prefixRemaining > 0) prefixRemaining else cycle.frameCount - offset
-			val chunkFrames = minOf(remaining, segmentFrames)
-			val sourceStartFrame = if (prefixRemaining > 0) {
-				cycle.region.aFrame + cycle.fadeFrames + offset
-			} else {
-				cycle.region.bFrame - cycle.fadeFrames + offset - cycle.prefixFrames
-			}
-			val written = writeStretched(
-				handle,
-				cycle.samples,
-				offset,
-				chunkFrames,
-				sourceStartFrame,
-				cycle.region.takeIf { it.enabled },
-				channelCount,
-			)
-			writtenFrames += written
-			remaining -= written
-			offset = (offset + written) % cycle.frameCount
-			if (written != chunkFrames) break
-		}
-		return CachedLoopWrite(writtenFrames, offset)
-	}
-
-	private fun equalPowerCrossfade(tail: FloatArray, head: FloatArray, frameCount: Int, channelCount: Int): FloatArray {
-		val mixed = FloatArray(tail.size)
-		for (frame in 0 until frameCount) {
-			val progress = if (frameCount <= 1) 1.0 else frame.toDouble() / (frameCount - 1)
-			val angle = progress * PI / 2.0
-			val tailGain = cos(angle).toFloat()
-			val headGain = sin(angle).toFloat()
-			for (channel in 0 until channelCount) {
-				val sample = frame * channelCount + channel
-				mixed[sample] = (tail[sample] * tailGain + head[sample] * headGain).coerceIn(-1f, 1f)
-			}
-		}
-		return mixed
+		return CachedLoopCycle.create(region, source, currentTrack.channelCount, fadeFrames)
 	}
 
 	private suspend fun awaitPrebuffer(handle: Long, startFrame: Long) {
@@ -918,13 +862,4 @@ class AndroidPlaybackController(context: Context) {
 		const val SHORT_LOOP_CACHE_MAX_SECONDS = 2
 	}
 
-	private data class CachedLoopCycle(
-		val region: LoopRegion,
-		val samples: FloatArray,
-		val prefixFrames: Int,
-		val frameCount: Int,
-		val fadeFrames: Int,
-	)
-
-	private data class CachedLoopWrite(val framesWritten: Int, val nextOffset: Int)
 }

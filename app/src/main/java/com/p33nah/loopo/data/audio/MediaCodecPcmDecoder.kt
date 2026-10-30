@@ -60,7 +60,8 @@ class MediaCodecPcmDecoder private constructor(
 	override fun seekToFrame(frame: Long): PcmSeekResult {
 		if (closed || frame < 0) return PcmSeekResult.Failed(PcmDecodeFailure.INVALID_FILE)
 		return try {
-			val timeUs = (frame * 1_000_000L) / format.sampleRate
+			val timeUs = microsFromFrame(frame, format.sampleRate)
+				?: return PcmSeekResult.Failed(PcmDecodeFailure.INVALID_FILE)
 			extractor.seekTo(timeUs, MediaExtractor.SEEK_TO_PREVIOUS_SYNC)
 			codec.flush()
 			inputEnded = false
@@ -126,10 +127,16 @@ class MediaCodecPcmDecoder private constructor(
 							if (info.size % bytesPerFrame != 0) return DecodeResult.Failed(PcmDecodeFailure.READ_FAILED)
 							val totalFrames = info.size / bytesPerFrame
 							val targetFrame = seekTargetFrame
-							val outputStartFrame = ((info.presentationTimeUs * format.sampleRate) + 500_000) / 1_000_000
+							val outputStartFrame = framesFromDurationMicros(info.presentationTimeUs, format.sampleRate)
+								?: return DecodeResult.Failed(PcmDecodeFailure.INVALID_FILE)
+							val outputEndFrame = try {
+								Math.addExact(outputStartFrame, totalFrames.toLong())
+							} catch (_: ArithmeticException) {
+								return DecodeResult.Failed(PcmDecodeFailure.INVALID_FILE)
+							}
 							val framesToDrop = if (targetFrame == null) 0 else
 								(targetFrame - outputStartFrame).coerceIn(0, totalFrames.toLong()).toInt()
-							if (targetFrame != null && outputStartFrame + totalFrames <= targetFrame) {
+							if (targetFrame != null && outputEndFrame <= targetFrame) {
 								FloatArray(0)
 							} else {
 								val remainingFrames = totalFrames - framesToDrop

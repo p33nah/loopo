@@ -96,8 +96,11 @@ bool PlaybackEngine::pauseAndWait() {
 
 bool PlaybackEngine::resetAtFrame(int64_t sourceFrame) {
 	if (!pauseAndWait()) return false;
-	if (stream_->getState() == oboe::StreamState::Paused &&
-			stream_->flush(500'000'000) != oboe::Result::OK) return false;
+	if (stream_->getState() == oboe::StreamState::Paused) {
+		const auto result = stream_->getAudioApi() == oboe::AudioApi::OpenSLES
+				? stream_->requestFlush() : stream_->flush(500'000'000);
+		if (result != oboe::Result::OK) return false;
+	}
 	ring_.clear();
 	stretcher_.reset();
 	sourcePosition_.store(sourceFrame, std::memory_order_release);

@@ -17,7 +17,7 @@ The hardening work adds automated verification before further product features. 
 | 16 KB page compatibility | All packaged 64-bit ELF LOAD and uncompressed ZIP alignment checks pass; a 16 KB runtime test remains required |
 | Output device changes | [Issue 16](https://github.com/p33nah/loopo/issues/16) remains a release blocker until route/error behavior is reproduced and addressed |
 | Fractional output at loop wrap | [Issue 20](https://github.com/p33nah/loopo/issues/20) tracks one-input-frame segments at fast rates; controller reproduction and a fix remain required |
-| API 26 output reset | [Issue 21](https://github.com/p33nah/loopo/issues/21) reproduces seek failure after pause on OpenSL ES; native isolation and same-device verification are in progress |
+| API 26 output reset | [Issue 21](https://github.com/p33nah/loopo/issues/21) has a native/application regression and a backend-specific flush fix in PR #17; use that PR's current API 26 and 36 results as verification evidence |
 | Physical Android matrix | Xiaomi rerun plus at least one other manufacturer and representative API versions |
 | File-provider and storage failures | Verify expired grants, changed/deleted files, process death, nonseekable sources, large files, and disk-full behavior |
 | Screen compatibility | Verify small screens and Android 16 large-screen behavior where orientation restrictions may be ignored |

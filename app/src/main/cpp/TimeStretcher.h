@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <vector>
 
 #include "third_party/signalsmith-stretch/signalsmith-stretch.h"
@@ -35,9 +36,9 @@ public:
 		return true;
 	}
 
-	int process(const float* interleaved, int inputFrames, int outputFrames) {
+	bool process(const float* interleaved, int inputFrames, int outputFrames) {
 		if (!primed_ || !interleaved || inputFrames <= 0 || inputFrames > MAX_INPUT_FRAMES ||
-				outputFrames <= 0 || outputFrames > MAX_OUTPUT_FRAMES) return 0;
+				outputFrames < 0 || outputFrames > MAX_OUTPUT_FRAMES) return false;
 		for (int frame = 0; frame < inputFrames; ++frame) {
 			inputLeft_[frame] = interleaved[frame * channelCount_];
 			if (channelCount_ == 2) inputRight_[frame] = interleaved[frame * channelCount_ + 1];
@@ -49,23 +50,45 @@ public:
 			outputInterleaved_[frame * channelCount_] = outputLeft_[frame];
 			if (channelCount_ == 2) outputInterleaved_[frame * channelCount_ + 1] = outputRight_[frame];
 		}
-		return outputFrames;
+		return true;
 	}
 
-	std::vector<float> finish(float playbackRate, double outputRemainder) {
-		if (!primed_ || !std::isfinite(playbackRate) || playbackRate < 0.25f || playbackRate > 2.0f ||
-				!std::isfinite(outputRemainder) || outputRemainder < 0.0 || outputRemainder >= 1.0) return {};
+	int finishFrameCount(int playbackRatePercent, int remainderUnits) const {
+		if (!primed_ || playbackRatePercent < 25 || playbackRatePercent > 200 ||
+				remainderUnits < 0 || remainderUnits >= playbackRatePercent) return -1;
+		int outputFrameCount = 0;
+		int remainder = remainderUnits;
+		int inputFramesRemaining = stretcher_.inputLatency();
+		while (inputFramesRemaining > 0) {
+			const int chunkFrames = std::min(MAX_INPUT_FRAMES, inputFramesRemaining);
+			const int64_t totalUnits = static_cast<int64_t>(chunkFrames) * 100 + remainder;
+			const int outputFrames = static_cast<int>(totalUnits / playbackRatePercent);
+			if (outputFrames < 0 || outputFrames > MAX_OUTPUT_FRAMES ||
+					outputFrameCount > std::numeric_limits<int>::max() - outputFrames) return -1;
+			outputFrameCount += outputFrames;
+			remainder = static_cast<int>(totalUnits % playbackRatePercent);
+			inputFramesRemaining -= chunkFrames;
+		}
+		const int flushFrames = stretcher_.outputLatency();
+		if (flushFrames < 0 || flushFrames > MAX_OUTPUT_FRAMES ||
+				outputFrameCount > std::numeric_limits<int>::max() - flushFrames) return -1;
+		return outputFrameCount + flushFrames;
+	}
+
+	std::vector<float> finish(int playbackRatePercent, int remainderUnits) {
+		const int expectedFrames = finishFrameCount(playbackRatePercent, remainderUnits);
+		if (expectedFrames < 0) return {};
 		std::vector<float> tail;
 		const int inputFrames = stretcher_.inputLatency();
-		tail.reserve(static_cast<size_t>(inputFrames / playbackRate + stretcher_.outputLatency()) * channelCount_);
+		tail.reserve(static_cast<size_t>(expectedFrames) * channelCount_);
 		std::vector<float> silence(MAX_INPUT_FRAMES * channelCount_, 0.0f);
 		int framesRemaining = inputFrames;
 		while (framesRemaining > 0) {
 			const int chunkFrames = std::min(MAX_INPUT_FRAMES, framesRemaining);
-			const double requestedOutput = chunkFrames / playbackRate + outputRemainder;
-			const int outputFrames = static_cast<int>(requestedOutput);
-			outputRemainder = requestedOutput - outputFrames;
-			if (process(silence.data(), chunkFrames, outputFrames) != outputFrames) return {};
+			const int64_t totalUnits = static_cast<int64_t>(chunkFrames) * 100 + remainderUnits;
+			const int outputFrames = static_cast<int>(totalUnits / playbackRatePercent);
+			remainderUnits = static_cast<int>(totalUnits % playbackRatePercent);
+			if (!process(silence.data(), chunkFrames, outputFrames)) return {};
 			tail.insert(tail.end(), outputInterleaved_.begin(), outputInterleaved_.begin() + outputFrames * channelCount_);
 			framesRemaining -= chunkFrames;
 		}
@@ -79,6 +102,7 @@ public:
 		}
 		tail.insert(tail.end(), outputInterleaved_.begin(), outputInterleaved_.begin() + flushFrames * channelCount_);
 		primed_ = false;
+		if (tail.size() != static_cast<size_t>(expectedFrames) * channelCount_) return {};
 		return tail;
 	}
 

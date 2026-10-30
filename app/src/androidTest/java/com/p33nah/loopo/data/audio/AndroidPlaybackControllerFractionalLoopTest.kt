@@ -40,8 +40,71 @@ class AndroidPlaybackControllerFractionalLoopTest {
 		)
 	}
 
-	private suspend fun assertShortLoopPlaybackSurvives(name: String, loop: LoopRegion) {
+	@Test
+	fun oneFrameFileLoopAtDoubleRateKeepsBufferingAndPlaybackAlive() = runBlocking {
+		assertShortLoopPlaybackSurvives(
+			name = "fractional-output-one-frame-file.wav",
+			loop = LoopRegion(aFrame = 0, bFrame = 1, enabled = true, crossfadeMs = 0),
+			trackFrames = 1,
+		)
+	}
+
+	@Test
+	fun rateChangesAndSeeksWhilePumpingKeepRemaindersValid() = runBlocking {
+		val name = "fractional-output-rate-transitions.wav"
 		val audioFile = WavFixture.pcmFile(context, name, frames = TRACK_FRAMES)
+		val controller = AndroidPlaybackController(context)
+		var activity: ActivityScenario<MainActivity>? = null
+		val loop = LoopRegion(aFrame = 24_000, bFrame = 84_000, enabled = true, crossfadeMs = 10)
+		try {
+			activity = ActivityScenario.launch(MainActivity::class.java)
+			val track = TrackInfo(
+				id = TrackId(name),
+				uri = Uri.fromFile(audioFile),
+				displayName = name,
+				container = AudioContainer.WAV,
+				durationFrames = TRACK_FRAMES.toLong(),
+				sampleRate = SAMPLE_RATE,
+				channelCount = 1,
+				sourceMimeType = "audio/wav",
+			)
+			assertNull("Generated WAV must load", controller.load(track))
+			assertTrue("Loop settings must be accepted", controller.setLoopRegion(loop))
+			controller.setPlaybackRate(PlaybackRate(199))
+			controller.seekToFrame(loop.aFrame + 1_000)
+			controller.togglePlayback()
+			assertTrue("Playback did not start: ${controller.state.value}", controller.state.value.isPlaying)
+
+			for (ratePercent in listOf(25, 75, 200)) {
+				controller.setPlaybackRate(PlaybackRate(ratePercent))
+				assertEquals(PlaybackRate(ratePercent), controller.state.value.playbackRate)
+				assertTrue("Rate change did not resume playback: ${controller.state.value}", controller.state.value.isPlaying)
+				controller.seekToFrame(loop.aFrame + 2_000)
+				assertTrue("Seek did not resume playback: ${controller.state.value}", controller.state.value.isPlaying)
+				assertHealthy(150L) {
+					val snapshot = controller.state.value
+					assertNull("Rate transition or seek reported an error: $snapshot", snapshot.error)
+					assertFalse("Loop ended during a rate transition: $snapshot", snapshot.isEnded)
+					assertTrue("Playback stopped during a rate transition: $snapshot", snapshot.isPlaying)
+					assertInLoop(loop, snapshot)
+				}
+			}
+		} finally {
+			try {
+				controller.unload()
+			} finally {
+				activity?.close()
+				audioFile.delete()
+			}
+		}
+	}
+
+	private suspend fun assertShortLoopPlaybackSurvives(
+		name: String,
+		loop: LoopRegion,
+		trackFrames: Int = TRACK_FRAMES,
+	) {
+		val audioFile = WavFixture.pcmFile(context, name, frames = trackFrames)
 		val controller = AndroidPlaybackController(context)
 		var activity: ActivityScenario<MainActivity>? = null
 		try {
@@ -51,7 +114,7 @@ class AndroidPlaybackControllerFractionalLoopTest {
 				uri = Uri.fromFile(audioFile),
 				displayName = name,
 				container = AudioContainer.WAV,
-				durationFrames = TRACK_FRAMES.toLong(),
+				durationFrames = trackFrames.toLong(),
 				sampleRate = SAMPLE_RATE,
 				channelCount = 1,
 				sourceMimeType = "audio/wav",

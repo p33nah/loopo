@@ -22,6 +22,7 @@ int64_t outputLatencyFrames(oboe::AudioStream& stream) {
 PlaybackEngine::PlaybackEngine(int sampleRate, int channelCount, int capacityFrames)
 		: sampleRate_(sampleRate), channelCount_(channelCount), ring_(channelCount, capacityFrames),
 		  stretcher_(sampleRate, channelCount),
+		  sourcePositionScratch_(capacityFrames),
 		  callbackSourceFrames_(capacityFrames), audiblePositionHistory_(capacityFrames) {}
 
 PlaybackEngine::~PlaybackEngine() {
@@ -58,11 +59,13 @@ bool PlaybackEngine::open() {
 
 void PlaybackEngine::close() {
 	outputLatencyFrames_.store(-1, std::memory_order_release);
-	if (!stream_) return;
-	playing_.store(false, std::memory_order_release);
-	stream_->requestStop();
-	stream_->close();
-	stream_.reset();
+	if (stream_) {
+		playing_.store(false, std::memory_order_release);
+		stream_->requestStop();
+		stream_->close();
+		stream_.reset();
+	}
+	sourceFrameMapper_.reset();
 }
 
 bool PlaybackEngine::play() {
@@ -103,6 +106,7 @@ bool PlaybackEngine::resetAtFrame(int64_t sourceFrame) {
 	}
 	ring_.clear();
 	stretcher_.reset();
+	sourceFrameMapper_.reset();
 	sourcePosition_.store(sourceFrame, std::memory_order_release);
 	basePosition_.store(sourceFrame, std::memory_order_release);
 	renderedOutputFrames_.store(0, std::memory_order_release);
@@ -121,21 +125,31 @@ bool PlaybackEngine::prime(const float* samples, int frames, float playbackRate)
 }
 
 int PlaybackEngine::write(const float* samples, int inputFrames, int outputFrames, int64_t sourceStartFrame,
-		double sourceFramesPerOutputFrame, int64_t loopStartFrame, int64_t loopEndFrame) {
-	if (!samples || inputFrames <= 0 || inputEnded_.load(std::memory_order_acquire)) return 0;
-	const auto processed = stretcher_.process(samples, inputFrames, outputFrames);
-	if (processed != outputFrames) return 0;
-	const auto written = ring_.write(stretcher_.output(), outputFrames, sourceStartFrame,
-			sourceFramesPerOutputFrame, loopStartFrame, loopEndFrame);
-	return written == outputFrames ? inputFrames : 0;
+		int playbackRatePercent, int64_t loopStartFrame, int64_t loopEndFrame) {
+	if (!samples || inputFrames <= 0 || inputEnded_.load(std::memory_order_acquire) ||
+			outputFrames > ring_.availableToWrite()) return 0;
+	auto nextSourceFrameMapper = sourceFrameMapper_;
+	if (!nextSourceFrameMapper.map(sourceStartFrame, inputFrames, outputFrames, playbackRatePercent,
+			loopStartFrame, loopEndFrame, sourcePositionScratch_.data(),
+			static_cast<int>(sourcePositionScratch_.size()))) return 0;
+	if (!stretcher_.process(samples, inputFrames, outputFrames)) return 0;
+	if (ring_.write(stretcher_.output(), outputFrames, sourcePositionScratch_.data()) != outputFrames) return 0;
+	sourceFrameMapper_ = nextSourceFrameMapper;
+	return inputFrames;
 }
 
-bool PlaybackEngine::finish(float playbackRate, double outputRemainder, int64_t endFrame) {
+bool PlaybackEngine::finish(int playbackRatePercent, int remainderUnits, int64_t endFrame) {
 	if (inputEnded_.load(std::memory_order_acquire)) return false;
-	const auto tail = stretcher_.finish(playbackRate, outputRemainder);
+	const int expectedFrames = stretcher_.finishFrameCount(playbackRatePercent, remainderUnits);
+	if (expectedFrames <= 0 || expectedFrames > ring_.availableToWrite() ||
+			expectedFrames > static_cast<int>(sourcePositionScratch_.size())) return false;
+	const auto tail = stretcher_.finish(playbackRatePercent, remainderUnits);
 	if (tail.empty()) return false;
 	const auto frames = static_cast<int>(tail.size() / channelCount_);
-	if (ring_.write(tail.data(), frames, endFrame, 0.0, -1, -1) != frames) return false;
+	if (frames != expectedFrames) return false;
+	std::fill_n(sourcePositionScratch_.data(), frames, endFrame);
+	if (ring_.write(tail.data(), frames, sourcePositionScratch_.data()) != frames) return false;
+	sourceFrameMapper_.reset();
 	inputEnded_.store(true, std::memory_order_release);
 	return true;
 }

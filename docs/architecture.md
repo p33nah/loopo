@@ -20,7 +20,7 @@ flowchart LR
 
 Decoding and DSP happen before the output ring. The Oboe callback reads prepared PCM, converts channel layout, tracks source frames, and supplies silence on underrun. It must not decode, allocate, wait for a coroutine, or access storage.
 
-The cached loop is a deterministic value containing prepared PCM and the mapping between source position and cycle phase. Its JVM tests can verify a seek and preroll at exact sample boundaries. Platform-specific decoder reads and native writes stay with the controller. A pure cycle test cannot prove Android focus or output-device recovery.
+The cached loop is a deterministic value containing prepared PCM and the mapping between source position and cycle phase. It retains the full source head for an initial seek, mixes the tail with the head, and wraps later cycles past the already-overlapped head. Its cursor keeps the DSP input position separate from the audible output position. Priming advances input while the first output metadata stays at the requested frame. JVM tests verify those samples and positions across multiple wraps. Platform-specific decoder reads and native writes stay with the controller. A pure cycle test cannot prove Android focus or output-device recovery.
 
 The waveform cache identifies source content separately from the short-loop PCM cache. Comparing a full `LoopRegion` already invalidates the loop cache when markers or crossfade change. Hashing only the endpoints of a source file does not detect all waveform changes, even when size and modification time are unchanged.
 

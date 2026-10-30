@@ -97,14 +97,9 @@ bool PlaybackEngine::pauseAndWait() {
 bool PlaybackEngine::resetAtFrame(int64_t sourceFrame) {
 	if (!pauseAndWait()) return false;
 	if (stream_->getState() == oboe::StreamState::Paused) {
-		const auto result = stream_->flush(500'000'000);
-		if (result != oboe::Result::OK) {
-#if !defined(NDEBUG)
-			__android_log_print(ANDROID_LOG_DEBUG, "LoopoReset", "flush api=%d state=%d result=%d",
-					static_cast<int>(stream_->getAudioApi()), static_cast<int>(stream_->getState()), static_cast<int>(result));
-#endif
-			return false;
-		}
+		const auto result = stream_->getAudioApi() == oboe::AudioApi::OpenSLES
+				? stream_->requestFlush() : stream_->flush(500'000'000);
+		if (result != oboe::Result::OK) return false;
 	}
 	ring_.clear();
 	stretcher_.reset();

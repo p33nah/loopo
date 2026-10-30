@@ -92,6 +92,33 @@ class CachedLoopCycleTest {
 	}
 
 	@Test
+	fun prerollSpanningSeveralCyclesDoesNotAdvanceTheAudiblePlayhead() {
+		val cycle = cycle(LoopRegion(100, 104, true, 0), fadeFrames = 1)
+		val prime = cycle.primeAt(101, 13)
+		assertArrayEquals(
+			floatArrayOf(1f, 2f, 0f, 1f, 2f, 0f, 1f, 2f, 0f, 1f, 2f, 0f, 1f).map { it / 16f }.toFloatArray(),
+			prime.samples, 0.000001f,
+		)
+		val write = cycle.take(prime.next, 6)
+		assertArrayEquals(floatArrayOf(2f, 0f, 1f, 2f, 0f, 1f).map { it / 16f }.toFloatArray(), write.samples, 0.000001f)
+		assertEquals(listOf(101L, 102L, 103L, 101L, 102L, 103L), write.segments.flatMap { segment ->
+			(segment.sourceStartFrame until segment.sourceStartFrame + segment.frameCount).toList()
+		})
+	}
+
+	@Test
+	fun oneFrameLoopRemainsReadableThroughPrerollAndRepeatedWraps() {
+		val cycle = CachedLoopCycle.create(LoopRegion(5, 6, true, 0), floatArrayOf(0.25f), 1, 0)!!
+		val prime = cycle.primeAt(5, 20)
+		val write = cycle.take(prime.next, 10)
+		assertArrayEquals(FloatArray(20) { 0.25f }, prime.samples, 0f)
+		assertArrayEquals(FloatArray(10) { 0.25f }, write.samples, 0f)
+		assertEquals(List(10) { 5L }, write.segments.flatMap { segment ->
+			(segment.sourceStartFrame until segment.sourceStartFrame + segment.frameCount).toList()
+		})
+	}
+
+	@Test
 	fun zeroFadeCycleHasLoopLengthAndRejectsMalformedShapes() {
 		val region = LoopRegion(4, 12, true, 0)
 		val cycle = CachedLoopCycle.create(region, FloatArray(8) { it.toFloat() }, 1, 0)

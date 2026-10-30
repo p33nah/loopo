@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.p33nah.loopo.domain.audio.PcmDecoderResult
 import com.p33nah.loopo.domain.audio.PcmReadResult
 import com.p33nah.loopo.domain.audio.PcmSeekResult
+import com.p33nah.loopo.domain.model.AudioContainer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -25,7 +26,12 @@ class MediaCodecPcmDecoderTest {
 			instrumentation.context.assets.open(assetName).use { input ->
 				file.outputStream().use { output -> input.copyTo(output) }
 			}
-			val opened = MediaCodecPcmDecoder.open(context, Uri.fromFile(file))
+			val inspection = AndroidTrackInspector(context).inspect(Uri.fromFile(file), hasPersistedAccess = false)
+			assertTrue("Metadata inspection failed for $assetName: $inspection", inspection is TrackInspection.Ready)
+			val track = (inspection as TrackInspection.Ready).track
+			assertEquals(if (assetName.endsWith(".mp3")) AudioContainer.MP3 else AudioContainer.FLAC, track.container)
+			assertTrue("Invalid inspected duration for $assetName", track.durationFrames in 40_000L..52_000L)
+			val opened = AndroidPcmDecoderFactory(context).open(track.container, track.uri)
 			val decoder = (opened as? PcmDecoderResult.Ready)?.decoder
 				?: error("Platform decoder could not open generated $assetName: $opened")
 			decoder.use {

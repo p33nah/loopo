@@ -208,6 +208,32 @@ void testStretcherRatePitchAndChannels() {
 	}
 }
 
+void testStretcherRetainsInputAcrossZeroOutput() {
+	constexpr int sampleRate = 48'000;
+	constexpr int inputFrames = 2'048;
+	constexpr int outputFrames = inputFrames / 2;
+	constexpr float rate = 2.0f;
+	const auto preroll = TimeStretcher(sampleRate, 1).prerollFrames(rate);
+	auto signal = makeSine(preroll + inputFrames, 1, sampleRate, 440.0);
+	TimeStretcher segmented(sampleRate, 1);
+	TimeStretcher batched(sampleRate, 1);
+	require(segmented.prime(signal.data(), preroll, rate), "segmented DSP accepts valid preroll");
+	require(batched.prime(signal.data(), preroll, rate), "batched DSP accepts valid preroll");
+	require(segmented.process(signal.data() + preroll, 1, 0),
+			"DSP accepts one real input frame when no whole output frame is due");
+	require(segmented.process(signal.data() + preroll + 1, inputFrames - 1, outputFrames),
+			"DSP accepts the remaining input after an input-only segment");
+	require(batched.process(signal.data() + preroll, inputFrames, outputFrames),
+			"batched DSP accepts the same input and output budget");
+	for (int frame = 0; frame < outputFrames; ++frame) {
+		const auto actual = segmented.output()[frame];
+		const auto expected = batched.output()[frame];
+		require(std::isfinite(actual), "input-only processing keeps later output finite");
+		requireNear(actual, expected, 0.02,
+				"later output retains the input consumed by the zero-output segment");
+	}
+}
+
 void testStretcherValidationResetAndFinish() {
 	TimeStretcher stretcher(48'000, 1);
 	const float silence[4]{};
@@ -289,6 +315,7 @@ int main() {
 		{"ring loop metadata and storage wraparound", testRingLoopMetadataAndWraparound},
 		{"ring SPSC stress", testRingSpscStress},
 		{"DSP rate, pitch, and channels", testStretcherRatePitchAndChannels},
+		{"DSP input retention across zero output", testStretcherRetainsInputAcrossZeroOutput},
 		{"DSP validation, reset, and finish", testStretcherValidationResetAndFinish},
 		{"JNI interleaved array bounds", testInterleavedArrayBounds},
 		{"native resource limits", testEngineResourceLimits},

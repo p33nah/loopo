@@ -98,12 +98,14 @@ class AndroidPlaybackControllerFractionalLoopTest {
 				observedPositions += snapshot.positionFrame
 			}
 			assertTrue("Playback position did not advance for $scenario: $observedPositions", observedPositions.distinct().size > 1)
-			val edgeWindowFrames = maxOf(fadeFrames, scenario.sampleRate / 100L)
-			val nearLoopEndIndex = observedPositions.indexOfFirst { it >= loop.bFrame - edgeWindowFrames * 4 }
+			val tailStartFrame = loop.bFrame - fadeFrames - scenario.sampleRate / 20L
+			val nearLoopEndIndex = observedPositions.indexOfFirst { it >= tailStartFrame }
 			assertTrue("Playback did not reach the loop tail for $scenario: $observedPositions", nearLoopEndIndex >= 0)
+			val headStartFrame = loop.aFrame + fadeFrames
+			val headEndFrame = headStartFrame + scenario.sampleRate / 5L
 			assertTrue(
 				"Playback did not wrap from the tail to the head for $scenario: $observedPositions",
-				observedPositions.drop(nearLoopEndIndex + 1).any { it < loop.aFrame + edgeWindowFrames * 2 },
+				observedPositions.drop(nearLoopEndIndex + 1).any { it in headStartFrame until headEndFrame },
 			)
 		} finally {
 			try {

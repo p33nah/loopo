@@ -1,4 +1,5 @@
 #include "PcmRingBuffer.h"
+#include "PlaybackProducer.h"
 #include "TimeStretcher.h"
 #include "NativeArrayBounds.h"
 #include "NativeAudioLimits.h"
@@ -12,6 +13,7 @@
 #include <iostream>
 #include <limits>
 #include <numbers>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -394,6 +396,95 @@ void testStretcherRetainsInputAcrossZeroOutput() {
 			"both valid long-running schedules can finish their DSP tail");
 }
 
+void testPlaybackProducerEmitsPcmAndSourceAnchors() {
+	constexpr int sampleRate = 48'000;
+	constexpr int inputFrames = 48'000;
+	constexpr int playbackRatePercent = 200;
+	constexpr int expectedOutputFrames = inputFrames / 2;
+	constexpr int capacityFrames = 65'536;
+	constexpr int64_t sourceStartFrame = 12'000;
+	constexpr int64_t sourceEndFrame = sourceStartFrame + inputFrames;
+	PlaybackProducer producer(sampleRate, 1, capacityFrames);
+	const auto prerollFrames = producer.prerollFrames(2.0f);
+	require(prerollFrames > 0, "producer has a post-preroll signal window");
+	auto signal = makeSine(prerollFrames + inputFrames, 1, sampleRate, 440.0);
+	require(producer.prime(signal.data(), prerollFrames, 2.0f), "producer accepts a valid sine preroll");
+	for (int inputFrame = 0; inputFrame < inputFrames; ++inputFrame) {
+		const int outputFrames = inputFrame % 2 == 0 ? 0 : 1;
+		require(producer.write(signal.data() + prerollFrames + inputFrame, 1, outputFrames,
+				sourceStartFrame + inputFrame, playbackRatePercent, -1, -1) == 1,
+				"producer accepts exact-budget one-frame input-only and emitting writes");
+	}
+	require(producer.queuedFrames() == expectedOutputFrames,
+			"producer queues the output budget for the complete input signal");
+
+	std::vector<float> actual(expectedOutputFrames);
+	std::vector<int64_t> sourceFrames(expectedOutputFrames);
+	require(producer.read(actual.data(), expectedOutputFrames, 1, sourceFrames.data()) == expectedOutputFrames,
+			"consumer drains the producer's actual PCM and source anchors");
+	for (int outputFrame = 0; outputFrame < expectedOutputFrames; ++outputFrame) {
+		require(sourceFrames[outputFrame] == sourceStartFrame + outputFrame * 2,
+				"producer preserves each source anchor through input-only writes");
+	}
+	for (const float sample : actual) require(std::isfinite(sample), "producer PCM remains finite");
+	const double actualRms = std::sqrt(std::inner_product(actual.begin(), actual.end(), actual.begin(), 0.0) /
+			actual.size());
+	require(actualRms > 0.01, "producer emits observable signal energy after input-only writes");
+	const auto actualFrequency = estimateZeroCrossingFrequency(actual, 1, sampleRate,
+			expectedOutputFrames / 5, expectedOutputFrames * 4 / 5);
+	requireNear(actualFrequency, 440.0, 35.0,
+			"producer retains the sine signal after valid input-only writes");
+
+	TimeStretcher batched(sampleRate, 1);
+	require(batched.prime(signal.data(), prerollFrames, 2.0f), "batched reference accepts the same preroll");
+	std::vector<float> reference;
+	reference.reserve(expectedOutputFrames);
+	for (int inputOffset = 0; inputOffset < inputFrames; inputOffset += 2'048) {
+		const int chunkFrames = std::min(2'048, inputFrames - inputOffset);
+		const int chunkOutputFrames = chunkFrames / 2;
+		require(batched.process(signal.data() + prerollFrames + inputOffset,
+				chunkFrames, chunkOutputFrames), "batched reference accepts exact integer budgets");
+		reference.insert(reference.end(), batched.output(), batched.output() + chunkOutputFrames);
+	}
+	require(reference.size() == actual.size(), "reference and producer have the same output duration");
+	const auto referenceFrequency = estimateZeroCrossingFrequency(reference, 1, sampleRate,
+			expectedOutputFrames / 5, expectedOutputFrames * 4 / 5);
+	requireNear(referenceFrequency, 440.0, 35.0, "batched reference retains the 440 Hz source pitch");
+
+	const auto tailRemainder = static_cast<int>((static_cast<int64_t>(inputFrames) * 100) % playbackRatePercent);
+	require(producer.finish(playbackRatePercent, tailRemainder, sourceEndFrame),
+			"producer finishes the current stream");
+	const int tailFrames = producer.queuedFrames();
+	require(tailFrames > 0, "producer queues the DSP finish tail");
+	std::vector<float> tail(tailFrames);
+	std::vector<int64_t> tailSourceFrames(tailFrames);
+	require(producer.read(tail.data(), tailFrames, 1, tailSourceFrames.data()) == tailFrames,
+			"consumer drains the finish tail");
+	for (const auto position : tailSourceFrames) {
+		require(position == sourceEndFrame, "finish tail retains its terminal source anchor");
+	}
+
+	producer.reset();
+	require(producer.queuedFrames() == 0 && producer.writeSpace() == capacityFrames,
+			"reset clears queued PCM before a new source is primed");
+	constexpr int resetInputFrames = 2'048;
+	constexpr int64_t resetSourceStartFrame = 90'000;
+	auto resetSignal = makeSine(prerollFrames + resetInputFrames, 1, sampleRate, 660.0);
+	require(producer.prime(resetSignal.data(), prerollFrames, 2.0f), "reset producer primes a new source");
+	require(producer.write(resetSignal.data() + prerollFrames, resetInputFrames,
+			resetInputFrames / 2, resetSourceStartFrame, playbackRatePercent, -1, -1) == resetInputFrames,
+			"reset producer accepts a new stream");
+	std::vector<float> resetOutput(resetInputFrames / 2);
+	std::vector<int64_t> resetAnchors(resetInputFrames / 2);
+	require(producer.read(resetOutput.data(), resetInputFrames / 2, 1, resetAnchors.data()) ==
+			resetInputFrames / 2, "consumer reads PCM after reset");
+	require(resetAnchors.front() == resetSourceStartFrame,
+			"reset producer maps the first output to the new source position");
+	const double resetRms = std::sqrt(std::inner_product(resetOutput.begin(), resetOutput.end(),
+			resetOutput.begin(), 0.0) / resetOutput.size());
+	require(resetRms > 0.01, "reset producer emits the new source signal");
+}
+
 void testStretcherValidationResetAndFinish() {
 	TimeStretcher stretcher(48'000, 1);
 	const float silence[4]{};
@@ -480,6 +571,7 @@ int main() {
 		{"source mapper bounded one-frame anchors", testSourceFrameMapperBoundsAlternatingOneFrameAnchors},
 		{"DSP rate, pitch, and channels", testStretcherRatePitchAndChannels},
 		{"DSP input retention across zero output", testStretcherRetainsInputAcrossZeroOutput},
+		{"producer PCM, anchors, reset, and finish", testPlaybackProducerEmitsPcmAndSourceAnchors},
 		{"DSP validation, reset, and finish", testStretcherValidationResetAndFinish},
 		{"JNI interleaved array bounds", testInterleavedArrayBounds},
 		{"native resource limits", testEngineResourceLimits},

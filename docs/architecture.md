@@ -11,18 +11,20 @@ flowchart LR
     Playback --> Decoder[WAV or MediaCodec decoder]
     Playback --> Cycle[Pure cached loop cycle]
     Playback --> JNI[Native bridge]
-    JNI --> Stretch[Signalsmith time stretcher]
+    JNI --> Engine[PlaybackEngine and Oboe adapter]
+    Engine --> Producer[PlaybackProducer]
+    Producer --> Stretch[Signalsmith time stretcher]
     Stretch --> Ring[SPSC PCM ring]
     Ring --> Oboe[Oboe output callback]
 ```
 
-`StudyViewModel` owns the selected track, cancellation of obsolete opens, waveform jobs, viewport, and session saving. `AndroidPlaybackController` owns decoder and native-handle lifetime, command serialization, audio focus, seek generation, stretch priming, and the active loop cache. These owners remain separate. The UI receives state and callbacks, so its rendering tests do not require opening an audio stream.
+`StudyViewModel` owns the selected track, cancellation of obsolete opens, waveform jobs, viewport, and session saving. `AndroidPlaybackController` owns decoder and native-handle lifetime, command serialization, audio focus, seek generation, stretch priming, and the active loop cache. `PlaybackEngine` owns the Oboe stream lifecycle and playback state. `PlaybackProducer` owns native DSP, source-frame mapping, and the PCM ring shared by JNI playback and host signal tests. These owners remain separate. The UI receives state and callbacks, so its rendering tests do not require opening an audio stream.
 
-Decoding and DSP happen before the output ring. The Oboe callback reads prepared PCM, converts channel layout, tracks source frames, and supplies silence on underrun. It must not decode, allocate, wait for a coroutine, or access storage.
+Decoding and DSP happen before the output ring. `PlaybackProducer` runs `TimeStretcher`, maps each output frame to its source position, and queues both in the ring. `PlaybackEngine` forwards producer operations and owns the Oboe callback. The callback reads prepared PCM, converts channel layout, tracks source frames, and supplies silence on underrun. It must not decode, allocate, wait for a coroutine, or access storage.
 
 The cached loop is a deterministic value containing prepared PCM and the mapping between source position and cycle phase. It retains the full source head for an initial seek, mixes the tail with the head, and wraps later cycles past the already-overlapped head. Its cursor keeps the DSP input position separate from the audible output position. Priming advances input while the first output metadata stays at the requested frame. JVM tests verify those samples and positions across multiple wraps. Platform-specific decoder reads and native writes stay with the controller. A pure cycle test cannot prove Android focus or output-device recovery.
 
-Frame budgets use integer percent units. Each input frame contributes 100 units, and each output frame consumes the selected playback percentage. `PlaybackFrameBudgetCalculator` computes output counts and the controller-owned remainder without floating-point rounding. Native `write` returns accepted input frames; a valid call can consume input through Signalsmith while producing zero output. `TimeStretcher::process` reports acceptance separately from the requested output count.
+Frame budgets use integer percent units. Each input frame contributes 100 units, and each output frame consumes the selected playback percentage. `PlaybackFrameBudgetCalculator` computes output counts and the controller-owned remainder without floating-point rounding. `PlaybackEngine::write` returns accepted input frames through `PlaybackProducer`; a valid call can consume input through Signalsmith while producing zero output. `TimeStretcher::process` reports acceptance separately from the requested output count. The host native signal test compiles the same `PlaybackProducer` implementation used by `PlaybackEngine` and observes its queued PCM and source anchors.
 
 `SourceFrameMapper` retains only the source spans not yet represented by output. It uses the same integer units, preserves each span's source anchor and loop bounds, and resolves source positions before the ring receives PCM. Three fixed span slots include the incoming span; less than two source frames can remain pending at the supported rates. This preserves the first source position after a fractional delay and the jump past an overlapped crossfade head. The callback reads prepared samples and positions. A native write checks capacity and plans mapping before DSP changes; it commits mapping only after all output is queued.
 

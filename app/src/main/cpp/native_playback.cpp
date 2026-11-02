@@ -1,8 +1,8 @@
 #include <jni.h>
 
-#include <cmath>
 #include <exception>
 #include <memory>
+#include <utility>
 
 #include "PlaybackEngine.h"
 #include "NativeArrayBounds.h"
@@ -62,27 +62,27 @@ extern "C" JNIEXPORT jint JNICALL
 Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_write(JNIEnv* env, jobject, jlong handle,
 																	  jfloatArray samples, jint offsetFrames,
 													  jint inputFrames, jint outputFrames, jint channels,
-													  jlong sourceStartFrame, jdouble sourceFramesPerOutputFrame,
+													  jlong sourceStartFrame, jint playbackRatePercent,
 													  jlong loopStartFrame, jlong loopEndFrame) {
 	auto* engine = engineFrom(handle);
-	if (!engine || !samples || inputFrames <= 0 || outputFrames <= 0 || offsetFrames < 0 ||
-			channels != (*engine)->channelCount() || !std::isfinite(sourceFramesPerOutputFrame) ||
-			sourceFramesPerOutputFrame <= 0.0) return 0;
+	if (!engine || !samples || inputFrames <= 0 || outputFrames < 0 || offsetFrames < 0 ||
+			channels != (*engine)->channelCount() || playbackRatePercent < 25 ||
+			playbackRatePercent > 200 || sourceStartFrame < 0) return 0;
 	if (!containsInterleavedFrames(offsetFrames, inputFrames, channels, env->GetArrayLength(samples))) return 0;
 	auto* values = env->GetFloatArrayElements(samples, nullptr);
 	if (!values) return 0;
 	const auto written = (*engine)->write(values + offsetFrames * channels, inputFrames, outputFrames,
-			sourceStartFrame, sourceFramesPerOutputFrame, loopStartFrame, loopEndFrame);
+			sourceStartFrame, playbackRatePercent, loopStartFrame, loopEndFrame);
 	env->ReleaseFloatArrayElements(samples, values, JNI_ABORT);
 	return written;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_finish(JNIEnv*, jobject, jlong handle,
-																			 jfloat playbackRate, jdouble outputRemainder,
+														 jint playbackRatePercent, jint remainderUnits,
 																			 jlong endFrame) {
 	if (auto* engine = engineFrom(handle)) {
-		return (*engine)->finish(playbackRate, outputRemainder, endFrame) ? JNI_TRUE : JNI_FALSE;
+		return (*engine)->finish(playbackRatePercent, remainderUnits, endFrame) ? JNI_TRUE : JNI_FALSE;
 	}
 	return JNI_FALSE;
 }

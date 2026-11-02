@@ -37,16 +37,16 @@ The feature matrix identifies the required evidence for the release:
 
 | Feature | Automated evidence | Additional release evidence |
 | --- | --- | --- |
-| Playback rate and loop limits | Domain tests at valid boundaries and invalid values | Controls remain usable at supported display sizes |
+| Playback rate and loop limits | Domain boundaries and exact frame-budget tests across all 176 supported percentages | Controls remain usable at supported display sizes |
 | Cached loop seek and crossfade | Exact sample, phase, wrap, channel, and clipping tests | Listen for clicks at multiple loop lengths and rates |
-| Time stretching | Native generated-signal pitch, duration, reset, tail, and finite-output tests | MP3, WAV, FLAC listening on target hardware |
-| Output queue | Ring capacity, wrap, metadata, and SPSC tests | Underruns and stable playback under device load |
+| Time stretching | Native generated-signal pitch, duration, input-only retention, reset, tail, and finite-output tests | MP3, WAV, FLAC listening on target hardware |
+| Output queue | Ring capacity, explicit source positions, bounded source-span mapping, wrap, and SPSC tests | Underruns and stable playback under device load |
 | WAV decode and seek | Generated encoding and malformed-file tests | Real document providers and large files |
 | MediaCodec MP3 and FLAC | Android integration scenarios | Vendor decoder outputs and inaccurate duration metadata |
 | Waveform | Pyramid extrema, partial buckets, cache roundtrip and corruption tests | Large file, cancellation, low storage, and cloud provider behavior |
 | Session | Source matching and persistence integration tests | Process death, expired grants, changed or deleted file, disk-full recovery |
 | Interface | State rendering, callback and application integration tests | Touch seek, pinch, pan, marker drag, accessibility, and small displays |
-| Audio lifecycle | Pause and foreground integration tests | Focus loss, calls, wired/Bluetooth changes, unplug, lock screen |
+| Audio lifecycle | Pause, seek, rate-transition, and foreground integration tests | Focus loss, calls, wired/Bluetooth changes, unplug, lock screen |
 | Distribution | Three ABIs, ELF/ZIP alignment, notices, lint | Signed install/update and physical ARM devices |
 
 Use a generated sine or short redistributable recording in mono and stereo at 44.1 and 48 kHz. Include a one-frame or very short WAV, invalid header, truncated payload, unsupported channel layout, and long file. Check playback rates at 25%, 100%, and 200%, plus a fractional value such as 73%. Check loops around the crossfade limit and the two-second cache boundary.

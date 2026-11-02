@@ -569,16 +569,22 @@ class AndroidPlaybackController(context: Context) {
 						} else {
 							val mixed = equalPowerCrossfade(tail, head, fadeFrames, currentTrack.channelCount)
 							val fadeStart = loop.bFrame - fadeFrames
-							val written = writeStretched(
-								handle,
-								mixed,
-								0,
-								fadeFrames,
-								fadeStart,
-								loop,
-								currentTrack.channelCount,
-							)
-							if (written != fadeFrames) {
+							var writtenFrames = 0
+							while (writtenFrames < fadeFrames) {
+								val chunkFrames = minOf(MAX_DECODE_BLOCK_FRAMES, fadeFrames - writtenFrames)
+								val written = writeStretched(
+									handle,
+									mixed,
+									writtenFrames,
+									chunkFrames,
+									fadeStart + writtenFrames,
+									loop,
+									currentTrack.channelCount,
+								)
+								if (written != chunkFrames) break
+								writtenFrames += written
+							}
+							if (writtenFrames != fadeFrames) {
 								mutableState.update { it.copy(error = PlaybackError.DECODER_READ_FAILED) }
 								NativePlaybackBridge.setEndOfStream(handle)
 								true

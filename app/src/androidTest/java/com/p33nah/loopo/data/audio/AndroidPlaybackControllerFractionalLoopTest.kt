@@ -51,11 +51,18 @@ class AndroidPlaybackControllerFractionalLoopTest {
 
 	@Test
 	fun maximumStreamingCrossfadeKeepsPlaybackAlive() = runBlocking {
-		val name = "streaming-crossfade-maximum.wav"
-		val audioFile = WavFixture.pcmFile(context, name, frames = SAMPLE_RATE * 4)
+		for (scenario in STREAMING_CROSSFADE_CASES) {
+			assertStreamingCrossfadeSurvives(scenario)
+		}
+	}
+
+	private suspend fun assertStreamingCrossfadeSurvives(scenario: StreamingCrossfadeCase) {
+		val name = "streaming-crossfade-${scenario.sampleRate}-${scenario.crossfadeMs}-${scenario.playbackRatePercent}.wav"
+		val trackFrames = scenario.sampleRate * 4
+		val audioFile = WavFixture.pcmFile(context, name, sampleRate = scenario.sampleRate, frames = trackFrames)
 		val controller = AndroidPlaybackController(context)
 		var activity: ActivityScenario<MainActivity>? = null
-		val loop = LoopRegion(aFrame = 0, bFrame = SAMPLE_RATE.toLong() * 3, enabled = true, crossfadeMs = 100)
+		val loop = LoopRegion(aFrame = 0, bFrame = scenario.loopFrames, enabled = true, crossfadeMs = scenario.crossfadeMs)
 		try {
 			activity = ActivityScenario.launch(MainActivity::class.java)
 			val track = TrackInfo(
@@ -63,27 +70,41 @@ class AndroidPlaybackControllerFractionalLoopTest {
 				uri = Uri.fromFile(audioFile),
 				displayName = name,
 				container = AudioContainer.WAV,
-				durationFrames = (SAMPLE_RATE * 4).toLong(),
-				sampleRate = SAMPLE_RATE,
+				durationFrames = trackFrames.toLong(),
+				sampleRate = scenario.sampleRate,
 				channelCount = 1,
 				sourceMimeType = "audio/wav",
 			)
 			assertNull("Generated WAV must load", controller.load(track))
-			assertTrue("Three-second streaming loop must be accepted", controller.setLoopRegion(loop))
-			controller.seekToFrame(loop.aFrame)
+			assertTrue("Streaming loop must be accepted: $scenario", controller.setLoopRegion(loop))
+			controller.setPlaybackRate(PlaybackRate(scenario.playbackRatePercent))
+			val fadeFrames = loop.effectiveCrossfadeFrames(scenario.sampleRate)
+			val startFrame = if (scenario.startAtLoopStart) {
+				loop.aFrame
+			} else {
+				(loop.bFrame - fadeFrames - scenario.sampleRate / 20).coerceAtLeast(loop.aFrame)
+			}
+			controller.seekToFrame(startFrame)
 			controller.togglePlayback()
-			assertTrue("Playback did not start: ${controller.state.value}", controller.state.value.isPlaying)
+			assertTrue("Playback did not start for $scenario: ${controller.state.value}", controller.state.value.isPlaying)
 
-			val observedPositions = mutableSetOf<Long>()
-			assertHealthy(STREAMING_CROSSFADE_OBSERVATION_MS) {
+			val observedPositions = mutableListOf<Long>()
+			assertHealthy(scenario.observationMillis) {
 				val snapshot = controller.state.value
-				assertNull("Streaming crossfade reported an error: $snapshot", snapshot.error)
-				assertFalse("Playback ended while the loop was enabled: $snapshot", snapshot.isEnded)
-				assertTrue("Playback stopped while the loop was enabled: $snapshot", snapshot.isPlaying)
+				assertNull("Streaming crossfade reported an error for $scenario: $snapshot", snapshot.error)
+				assertFalse("Playback ended while the loop was enabled for $scenario: $snapshot", snapshot.isEnded)
+				assertTrue("Playback stopped while the loop was enabled for $scenario: $snapshot", snapshot.isPlaying)
 				assertInLoop(loop, snapshot)
 				observedPositions += snapshot.positionFrame
 			}
-			assertTrue("Playback position did not advance: $observedPositions", observedPositions.size > 1)
+			assertTrue("Playback position did not advance for $scenario: $observedPositions", observedPositions.distinct().size > 1)
+			val edgeWindowFrames = maxOf(fadeFrames, scenario.sampleRate / 100L)
+			val nearLoopEndIndex = observedPositions.indexOfFirst { it >= loop.bFrame - edgeWindowFrames * 2 }
+			assertTrue("Playback did not reach the loop tail for $scenario: $observedPositions", nearLoopEndIndex >= 0)
+			assertTrue(
+				"Playback did not wrap from the tail to the head for $scenario: $observedPositions",
+				observedPositions.drop(nearLoopEndIndex + 1).any { it < loop.aFrame + edgeWindowFrames * 2 },
+			)
 		} finally {
 			try {
 				controller.unload()
@@ -224,6 +245,21 @@ class AndroidPlaybackControllerFractionalLoopTest {
 		const val TRACK_FRAMES = SAMPLE_RATE * 2
 		const val PAUSED_OBSERVATION_MS = 500L
 		const val PLAYING_OBSERVATION_MS = 750L
-		const val STREAMING_CROSSFADE_OBSERVATION_MS = 4_500L
+		val STREAMING_CROSSFADE_CASES = listOf(
+			StreamingCrossfadeCase(SAMPLE_RATE, SAMPLE_RATE.toLong() * 3, 100, 100, true, 4_500L),
+			StreamingCrossfadeCase(SAMPLE_RATE, SAMPLE_RATE.toLong() * 3, 100, 25, false, 1_500L),
+			StreamingCrossfadeCase(SAMPLE_RATE, SAMPLE_RATE.toLong() * 2 + 1, 100, 73, false, 1_500L),
+			StreamingCrossfadeCase(96_000, 96_000L * 3, 30, 200, false, 1_500L),
+			StreamingCrossfadeCase(SAMPLE_RATE, SAMPLE_RATE.toLong() * 3, 0, 100, false, 1_500L),
+		)
 	}
+
+	private data class StreamingCrossfadeCase(
+		val sampleRate: Int,
+		val loopFrames: Long,
+		val crossfadeMs: Int,
+		val playbackRatePercent: Int,
+		val startAtLoopStart: Boolean,
+		val observationMillis: Long,
+	)
 }

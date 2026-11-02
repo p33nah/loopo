@@ -1,6 +1,6 @@
 # First release readiness
 
-Status on 2026-10-31 is **not ready for public release**. The owner reports successful testing on one Xiaomi device at the pre-hardening baseline. This is a release candidate reference. No official version tag, signed public APK, or compatibility certification is created by this change.
+Status on 2026-11-02 is **not ready for public release**. The owner reports successful testing on one Xiaomi device at the pre-hardening baseline. This is a release candidate reference. No official version tag, signed public APK, or compatibility certification is created by this change.
 
 The hardening work adds automated verification before further product features. Each result must name the commit and executed check. A missing check remains open even if the build succeeds.
 
@@ -17,6 +17,7 @@ The hardening work adds automated verification before further product features. 
 | 16 KB page compatibility | All packaged 64-bit ELF LOAD and uncompressed ZIP alignment checks pass; a 16 KB runtime test remains required |
 | Output device changes | [Issue 16](https://github.com/p33nah/loopo/issues/16) remains a release blocker until route/error behavior is reproduced and addressed |
 | Fractional output at loop wrap | [Issue 20](https://github.com/p33nah/loopo/issues/20) records the two failing controller cases on both APIs in [run 41136630147](https://github.com/p33nah/loopo/actions/runs/41136630147); its linked fix PR must verify integer budgets, input conservation, source spans, and seek/rate transitions before merge |
+| Streaming crossfade block limit | [Issue 34](https://github.com/p33nah/loopo/issues/34) reproduces a 4,800-frame write failure on API 26 and 36. [PR 35](https://github.com/p33nah/loopo/pull/35) chunks the writes. [Run 41412838191](https://github.com/p33nah/loopo/actions/runs/41412838191) passes all five CI jobs on head `bff2f57`, including 14 instrumented tests per API with zero failures or skips. The issue remains open until merge. |
 | PCM across engine/JNI | [Issue 32](https://github.com/p33nah/loopo/issues/32) tracks observable signal verification across the engine boundary; current wrapper signal tests and Android state tests do not assert that entire path's PCM |
 | API 26 output reset | [Issue 21](https://github.com/p33nah/loopo/issues/21) was fixed in PR #17; [run 41100993099](https://github.com/p33nah/loopo/actions/runs/41100993099) passes the native reset and application seek regressions on API 26 and 36 |
 | Physical Android matrix | Xiaomi rerun plus at least one other manufacturer and representative API versions |
@@ -25,6 +26,6 @@ The hardening work adds automated verification before further product features. 
 | Repository protection | Configured and read back on 2026-10-30; main requires a PR and all five CI jobs, forbids force push/deletion, and release requires owner approval |
 | Signing and updates | Owner supplies stable key, verifies certificate, backup, install, and signed update |
 
-Time/frame conversions now use checked arithmetic. Remaining source risks include delayed detection of truncated WAV payloads, best-effort session saving during abrupt process death, and uncovered playback transitions in the controller. Resolve reproduced defects with focused regressions. Keep assumptions about vendor codecs and output routes labeled until physical evidence exists.
+Time/frame conversions now use checked arithmetic. Remaining source risks include delayed detection of truncated WAV payloads, best-effort session saving during abrupt process death, and playback transitions not covered by automated evidence. Resolve reproduced defects with focused regressions. Keep assumptions about vendor codecs and output routes labeled until physical evidence exists.
 
 PR #17 established the test and release infrastructure. Each follow-up records its current-head CI evidence in the linked issue and PR. Update this record with actual test outputs, physical-device results, and signed-artifact checks before tagging the first version.

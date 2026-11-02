@@ -50,6 +50,51 @@ class AndroidPlaybackControllerFractionalLoopTest {
 	}
 
 	@Test
+	fun maximumStreamingCrossfadeKeepsPlaybackAlive() = runBlocking {
+		val name = "streaming-crossfade-maximum.wav"
+		val audioFile = WavFixture.pcmFile(context, name, frames = SAMPLE_RATE * 4)
+		val controller = AndroidPlaybackController(context)
+		var activity: ActivityScenario<MainActivity>? = null
+		val loop = LoopRegion(aFrame = 0, bFrame = SAMPLE_RATE.toLong() * 3, enabled = true, crossfadeMs = 100)
+		try {
+			activity = ActivityScenario.launch(MainActivity::class.java)
+			val track = TrackInfo(
+				id = TrackId(name),
+				uri = Uri.fromFile(audioFile),
+				displayName = name,
+				container = AudioContainer.WAV,
+				durationFrames = (SAMPLE_RATE * 4).toLong(),
+				sampleRate = SAMPLE_RATE,
+				channelCount = 1,
+				sourceMimeType = "audio/wav",
+			)
+			assertNull("Generated WAV must load", controller.load(track))
+			assertTrue("Three-second streaming loop must be accepted", controller.setLoopRegion(loop))
+			controller.seekToFrame(loop.aFrame)
+			controller.togglePlayback()
+			assertTrue("Playback did not start: ${controller.state.value}", controller.state.value.isPlaying)
+
+			val observedPositions = mutableSetOf<Long>()
+			assertHealthy(STREAMING_CROSSFADE_OBSERVATION_MS) {
+				val snapshot = controller.state.value
+				assertNull("Streaming crossfade reported an error: $snapshot", snapshot.error)
+				assertFalse("Playback ended while the loop was enabled: $snapshot", snapshot.isEnded)
+				assertTrue("Playback stopped while the loop was enabled: $snapshot", snapshot.isPlaying)
+				assertInLoop(loop, snapshot)
+				observedPositions += snapshot.positionFrame
+			}
+			assertTrue("Playback position did not advance: $observedPositions", observedPositions.size > 1)
+		} finally {
+			try {
+				controller.unload()
+			} finally {
+				activity?.close()
+				audioFile.delete()
+			}
+		}
+	}
+
+	@Test
 	fun rateChangesAndSeeksWhilePumpingKeepRemaindersValid() = runBlocking {
 		val name = "fractional-output-rate-transitions.wav"
 		val audioFile = WavFixture.pcmFile(context, name, frames = TRACK_FRAMES)
@@ -179,5 +224,6 @@ class AndroidPlaybackControllerFractionalLoopTest {
 		const val TRACK_FRAMES = SAMPLE_RATE * 2
 		const val PAUSED_OBSERVATION_MS = 500L
 		const val PLAYING_OBSERVATION_MS = 750L
+		const val STREAMING_CROSSFADE_OBSERVATION_MS = 4_500L
 	}
 }

@@ -6,9 +6,7 @@
 
 #include <oboe/Oboe.h>
 
-#include "PcmRingBuffer.h"
-#include "SourceFrameMapper.h"
-#include "TimeStretcher.h"
+#include "PlaybackProducer.h"
 
 class PlaybackEngine final : public oboe::AudioStreamDataCallback,
 							 public std::enable_shared_from_this<PlaybackEngine> {
@@ -42,10 +40,7 @@ public:
 private:
 	const int sampleRate_;
 	const int channelCount_;
-	PcmRingBuffer ring_;
-	TimeStretcher stretcher_;
-	SourceFrameMapper sourceFrameMapper_;
-	std::vector<int64_t> sourcePositionScratch_;
+	PlaybackProducer producer_;
 	std::vector<int64_t> callbackSourceFrames_;
 	std::vector<std::atomic<int64_t>> audiblePositionHistory_;
 	std::shared_ptr<oboe::AudioStream> stream_;

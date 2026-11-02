@@ -28,6 +28,7 @@ PlaybackEngine::~PlaybackEngine() {
 }
 
 bool PlaybackEngine::open() {
+	activeStream_.store(nullptr, std::memory_order_release);
 	outputLatencyFrames_.store(-1, std::memory_order_release);
 	oboe::AudioStreamBuilder builder;
 	builder.setDirection(oboe::Direction::Output);
@@ -39,12 +40,14 @@ bool PlaybackEngine::open() {
 	builder.setUsage(oboe::Usage::Media);
 	builder.setContentType(oboe::ContentType::Music);
 	builder.setDataCallback(shared_from_this());
+	builder.setErrorCallback(shared_from_this());
 	if (builder.openStream(stream_) != oboe::Result::OK || !stream_) return false;
 	if (stream_->getFormat() != oboe::AudioFormat::Float || stream_->getChannelCount() <= 0) {
 		stream_->close();
 		stream_.reset();
 		return false;
 	}
+	activeStream_.store(stream_.get(), std::memory_order_release);
 	outputLatencyFrames_.store(outputLatencyFrames(*stream_), std::memory_order_release);
 #if !defined(NDEBUG)
 	__android_log_print(ANDROID_LOG_DEBUG, "LoopoLatency",
@@ -56,6 +59,7 @@ bool PlaybackEngine::open() {
 }
 
 void PlaybackEngine::close() {
+	activeStream_.store(nullptr, std::memory_order_release);
 	outputLatencyFrames_.store(-1, std::memory_order_release);
 	if (stream_) {
 		playing_.store(false, std::memory_order_release);
@@ -174,6 +178,36 @@ double PlaybackEngine::estimatedLatencyMillis() {
 
 int64_t PlaybackEngine::underrunCount() const {
 	return underruns_.load(std::memory_order_relaxed);
+}
+
+int32_t PlaybackEngine::outputDeviceId() const {
+	if (!stream_) return -1;
+	const auto deviceId = stream_->getDeviceId();
+	return deviceId == oboe::kUnspecified ? -1 : deviceId;
+}
+
+int PlaybackEngine::takeStreamFailure() {
+	return pendingStreamFailure_.exchange(static_cast<int>(oboe::Result::OK), std::memory_order_acq_rel);
+}
+
+bool PlaybackEngine::outputNeedsReopen() const {
+	return streamNeedsReopen_.load(std::memory_order_acquire);
+}
+
+bool PlaybackEngine::reopenOutput() {
+	if (!streamNeedsReopen_.load(std::memory_order_acquire)) return stream_ != nullptr;
+	stream_.reset();
+	if (!open()) return false;
+	pendingStreamFailure_.store(static_cast<int>(oboe::Result::OK), std::memory_order_release);
+	streamNeedsReopen_.store(false, std::memory_order_release);
+	return true;
+}
+
+void PlaybackEngine::onErrorAfterClose(oboe::AudioStream* stream, oboe::Result error) {
+	if (stream != activeStream_.load(std::memory_order_acquire)) return;
+	playing_.store(false, std::memory_order_release);
+	pendingStreamFailure_.store(static_cast<int>(error), std::memory_order_release);
+	streamNeedsReopen_.store(true, std::memory_order_release);
 }
 
 bool PlaybackEngine::isPlaying() const {

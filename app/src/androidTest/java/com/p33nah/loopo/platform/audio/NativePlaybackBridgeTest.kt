@@ -1,6 +1,9 @@
 package com.p33nah.loopo.platform.audio
 
+import android.media.AudioManager
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -13,6 +16,27 @@ class NativePlaybackBridgeTest {
 	fun invalidEngineDimensionsAreRejectedBeforeNativeAllocation() {
 		assertEquals(0L, NativePlaybackBridge.create(1_000_000_000, 2, 2_000_000_000))
 		assertEquals(0L, NativePlaybackBridge.create(Int.MAX_VALUE, 2, Int.MAX_VALUE))
+	}
+
+	@Test
+	fun outputIdentityAndErrorStateMatchCurrentAndroidDevices() {
+		val handle = NativePlaybackBridge.create(48_000, 1, 96_000)
+		assertTrue("Native output must open", handle != 0L)
+		try {
+			val context = InstrumentationRegistry.getInstrumentation().targetContext
+			val audioManager = context.getSystemService(AudioManager::class.java)
+			val outputs = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).toList()
+			val outputIds = outputs.map { it.id }.toSet()
+			val deviceId = NativePlaybackBridge.outputDeviceId(handle)
+			Log.i("LoopoRouteTest", "Oboe output id=$deviceId; Android outputs=${outputs.map { "${it.id}:${it.type}" }}")
+
+			assertTrue("Unknown device IDs use -1", deviceId == -1 || deviceId in outputIds)
+			assertEquals(NativePlaybackBridge.NO_STREAM_FAILURE, NativePlaybackBridge.takeStreamFailure(handle))
+			assertFalse(NativePlaybackBridge.outputNeedsReopen(handle))
+			assertTrue(NativePlaybackBridge.reopenOutput(handle))
+		} finally {
+			NativePlaybackBridge.destroy(handle)
+		}
 	}
 
 	@Test

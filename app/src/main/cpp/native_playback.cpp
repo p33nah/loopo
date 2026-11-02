@@ -140,6 +140,30 @@ Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_underrunCount(JNIEnv*,
 	return 0;
 }
 
+extern "C" JNIEXPORT jint JNICALL
+Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_outputDeviceId(JNIEnv*, jobject, jlong handle) {
+	if (auto* engine = engineFrom(handle)) return (*engine)->outputDeviceId();
+	return -1;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_takeStreamFailure(JNIEnv*, jobject, jlong handle) {
+	if (auto* engine = engineFrom(handle)) return (*engine)->takeStreamFailure();
+	return static_cast<jint>(0);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_outputNeedsReopen(JNIEnv*, jobject, jlong handle) {
+	if (auto* engine = engineFrom(handle)) return (*engine)->outputNeedsReopen() ? JNI_TRUE : JNI_FALSE;
+	return JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_reopenOutput(JNIEnv*, jobject, jlong handle) {
+	if (auto* engine = engineFrom(handle)) return (*engine)->reopenOutput() ? JNI_TRUE : JNI_FALSE;
+	return JNI_FALSE;
+}
+
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_p33nah_loopo_platform_audio_NativePlaybackBridge_isPlaying(JNIEnv*, jobject, jlong handle) {
 	if (auto* engine = engineFrom(handle)) return (*engine)->isPlaying() ? JNI_TRUE : JNI_FALSE;

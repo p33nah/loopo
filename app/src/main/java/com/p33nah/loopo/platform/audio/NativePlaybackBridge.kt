@@ -1,6 +1,8 @@
 package com.p33nah.loopo.platform.audio
 
 internal object NativePlaybackBridge {
+	const val NO_STREAM_FAILURE = 0
+
 	init {
 		System.loadLibrary("loopo_native")
 	}
@@ -31,6 +33,10 @@ internal object NativePlaybackBridge {
 	external fun positionFrame(handle: Long): Long
 	external fun estimatedLatencyMillis(handle: Long): Double
 	external fun underrunCount(handle: Long): Long
+	external fun outputDeviceId(handle: Long): Int
+	external fun takeStreamFailure(handle: Long): Int
+	external fun outputNeedsReopen(handle: Long): Boolean
+	external fun reopenOutput(handle: Long): Boolean
 	external fun isPlaying(handle: Long): Boolean
 	external fun isEnded(handle: Long): Boolean
 }

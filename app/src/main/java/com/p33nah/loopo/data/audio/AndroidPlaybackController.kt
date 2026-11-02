@@ -42,6 +42,9 @@ class AndroidPlaybackController(context: Context) {
 	private val decoderFactory = AndroidPcmDecoderFactory(appContext)
 	private val audioManager = appContext.getSystemService(AudioManager::class.java)
 	private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+	private val outputDeviceObserver = AndroidOutputDeviceObserver(appContext) { removal ->
+		scope.launch { handleOutputRemoval(removal) }
+	}
 	private val transitionMutex = Mutex()
 	private val decoderMutex = Mutex()
 	private val mutableState = MutableStateFlow(PlaybackSnapshot())
@@ -55,6 +58,8 @@ class AndroidPlaybackController(context: Context) {
 	private var stretchedOutputRemainderUnits = 0
 	private var stretchedOutputSourceFrame = 0L
 	private var engineHandle = 0L
+	private var outputGeneration = 0L
+	private var outputSession: OutputDeviceSession? = null
 	private var pumpJob: Job? = null
 	private var monitorJob: Job? = null
 	private var focusRequest: AudioFocusRequest? = null
@@ -130,6 +135,8 @@ class AndroidPlaybackController(context: Context) {
 		stretchedOutputRemainderUnits = 0
 		stretchedOutputSourceFrame = 0L
 		engineHandle = handle
+		outputSession = OutputDeviceSession(++outputGeneration, deviceId = null)
+		outputDeviceObserver.register(outputGeneration)
 		val loopRegion = LoopRegion(0, newTrack.durationFrames, enabled = false, crossfadeMs = DEFAULT_CROSSFADE_MS)
 		mutableState.value = PlaybackSnapshot(
 			loopRegion = loopRegion,
@@ -177,13 +184,25 @@ class AndroidPlaybackController(context: Context) {
 				seekUnsafe(0, resumeAfterSeek = false)
 				if (mutableState.value.isEnded) return@withLock
 			}
+			if (NativePlaybackBridge.outputNeedsReopen(engineHandle)) {
+				val resumeFrame = mutableState.value.positionFrame
+				pumpJob?.cancelAndJoin()
+				pumpJob = null
+				val reopened = withContext(Dispatchers.IO) { NativePlaybackBridge.reopenOutput(engineHandle) }
+				if (!reopened) {
+					mutableState.update { it.copy(isPlaying = false, error = PlaybackError.OUTPUT_UNAVAILABLE) }
+					return@withLock
+				}
+				seekUnsafe(resumeFrame, resumeAfterSeek = false)
+				if (mutableState.value.error != null) return@withLock
+			}
 			ensurePumpRunning()
 			awaitPrebuffer(engineHandle, mutableState.value.positionFrame)
 			if (!requestAudioFocus()) {
 				mutableState.update { it.copy(error = PlaybackError.AUDIO_FOCUS_DENIED) }
 				return@withLock
 			}
-			if (NativePlaybackBridge.play(engineHandle)) {
+			if (startNativePlayback(engineHandle)) {
 				mutableState.update { it.copy(isPlaying = true, error = null) }
 				ensureMonitorRunning()
 			} else {
@@ -191,6 +210,13 @@ class AndroidPlaybackController(context: Context) {
 				mutableState.update { it.copy(error = PlaybackError.OUTPUT_UNAVAILABLE) }
 			}
 		}
+	}
+
+	private suspend fun handleOutputRemoval(removal: OutputRemoval) = transitionMutex.withLock {
+		val session = outputSession ?: return@withLock
+		if (!session.shouldInterrupt(removal, mutableState.value.isPlaying)) return@withLock
+		pauseUnsafe(abandonFocus = true)
+		mutableState.update { it.copy(isPlaying = false, error = PlaybackError.OUTPUT_UNAVAILABLE) }
 	}
 
 	suspend fun seekToFrame(frame: Long) = transitionMutex.withLock {
@@ -253,7 +279,7 @@ class AndroidPlaybackController(context: Context) {
 			ensurePumpRunning()
 			if (wasPlaying) {
 				awaitPrebuffer(handle, seeked.frame)
-				if (!NativePlaybackBridge.play(handle)) {
+				if (!startNativePlayback(handle)) {
 					mutableState.update { it.copy(isPlaying = false, error = PlaybackError.OUTPUT_UNAVAILABLE) }
 					return@withLock false
 				}
@@ -285,7 +311,7 @@ class AndroidPlaybackController(context: Context) {
 					ensurePumpRunning()
 					if (wasPlaying && !mutableState.value.isPlaying) {
 						awaitPrebuffer(handle, mutableState.value.positionFrame)
-						if (NativePlaybackBridge.play(handle)) {
+						if (startNativePlayback(handle)) {
 							mutableState.update { it.copy(isPlaying = true) }
 							ensureMonitorRunning()
 						}
@@ -369,7 +395,7 @@ class AndroidPlaybackController(context: Context) {
 			awaitPrebuffer(handle, frame)
 			if (!requestAudioFocus()) {
 				mutableState.update { it.copy(error = PlaybackError.AUDIO_FOCUS_DENIED) }
-			} else if (NativePlaybackBridge.play(handle)) {
+			} else if (startNativePlayback(handle)) {
 				mutableState.update { it.copy(isPlaying = true) }
 				ensureMonitorRunning()
 			} else {
@@ -399,7 +425,7 @@ class AndroidPlaybackController(context: Context) {
 		if (handle == 0L || mutableState.value.isEnded) return
 		ensurePumpRunning()
 		awaitPrebuffer(handle, mutableState.value.positionFrame)
-		if (NativePlaybackBridge.play(handle)) {
+		if (startNativePlayback(handle)) {
 			mutableState.update { it.copy(isPlaying = true, error = null) }
 			ensureMonitorRunning()
 		} else {
@@ -416,7 +442,21 @@ class AndroidPlaybackController(context: Context) {
 		if (monitorJob?.isActive != true && engineHandle != 0L) monitorJob = scope.launch { monitorPlayback() }
 	}
 
+	private fun startNativePlayback(handle: Long): Boolean {
+		refreshOutputSession(handle)
+		return NativePlaybackBridge.play(handle)
+	}
+
+	private fun refreshOutputSession(handle: Long) {
+		val session = outputSession ?: return
+		val deviceId = NativePlaybackBridge.outputDeviceId(handle)
+		outputSession = session.copy(deviceId = deviceId.takeIf { it >= 0 }?.let(::OutputDeviceId))
+	}
+
 	private suspend fun shutdownTrack() {
+		outputDeviceObserver.unregister()
+		outputGeneration++
+		outputSession = null
 		pumpJob?.cancelAndJoin()
 		pumpJob = null
 		monitorJob?.cancelAndJoin()
@@ -672,6 +712,20 @@ class AndroidPlaybackController(context: Context) {
 				val handle = engineHandle
 				val currentTrack = track ?: return
 				if (handle == 0L) return
+				if (NativePlaybackBridge.takeStreamFailure(handle) != NativePlaybackBridge.NO_STREAM_FAILURE) {
+					val position = currentPlaybackPositionFrame(handle)
+					mutableState.update {
+						it.copy(
+							positionFrame = position,
+							isPlaying = false,
+							error = PlaybackError.OUTPUT_UNAVAILABLE,
+						)
+					}
+					resumeAfterFocusGain = false
+					monitorJob = null
+					abandonAudioFocus()
+					return
+				}
 				val ended = NativePlaybackBridge.isEnded(handle)
 				mutableState.update { current ->
 					current.copy(

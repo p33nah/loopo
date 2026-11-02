@@ -46,7 +46,7 @@ The feature matrix identifies the required evidence for the release:
 | Waveform | Pyramid extrema, partial buckets, cache roundtrip and corruption tests | Large file, cancellation, low storage, and cloud provider behavior |
 | Session | Source matching and persistence integration tests | Process death, expired grants, changed or deleted file, disk-full recovery |
 | Interface | State rendering, callback and application integration tests | Touch seek, pinch, pan, marker drag, accessibility, and small displays |
-| Audio lifecycle | Pause, seek, rate-transition, and foreground integration tests | Focus loss, calls, wired/Bluetooth changes, unplug, lock screen |
+| Audio lifecycle | Pause, seek, rate-transition, output-device identity, and foreground integration tests | Focus loss, calls, Bluetooth and wired removal must pause visibly; reconnect then explicit Play must resume the retained track. Record route IDs and note when a backend uses the conservative unknown-ID fallback. |
 | Distribution | Three ABIs, ELF/ZIP alignment, notices, lint | Signed install/update and physical ARM devices |
 
 Use a generated sine or short redistributable recording in mono and stereo at 44.1 and 48 kHz. Include a one-frame or very short WAV, invalid header, truncated payload, unsupported channel layout, and long file. Check playback rates at 25%, 100%, and 200%, plus a fractional value such as 73%. Check loops around the crossfade limit and the two-second cache boundary.

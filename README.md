@@ -6,7 +6,7 @@ The app uses Kotlin and Jetpack Compose for its interface, Android's media decod
 
 ## Build
 
-Install JDK 17, Android SDK Platform 36, Android SDK Build Tools 35.0.0, NDK 27.0.12077973, and CMake 3.22.1. Then run `gradlew.bat assembleDebug` on Windows or `./gradlew assembleDebug` on Linux or macOS.
+Install JDK 17, Android SDK Platform 37.0, Android SDK Build Tools 36.0.0, NDK 27.0.12077973, and CMake 3.22.1. Then run `gradlew.bat assembleDebug` on Windows or `./gradlew assembleDebug` on Linux or macOS.
 
 Builds include `armeabi-v7a`, `arm64-v8a`, and `x86_64`. The minimum Android version is API 26. The planned first release is `0.0.1`. It is still a release candidate until the documented verification gates pass.
 

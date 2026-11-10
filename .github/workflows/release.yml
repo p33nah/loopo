@@ -51,7 +51,7 @@ jobs:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
       - name: Install pinned Android tools
-        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
+        run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
       - name: Restore signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.LOOPO_KEYSTORE_BASE64 }}
@@ -68,8 +68,8 @@ jobs:
         run: bash gradlew assembleRelease --no-daemon --console=plain
       - name: Verify signed artifact
         run: |
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
-          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 4 app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 app/build/outputs/apk/release/app-release.apk
           python3 scripts/verify_apk.py app/build/outputs/apk/release/app-release.apk
           cp app/build/outputs/apk/release/app-release.apk "loopo-$RELEASE_TAG.apk"
           sha256sum "loopo-$RELEASE_TAG.apk" > SHA256SUMS

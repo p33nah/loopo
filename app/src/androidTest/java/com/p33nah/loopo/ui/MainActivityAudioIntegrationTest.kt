@@ -23,11 +23,39 @@ import com.p33nah.loopo.domain.waveform.WaveformViewport
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityAudioIntegrationTest {
+	@Test
+	fun nativePlaybackKeepsAdvancingWhileActivityIsStopped() {
+		val context = InstrumentationRegistry.getInstrumentation().targetContext
+		val audioFile = WavFixture.pcmFile(context, "background.wav", frames = 480_000)
+		try {
+			ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+				lateinit var study: StudyViewModel
+				scenario.onActivity { activity ->
+					study = ViewModelProvider(activity)[StudyViewModel::class.java]
+					study.openTrack(Uri.fromFile(audioFile), hasPersistedAccess = false)
+				}
+				waitFor("background playback fixture to load") { study.state.value is StudyUiState.Ready }
+				scenario.onActivity { study.togglePlayback() }
+				waitFor("native playback start") { study.playbackState.value.isPlaying }
+
+				scenario.moveToState(Lifecycle.State.CREATED)
+				val stoppedPosition = study.playbackState.value.positionFrame
+				SystemClock.sleep(800)
+				val background = study.playbackState.value
+				assertTrue("Playback stopped with the activity: $background", background.isPlaying)
+				assertTrue("Background playback cursor did not advance: $background", background.positionFrame > stoppedPosition)
+			}
+		} finally {
+			audioFile.delete()
+		}
+	}
+
 	@Test
 	fun viewModelInspectsDecodesAndRestoresGeneratedWaveSessionAcrossLifecycle() {
 		val instrumentation = InstrumentationRegistry.getInstrumentation()

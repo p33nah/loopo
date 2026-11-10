@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22.1)
 project(loopo_native LANGUAGES CXX)
 
-add_library(loopo_native SHARED native_bootstrap.cpp native_playback.cpp PlaybackEngine.cpp)
+add_library(loopo_native SHARED native_bootstrap.cpp native_playback.cpp PlaybackEngine.cpp PlaybackProducer.cpp)
 target_compile_features(loopo_native PRIVATE cxx_std_20)
 target_include_directories(loopo_native PRIVATE third_party/signalsmith-linear/include)
 if(ANDROID)

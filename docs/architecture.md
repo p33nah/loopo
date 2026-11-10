@@ -11,16 +11,28 @@ flowchart LR
     Playback --> Decoder[WAV or MediaCodec decoder]
     Playback --> Cycle[Pure cached loop cycle]
     Playback --> JNI[Native bridge]
-    JNI --> Stretch[Signalsmith time stretcher]
+    JNI --> Engine[PlaybackEngine and Oboe adapter]
+    Engine --> Producer[PlaybackProducer]
+    Producer --> Stretch[Signalsmith time stretcher]
     Stretch --> Ring[SPSC PCM ring]
     Ring --> Oboe[Oboe output callback]
 ```
 
-`StudyViewModel` owns the selected track, cancellation of obsolete opens, waveform jobs, viewport, and session saving. `AndroidPlaybackController` owns decoder and native-handle lifetime, command serialization, audio focus, seek generation, stretch priming, and the active loop cache. These owners remain separate. The UI receives state and callbacks, so its rendering tests do not require opening an audio stream.
+`StudyViewModel` owns the selected track, cancellation of obsolete opens, waveform jobs, viewport, and session saving. `AndroidPlaybackController` owns decoder and native-handle lifetime, command serialization, audio focus, seek generation, stretch priming, and the active loop cache. `PlaybackEngine` owns the Oboe stream lifecycle and playback state. `PlaybackProducer` owns native DSP, source-frame mapping, and the PCM ring shared by JNI playback and host signal tests. These owners remain separate. The UI receives state and callbacks, so its rendering tests do not require opening an audio stream.
 
-Decoding and DSP happen before the output ring. The Oboe callback reads prepared PCM, converts channel layout, tracks source frames, and supplies silence on underrun. It must not decode, allocate, wait for a coroutine, or access storage.
+`AndroidPlaybackController` also observes Android output-device removals for its loaded engine. Before each start it records Oboe's output device ID; a generation-tagged removal pauses only when it matches that ID. If the backend reports no ID, removal of any external sink pauses conservatively to avoid continuing through an unintended route. The controller captures position, abandons focus, and publishes `OUTPUT_UNAVAILABLE`; adding a device never resumes playback. A real Oboe stream error is latched atomically by `onErrorAfterClose` and consumed by the controller monitor. On explicit Play, the controller reopens only the closed output stream off callback threads, stops the producer, resets queued audio, seeks the still-open decoder to the saved source frame, and primes before starting. Neither path reopens the selected file.
+
+Decoding and DSP happen before the output ring. `PlaybackProducer` runs `TimeStretcher`, maps each output frame to its source position, and queues both in the ring. `PlaybackEngine` forwards producer operations and owns the Oboe callback. The callback reads prepared PCM, converts channel layout, tracks source frames, and supplies silence on underrun. It must not decode, allocate, wait for a coroutine, or access storage.
 
 The cached loop is a deterministic value containing prepared PCM and the mapping between source position and cycle phase. It retains the full source head for an initial seek, mixes the tail with the head, and wraps later cycles past the already-overlapped head. Its cursor keeps the DSP input position separate from the audible output position. Priming advances input while the first output metadata stays at the requested frame. JVM tests verify those samples and positions across multiple wraps. Platform-specific decoder reads and native writes stay with the controller. A pure cycle test cannot prove Android focus or output-device recovery.
+
+Frame budgets use integer percent units. Each input frame contributes 100 units, and each output frame consumes the selected playback percentage. `PlaybackFrameBudgetCalculator` computes output counts and the controller-owned remainder without floating-point rounding. `PlaybackEngine::write` returns accepted input frames through `PlaybackProducer`; a valid call can consume input through Signalsmith while producing zero output. `TimeStretcher::process` reports acceptance separately from the requested output count. The host native signal test compiles the same `PlaybackProducer` implementation used by `PlaybackEngine` and observes its queued PCM and source anchors.
+
+`SourceFrameMapper` retains only the source spans not yet represented by output. It uses the same integer units, preserves each span's source anchor and loop bounds, and resolves source positions before the ring receives PCM. Three fixed span slots include the incoming span; less than two source frames can remain pending at the supported rates. This preserves the first source position after a fractional delay and the jump past an overlapped crossfade head. The callback reads prepared samples and positions. A native write checks capacity and plans mapping before DSP changes; it commits mapping only after all output is queued.
+
+Seek and rate changes stop and join the producer before resetting DSP and publishing the new rate, remainder, and source position. A successful paused seek starts a fresh producer to prebuffer. This uses the same stop/reset/restart ownership as loop edits. Native finish uses the same integer budget and resolves the remaining DSP output. Kotlin PCM coalescing was rejected because it would add another sample buffer and lifecycle owner to the controller.
+
+The renderer reports a consumed-frame cursor, which can equal the loop's exclusive B boundary. `LoopRegion.normalizePlaybackPosition` translates it to the active audible cycle, wrapping B to A plus the effective crossfade. The controller uses this policy when it reads position for monitoring, pause, rate changes, and loop edits. Initial positions inside the loop head remain valid, and disabled loops keep their linear cursor. This keeps loop policy outside the output callback.
 
 The waveform cache identifies source content separately from the short-loop PCM cache. Comparing a full `LoopRegion` already invalidates the loop cache when markers or crossfade change. Hashing only the endpoints of a source file does not detect all waveform changes, even when size and modification time are unchanged.
 

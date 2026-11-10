@@ -529,6 +529,7 @@ private fun PlaybackError.message(): String = when (this) {
 	PlaybackError.OUTPUT_UNAVAILABLE -> "Uscita audio non disponibile"
 	PlaybackError.AUDIO_FOCUS_DENIED -> "Audio in pausa: un'altra app sta usando l'audio"
 	PlaybackError.DECODER_READ_FAILED -> "Errore durante la decodifica del brano"
+	PlaybackError.BACKGROUND_UNAVAILABLE -> "Riproduzione in background non disponibile. Riprova da Loopo."
 }
 
 private fun TrackInfo.formatSummary(): String {

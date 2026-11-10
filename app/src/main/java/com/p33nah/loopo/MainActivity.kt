@@ -1,33 +1,52 @@
 package com.p33nah.loopo
 
 import android.content.pm.ActivityInfo
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.p33nah.loopo.platform.audio.NativeBootstrap
+import com.p33nah.loopo.platform.audio.PlaybackService
 import com.p33nah.loopo.ui.StudyScreen
-import com.p33nah.loopo.ui.StudyViewModel
 import com.p33nah.loopo.ui.theme.LoopoTheme
 
 class MainActivity : androidx.activity.ComponentActivity() {
-	private val viewModel: StudyViewModel by viewModels()
+	internal var playbackSession by mutableStateOf<PlaybackService.Session?>(null)
+		private set
+	private var bound = false
+	private val playbackConnection = object : ServiceConnection {
+		override fun onServiceConnected(name: ComponentName, service: IBinder) {
+			playbackSession = service as PlaybackService.Session
+		}
+
+		override fun onServiceDisconnected(name: ComponentName) {
+			playbackSession = null
+		}
+	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 		enterImmersiveMode()
 		check(NativeBootstrap.apiVersion() == 1)
+		bound = bindService(Intent(this, PlaybackService::class.java), playbackConnection, Context.BIND_AUTO_CREATE)
 
 		setContent {
+			val session = playbackSession ?: return@setContent
+			val viewModel = session.study
 			val context = LocalContext.current
 			val state by viewModel.state.collectAsStateWithLifecycle()
 			val playback by viewModel.playbackState.collectAsStateWithLifecycle()
@@ -55,7 +74,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 					viewport = viewport,
 					onOpenTrack = { openDocument.launch(arrayOf("audio/*", "application/octet-stream")) },
 					onViewportChange = viewModel::updateViewport,
-					onTogglePlayback = viewModel::togglePlayback,
+					onTogglePlayback = session::togglePlayback,
 					onSeekToFrame = viewModel::seekToFrame,
 					onSetLoopRegion = viewModel::setLoopRegion,
 					onSetPlaybackRate = viewModel::setPlaybackRate,
@@ -65,8 +84,13 @@ class MainActivity : androidx.activity.ComponentActivity() {
 	}
 
 	override fun onStop() {
-		viewModel.pauseForLifecycle()
+		playbackSession?.study?.checkpointSession()
 		super.onStop()
+	}
+
+	override fun onDestroy() {
+		if (bound) unbindService(playbackConnection)
+		super.onDestroy()
 	}
 
 	private fun enterImmersiveMode() {

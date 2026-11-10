@@ -1,10 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+
 	<application
 		android:allowBackup="false"
 		android:icon="@mipmap/ic_launcher"
 		android:label="Loopo"
 		android:supportsRtl="true"
 		android:theme="@android:style/Theme.Material.Light.NoActionBar">
+		<service
+			android:name=".platform.audio.PlaybackService"
+			android:exported="false"
+			android:foregroundServiceType="mediaPlayback" />
 		<activity
 			android:name=".MainActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden"

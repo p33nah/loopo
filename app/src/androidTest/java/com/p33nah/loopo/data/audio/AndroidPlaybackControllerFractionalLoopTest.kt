@@ -85,7 +85,7 @@ class AndroidPlaybackControllerFractionalLoopTest {
 				(loop.bFrame - fadeFrames - scenario.sampleRate / 20).coerceAtLeast(loop.aFrame)
 			}
 			controller.seekToFrame(startFrame)
-			controller.togglePlayback()
+			controller.play()
 			assertTrue("Playback did not start for $scenario: ${controller.state.value}", controller.state.value.isPlaying)
 
 			val observedPositions = mutableListOf<Long>()
@@ -140,7 +140,7 @@ class AndroidPlaybackControllerFractionalLoopTest {
 			assertTrue("Loop settings must be accepted", controller.setLoopRegion(loop))
 			controller.setPlaybackRate(PlaybackRate(199))
 			controller.seekToFrame(loop.aFrame + 1_000)
-			controller.togglePlayback()
+			controller.play()
 			assertTrue("Playback did not start: ${controller.state.value}", controller.state.value.isPlaying)
 
 			for (ratePercent in listOf(25, 75, 200)) {
@@ -202,7 +202,7 @@ class AndroidPlaybackControllerFractionalLoopTest {
 				assertInLoop(loop, snapshot)
 			}
 
-			controller.togglePlayback()
+			controller.play()
 			assertTrue("Playback did not start: ${controller.state.value}", controller.state.value.isPlaying)
 			val observedPositions = mutableSetOf<Long>()
 			assertHealthy(PLAYING_OBSERVATION_MS) {

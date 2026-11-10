@@ -4,7 +4,8 @@ Loopo keeps local-file study state in Kotlin and real-time audio output in C++. 
 
 ```mermaid
 flowchart LR
-    UI[Compose study screen] --> VM[StudyViewModel]
+    UI[Compose study screen] --> Service[PlaybackService]
+    Service --> VM[StudyViewModel]
     VM --> Session[DataStore session repository]
     VM --> Waveform[Waveform repository and cache]
     VM --> Playback[AndroidPlaybackController]
@@ -19,6 +20,10 @@ flowchart LR
 ```
 
 `StudyViewModel` owns the selected track, cancellation of obsolete opens, waveform jobs, viewport, and session saving. `AndroidPlaybackController` owns decoder and native-handle lifetime, command serialization, audio focus, seek generation, stretch priming, and the active loop cache. `PlaybackEngine` owns the Oboe stream lifecycle and playback state. `PlaybackProducer` owns native DSP, source-frame mapping, and the PCM ring shared by JNI playback and host signal tests. These owners remain separate. The UI receives state and callbacks, so its rendering tests do not require opening an audio stream.
+
+`PlaybackService` retains the study view model while the activity is bound or playback is active. A Play command promotes the service to the Android `mediaPlayback` foreground type before the controller requests audio focus. The service holds a partial wake lock and publishes the current track and Pause action through its media notification. When the activity stops, it saves a checkpoint and leaves playback running. A new activity binds to the same study session while playback continues.
+
+The controller retains audio focus through seek, rate changes, and temporary focus loss when it can resume playback. When focus is abandoned and playback commands have finished, the service saves the session, removes the notification, and releases the wake lock. A service recreated after process death restores a paused session through the existing storage flow.
 
 `AndroidPlaybackController` also observes Android output-device removals for its loaded engine. Before each start it records Oboe's output device ID; a generation-tagged removal pauses only when it matches that ID. If the backend reports no ID, removal of any external sink pauses conservatively to avoid continuing through an unintended route. The controller captures position, abandons focus, and publishes `OUTPUT_UNAVAILABLE`; adding a device never resumes playback. A real Oboe stream error is latched atomically by `onErrorAfterClose` and consumed by the controller monitor. On explicit Play, the controller reopens only the closed output stream off callback threads, stops the producer, resets queued audio, seeks the still-open decoder to the saved source frame, and primes before starting. Neither path reopens the selected file.
 

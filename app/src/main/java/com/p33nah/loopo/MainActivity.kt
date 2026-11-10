@@ -21,7 +21,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.p33nah.loopo.platform.audio.NativeBootstrap
 import com.p33nah.loopo.platform.audio.PlaybackService
 import com.p33nah.loopo.ui.StudyScreen
+import com.p33nah.loopo.ui.StudyUiState
 import com.p33nah.loopo.ui.theme.LoopoTheme
+import com.p33nah.loopo.ui.voice.VoiceStudy
 
 class MainActivity : androidx.activity.ComponentActivity() {
 	internal var playbackSession by mutableStateOf<PlaybackService.Session?>(null)
@@ -66,19 +68,38 @@ class MainActivity : androidx.activity.ComponentActivity() {
 				}
 			}
 
+			val trackUri = (state as? StudyUiState.Ready)?.inspection?.track?.uri
 			LoopoTheme {
-				StudyScreen(
-					state = state,
-					playback = playback,
-					waveform = waveform,
-					viewport = viewport,
-					onOpenTrack = { openDocument.launch(arrayOf("audio/*", "application/octet-stream")) },
-					onViewportChange = viewModel::updateViewport,
-					onTogglePlayback = session::togglePlayback,
-					onSeekToFrame = viewModel::seekToFrame,
-					onSetLoopRegion = viewModel::setLoopRegion,
-					onSetPlaybackRate = viewModel::setPlaybackRate,
-				)
+				VoiceStudy(session, trackUri, isSessionActive = { playbackSession === session }) { cancelVoice, voiceControls ->
+					StudyScreen(
+						state = state,
+						playback = playback,
+						waveform = waveform,
+						viewport = viewport,
+						onOpenTrack = {
+							cancelVoice()
+							openDocument.launch(arrayOf("audio/*", "application/octet-stream"))
+						},
+						onViewportChange = viewModel::updateViewport,
+						onTogglePlayback = {
+							cancelVoice()
+							session.togglePlayback()
+						},
+						onSeekToFrame = { frame ->
+							cancelVoice()
+							viewModel.seekToFrame(frame)
+						},
+						onSetLoopRegion = { loop ->
+							cancelVoice()
+							viewModel.setLoopRegion(loop)
+						},
+						onSetPlaybackRate = { rate ->
+							cancelVoice()
+							viewModel.setPlaybackRate(rate)
+						},
+						voiceControls = voiceControls,
+					)
+				}
 			}
 		}
 	}

@@ -202,7 +202,8 @@ class AndroidPlaybackController(context: Context) {
 		}
 	}
 
-	suspend fun pause() = transitionMutex.withLock {
+	suspend fun pause(shouldPause: () -> Boolean = { true }): Boolean = transitionMutex.withLock {
+		if (!shouldPause()) return@withLock false
 		pauseUnsafe(abandonFocus = true)
 	}
 
@@ -408,7 +409,7 @@ class AndroidPlaybackController(context: Context) {
 		}
 	}
 
-	private suspend fun pauseUnsafe(abandonFocus: Boolean) {
+	private suspend fun pauseUnsafe(abandonFocus: Boolean): Boolean {
 		val paused = engineHandle == 0L || withContext(Dispatchers.IO) { NativePlaybackBridge.pause(engineHandle) }
 		val position = if (engineHandle != 0L) currentPlaybackPositionFrame(engineHandle) else mutableState.value.positionFrame
 		mutableState.update {
@@ -421,6 +422,7 @@ class AndroidPlaybackController(context: Context) {
 		monitorJob?.cancelAndJoin()
 		monitorJob = null
 		if (abandonFocus) abandonAudioFocus()
+		return paused
 	}
 
 	private suspend fun resumeAfterFocusGainUnsafe() {

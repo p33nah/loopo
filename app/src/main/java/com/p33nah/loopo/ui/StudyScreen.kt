@@ -79,6 +79,7 @@ fun StudyScreen(
 	onSeekToFrame: (Long) -> Unit,
 	onSetLoopRegion: (LoopRegion) -> Unit,
 	onSetPlaybackRate: (PlaybackRate) -> Unit,
+	voiceControls: (@Composable () -> Unit)? = null,
 ) {
 	val readyTrack = (state as? StudyUiState.Ready)?.inspection?.track
 	val trackActionLabel = when (state) {
@@ -90,7 +91,7 @@ fun StudyScreen(
 		modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp, vertical = 12.dp),
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 	) {
-		TopBar(readyTrack, trackActionLabel, onOpenTrack)
+		TopBar(readyTrack, trackActionLabel, onOpenTrack, voiceControls)
 		when (state) {
 			StudyUiState.Empty -> EmptyStudy(onOpenTrack, Modifier.weight(1f))
 			is StudyUiState.Loading -> LoadingStudy(state.displayName, Modifier.weight(1f))
@@ -124,7 +125,12 @@ fun StudyScreen(
 }
 
 @Composable
-private fun TopBar(track: TrackInfo?, actionLabel: String?, onOpenTrack: () -> Unit) {
+private fun TopBar(
+	track: TrackInfo?,
+	actionLabel: String?,
+	onOpenTrack: () -> Unit,
+	voiceControls: (@Composable () -> Unit)?,
+) {
 	Row(
 		modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
 		verticalAlignment = Alignment.CenterVertically,
@@ -149,6 +155,10 @@ private fun TopBar(track: TrackInfo?, actionLabel: String?, onOpenTrack: () -> U
 			track?.let {
 				Text(it.formatSummary(), color = Muted, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
 			}
+		}
+		if (voiceControls != null) {
+			voiceControls()
+			Spacer(Modifier.width(8.dp))
 		}
 		if (actionLabel != null) {
 			OutlinedButton(

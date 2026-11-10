@@ -21,13 +21,20 @@ import com.p33nah.loopo.MainActivity
 import com.p33nah.loopo.R
 import com.p33nah.loopo.ui.StudyUiState
 import com.p33nah.loopo.ui.StudyViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PlaybackService : Service() {
 	private val viewModelStore = ViewModelStore()
@@ -37,20 +44,38 @@ class PlaybackService : Service() {
 	private lateinit var wakeLock: PowerManager.WakeLock
 	private var latestStartId: Int? = null
 	private var pendingCommands = 0
+	private val externalPauses = MutableStateFlow(0L)
 
 	internal inner class Session : Binder() {
 		val study: StudyViewModel get() = this@PlaybackService.study
+		val externalPauseVersion = externalPauses.asStateFlow()
 
 		fun togglePlayback() {
 			if (study.playbackState.value.isPlaying) {
-				runCommand(study::pause)
+				runCommand { study.pause() }
 			} else {
-				try {
-					ContextCompat.startForegroundService(this@PlaybackService, commandIntent(ACTION_PLAY))
-				} catch (failure: RuntimeException) {
-					reportStartFailure(failure)
-				}
+				requestPlay()
 			}
+		}
+
+		fun requestPlay() {
+			try {
+				ContextCompat.startForegroundService(this@PlaybackService, commandIntent(ACTION_PLAY))
+			} catch (failure: RuntimeException) {
+				reportStartFailure(failure)
+			}
+		}
+
+		suspend fun pauseForVoice(isCurrent: () -> Boolean = { true }): Boolean = withContext(Dispatchers.Main.immediate) {
+			val result = CompletableDeferred<Boolean>()
+			val request = currentCoroutineContext()
+			val job = runCommand {
+				result.complete(study.pause { request.isActive && isCurrent() })
+			}
+			job.invokeOnCompletion { failure ->
+				if (failure != null) result.completeExceptionally(failure)
+			}
+			result.await()
 		}
 	}
 
@@ -63,8 +88,8 @@ class PlaybackService : Service() {
 			.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$packageName:playback")
 		mediaSession = MediaSession(this, "Loopo").apply {
 			setCallback(object : MediaSession.Callback() {
-				override fun onPause() = runCommand(study::pause)
-				override fun onStop() = runCommand(study::pause)
+				override fun onPause() = pauseFromSystem()
+				override fun onStop() = pauseFromSystem()
 			})
 		}
 		getSystemService(NotificationManager::class.java).createNotificationChannel(
@@ -91,7 +116,7 @@ class PlaybackService : Service() {
 				if (startForegroundPlayback()) runCommand(study::play)
 				else scope.launch { stopWhenIdle() }
 			}
-			ACTION_PAUSE -> runCommand(study::pause)
+			ACTION_PAUSE -> pauseFromSystem()
 			else -> scope.launch { stopWhenIdle() }
 		}
 		return START_NOT_STICKY
@@ -105,9 +130,14 @@ class PlaybackService : Service() {
 		super.onDestroy()
 	}
 
-	private fun runCommand(command: suspend () -> Unit) {
+	private fun pauseFromSystem() {
+		externalPauses.value += 1
+		runCommand { study.pause() }
+	}
+
+	private fun runCommand(command: suspend () -> Unit): Job {
 		pendingCommands++
-		scope.launch {
+		return scope.launch {
 			try {
 				command()
 			} finally {

@@ -57,6 +57,7 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 
 	val state = mutableState.asStateFlow()
 	val playbackState = playbackController.state
+	internal val playbackFocus = playbackController.playbackFocus
 	val waveformState = mutableWaveformState.asStateFlow()
 	val viewport = mutableViewport.asStateFlow()
 
@@ -76,7 +77,7 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 		val previousReady = activeInspection
 		mutableState.value = StudyUiState.Loading(uri.lastPathSegment ?: "Audio")
 		openJob = viewModelScope.launch {
-			playbackController.pauseForLifecycle()
+			playbackController.pauseForTrackChange()
 			val inspection = inspect(uri, hasPersistedAccess)
 			if (generation != openGeneration) return@launch
 			if (inspection !is TrackInspection.Ready) {
@@ -100,11 +101,16 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 		requestSaveSoon()
 	}
 
-	fun togglePlayback() {
-		viewModelScope.launch {
-			playbackController.togglePlayback()
-			requestSaveSoon()
-		}
+	internal suspend fun play() {
+		if (state.value is StudyUiState.Ready) playbackController.play()
+	}
+
+	internal suspend fun pause() {
+		playbackController.pause()
+	}
+
+	internal fun reportBackgroundPlaybackUnavailable() {
+		playbackController.reportBackgroundPlaybackUnavailable()
 	}
 
 	fun seekToFrame(frame: Long) {
@@ -127,11 +133,8 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 		}
 	}
 
-	fun pauseForLifecycle() {
-		viewModelScope.launch {
-			playbackController.pauseForLifecycle()
-			saveSession()
-		}
+	internal fun checkpointSession() {
+		viewModelScope.launch { saveSession() }
 	}
 
 	override fun onCleared() {
@@ -221,7 +224,8 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 		if (loadError != null) {
 			mutableState.value = when (loadError) {
 				PlaybackError.OUTPUT_UNAVAILABLE -> StudyUiState.Error(TrackInspection.Reason.AUDIO_OUTPUT_UNAVAILABLE)
-				PlaybackError.AUDIO_FOCUS_DENIED, PlaybackError.DECODER_READ_FAILED -> StudyUiState.Error(TrackInspection.Reason.READ_FAILED)
+				PlaybackError.AUDIO_FOCUS_DENIED, PlaybackError.DECODER_READ_FAILED,
+				PlaybackError.BACKGROUND_UNAVAILABLE -> StudyUiState.Error(TrackInspection.Reason.READ_FAILED)
 			}
 			return
 		}
@@ -266,7 +270,7 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 		}
 	}
 
-	private suspend fun saveSession() = saveMutex.withLock {
+	internal suspend fun saveSession() = saveMutex.withLock {
 		if (!sessionReady || playbackController.state.value.isLoopCommandPending) return@withLock
 		val inspection = activeInspection ?: return@withLock
 		val snapshot = playbackController.state.value

@@ -1,0 +1,4 @@
+<resources>
+	<string name="playback_channel">Riproduzione audio</string>
+	<string name="playback_pause">Pausa</string>
+</resources>

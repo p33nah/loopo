@@ -1,9 +1,11 @@
 package com.p33nah.loopo.ui
 
+import android.app.Notification
+import android.app.NotificationManager
+import android.content.Intent
 import android.net.Uri
 import android.os.SystemClock
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -20,14 +22,60 @@ import com.p33nah.loopo.domain.model.SessionSource
 import com.p33nah.loopo.domain.model.SessionState
 import com.p33nah.loopo.domain.waveform.WaveformState
 import com.p33nah.loopo.domain.waveform.WaveformViewport
+import com.p33nah.loopo.platform.audio.PlaybackService
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityAudioIntegrationTest {
+	@Test
+	fun nativePlaybackKeepsAdvancingWhileActivityIsStopped() {
+		val context = InstrumentationRegistry.getInstrumentation().targetContext
+		val audioFile = WavFixture.pcmFile(context, "background.wav", frames = 480_000)
+		val notifications = context.getSystemService(NotificationManager::class.java)
+		try {
+			ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+				val study = awaitPlaybackSession(scenario).study
+				scenario.onActivity {
+					study.openTrack(Uri.fromFile(audioFile), hasPersistedAccess = false)
+				}
+				waitFor("background playback fixture to load") { study.state.value is StudyUiState.Ready }
+				scenario.onActivity { it.playbackSession!!.togglePlayback() }
+				waitFor("native playback start") { study.playbackState.value.isPlaying }
+
+				scenario.moveToState(Lifecycle.State.CREATED)
+				val stoppedPosition = study.playbackState.value.positionFrame
+				SystemClock.sleep(800)
+				val background = study.playbackState.value
+				assertTrue("Playback stopped with the activity: $background", background.isPlaying)
+				assertTrue("Background playback cursor did not advance: $background", background.positionFrame > stoppedPosition)
+
+				scenario.moveToState(Lifecycle.State.RESUMED)
+				scenario.recreate()
+				val reboundStudy = awaitPlaybackSession(scenario).study
+				assertTrue(reboundStudy.playbackState.value.isPlaying)
+				assertTrue(reboundStudy.playbackState.value.positionFrame >= background.positionFrame)
+
+				scenario.moveToState(Lifecycle.State.CREATED)
+				val notification = waitForValue("playback notification for the active track") {
+					notifications.activeNotifications.map { it.notification }.firstOrNull {
+						it.extras.getCharSequence(Notification.EXTRA_TITLE) == audioFile.name
+					}
+				}
+				notification.actions.single().actionIntent.send()
+				waitFor("notification pause") { !reboundStudy.playbackState.value.isPlaying }
+				waitFor("playback notification removed after pause") { notifications.activeNotifications.isEmpty() }
+			}
+		} finally {
+			context.stopService(Intent(context, PlaybackService::class.java))
+			audioFile.delete()
+		}
+	}
+
 	@Test
 	fun viewModelInspectsDecodesAndRestoresGeneratedWaveSessionAcrossLifecycle() {
 		val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -58,8 +106,7 @@ class MainActivityAudioIntegrationTest {
 
 		var scenario = ActivityScenario.launch(MainActivity::class.java)
 		try {
-			lateinit var viewModel: StudyViewModel
-			scenario.onActivity { activity -> viewModel = ViewModelProvider(activity)[StudyViewModel::class.java] }
+			val viewModel = awaitPlaybackSession(scenario).study
 			waitFor("file access recovery state") { viewModel.state.value is StudyUiState.RecoveryRequired }
 			// This exercises the existing ViewModel URI entry point; the system OpenDocument picker is not driven here.
 			viewModel.openTrack(uri, hasPersistedAccess = false)
@@ -80,9 +127,9 @@ class MainActivityAudioIntegrationTest {
 			waitFor("updated playback rate") { viewModel.playbackState.value.playbackRate == PlaybackRate(150) }
 			viewModel.setLoopRegion(LoopRegion(24_000, 84_000, enabled = true, crossfadeMs = 10))
 			waitFor("updated loop region") { viewModel.playbackState.value.loopRegion == LoopRegion(24_000, 84_000, true, 10) }
-			viewModel.togglePlayback()
+			scenario.onActivity { it.playbackSession!!.togglePlayback() }
 			waitFor("native playback start") { viewModel.playbackState.value.isPlaying }
-			viewModel.togglePlayback()
+			scenario.onActivity { it.playbackSession!!.togglePlayback() }
 			waitFor("native playback pause") { !viewModel.playbackState.value.isPlaying }
 			viewModel.seekToFrame(55_000)
 			waitFor("seek position", diagnostic = { viewModel.playbackState.value.toString() }) {
@@ -90,7 +137,6 @@ class MainActivityAudioIntegrationTest {
 			}
 
 			scenario.moveToState(Lifecycle.State.CREATED)
-			waitFor("lifecycle pause") { !viewModel.playbackState.value.isPlaying }
 			val stored = waitForValue("session saved on activity stop") {
 				(runBlocking { sessions.load() } as? SessionLoadOutcome.Found)?.session?.takeIf {
 					it.positionFrame == 55_000L && it.playbackRate == PlaybackRate(150) &&
@@ -102,8 +148,7 @@ class MainActivityAudioIntegrationTest {
 			scenario.close()
 
 			scenario = ActivityScenario.launch(MainActivity::class.java)
-			lateinit var restoredViewModel: StudyViewModel
-			scenario.onActivity { activity -> restoredViewModel = ViewModelProvider(activity)[StudyViewModel::class.java] }
+			val restoredViewModel = awaitPlaybackSession(scenario).study
 			waitFor("restored file access recovery state") { restoredViewModel.state.value is StudyUiState.RecoveryRequired }
 			restoredViewModel.openTrack(uri, hasPersistedAccess = false)
 			waitFor("persisted playback settings restored") {
@@ -116,9 +161,17 @@ class MainActivityAudioIntegrationTest {
 			assertEquals(initialSession.viewport, restoredViewModel.viewport.value)
 		} finally {
 			scenario.close()
+			context.stopService(Intent(context, PlaybackService::class.java))
 			audioFile.delete()
 		}
 	}
+
+	private fun awaitPlaybackSession(scenario: ActivityScenario<MainActivity>): PlaybackService.Session =
+		waitForValue("activity to connect to playback service") {
+			var session: PlaybackService.Session? = null
+			scenario.onActivity { session = it.playbackSession }
+			session
+		}
 
 	private fun waitFor(description: String, diagnostic: () -> String = { "" }, condition: () -> Boolean) {
 		waitForValue(description, diagnostic) { Unit.takeIf { condition() } }

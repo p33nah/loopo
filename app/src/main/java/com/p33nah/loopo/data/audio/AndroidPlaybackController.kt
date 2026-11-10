@@ -49,6 +49,8 @@ class AndroidPlaybackController(context: Context) {
 	private val decoderMutex = Mutex()
 	private val mutableState = MutableStateFlow(PlaybackSnapshot())
 	val state = mutableState.asStateFlow()
+	private val mutablePlaybackFocus = MutableStateFlow(false)
+	val playbackFocus = mutablePlaybackFocus.asStateFlow()
 
 	private var track: TrackInfo? = null
 	private var decoder: PcmDecoder? = null
@@ -63,36 +65,28 @@ class AndroidPlaybackController(context: Context) {
 	private var pumpJob: Job? = null
 	private var monitorJob: Job? = null
 	private var focusRequest: AudioFocusRequest? = null
-	private var hasAudioFocus = false
+	private var focusGeneration = 0L
 	private var focusTemporarilyLost = false
 	private var resumeAfterFocusGain = false
 
-	private val focusListener = AudioManager.OnAudioFocusChangeListener { change ->
+	private suspend fun handleFocusChange(generation: Long, change: Int) = transitionMutex.withLock {
+		if (focusRequest == null || generation != focusGeneration) return@withLock
 		when (change) {
-			AudioManager.AUDIOFOCUS_LOSS -> scope.launch {
-				transitionMutex.withLock {
-					focusTemporarilyLost = false
-					resumeAfterFocusGain = false
-					pauseUnsafe(abandonFocus = true)
-				}
-			}
+			AudioManager.AUDIOFOCUS_LOSS -> pauseUnsafe(abandonFocus = true)
 			AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-			AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> scope.launch {
-				transitionMutex.withLock {
-					focusTemporarilyLost = true
-					resumeAfterFocusGain = mutableState.value.isPlaying
-					pauseUnsafe(abandonFocus = false)
+			AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+				focusTemporarilyLost = true
+				resumeAfterFocusGain = resumeAfterFocusGain || mutableState.value.isPlaying
+				pauseUnsafe(abandonFocus = false)
+			}
+			AudioManager.AUDIOFOCUS_GAIN -> {
+				focusTemporarilyLost = false
+				if (resumeAfterFocusGain) {
+					resumeAfterFocusGain = false
+					resumeAfterFocusGainUnsafe()
 				}
 			}
-			AudioManager.AUDIOFOCUS_GAIN -> scope.launch {
-				transitionMutex.withLock {
-					focusTemporarilyLost = false
-					if (resumeAfterFocusGain) {
-						resumeAfterFocusGain = false
-						resumeAfterFocusGainUnsafe()
-					}
-				}
-			}
+			else -> Unit
 		}
 	}
 
@@ -155,7 +149,7 @@ class AndroidPlaybackController(context: Context) {
 	}
 
 	suspend fun restorePaused(settings: PlaybackRestoreSettings): Boolean {
-		pauseForLifecycle()
+		pauseForTrackChange()
 		val currentTrack = track ?: return false
 		val loop = settings.loop.copy(
 			aFrame = settings.loop.aFrame.coerceIn(0, currentTrack.durationFrames - 1),
@@ -169,46 +163,52 @@ class AndroidPlaybackController(context: Context) {
 		return mutableState.value.error == null && !mutableState.value.isPlaying
 	}
 
-	suspend fun togglePlayback() = transitionMutex.withLock {
-		if (mutableState.value.isPlaying) {
-			resumeAfterFocusGain = false
-			pauseUnsafe(abandonFocus = true)
-		} else {
-			if (focusTemporarilyLost) {
-				resumeAfterFocusGain = true
-				return@withLock
-			}
-			resumeAfterFocusGain = false
-			if (engineHandle == 0L) return@withLock
-			if (mutableState.value.isEnded) {
-				seekUnsafe(0, resumeAfterSeek = false)
-				if (mutableState.value.isEnded) return@withLock
-			}
-			if (NativePlaybackBridge.outputNeedsReopen(engineHandle)) {
-				val resumeFrame = mutableState.value.positionFrame
-				pumpJob?.cancelAndJoin()
-				pumpJob = null
-				val reopened = withContext(Dispatchers.IO) { NativePlaybackBridge.reopenOutput(engineHandle) }
-				if (!reopened) {
-					mutableState.update { it.copy(isPlaying = false, error = PlaybackError.OUTPUT_UNAVAILABLE) }
-					return@withLock
-				}
-				seekUnsafe(resumeFrame, resumeAfterSeek = false)
-				if (mutableState.value.error != null) return@withLock
-			}
-			ensurePumpRunning()
-			awaitPrebuffer(engineHandle, mutableState.value.positionFrame)
-			if (!requestAudioFocus()) {
-				mutableState.update { it.copy(error = PlaybackError.AUDIO_FOCUS_DENIED) }
-				return@withLock
-			}
-			if (startNativePlayback(engineHandle)) {
-				mutableState.update { it.copy(isPlaying = true, error = null) }
-				ensureMonitorRunning()
-			} else {
+	suspend fun play() = transitionMutex.withLock {
+		if (mutableState.value.isPlaying || engineHandle == 0L) return@withLock
+		if (focusTemporarilyLost) {
+			resumeAfterFocusGain = true
+			return@withLock
+		}
+		resumeAfterFocusGain = false
+		if (mutableState.value.isEnded) {
+			seekUnsafe(0, resumeAfterSeek = false)
+			if (mutableState.value.isEnded) return@withLock
+		}
+		if (NativePlaybackBridge.outputNeedsReopen(engineHandle)) {
+			val resumeFrame = mutableState.value.positionFrame
+			pumpJob?.cancelAndJoin()
+			pumpJob = null
+			val reopened = withContext(Dispatchers.IO) { NativePlaybackBridge.reopenOutput(engineHandle) }
+			if (!reopened) {
 				abandonAudioFocus()
-				mutableState.update { it.copy(error = PlaybackError.OUTPUT_UNAVAILABLE) }
+				mutableState.update { it.copy(isPlaying = false, error = PlaybackError.OUTPUT_UNAVAILABLE) }
+				return@withLock
 			}
+			seekUnsafe(resumeFrame, resumeAfterSeek = false)
+			if (mutableState.value.error != null) return@withLock
+		}
+		ensurePumpRunning()
+		awaitPrebuffer(engineHandle, mutableState.value.positionFrame)
+		if (!requestAudioFocus()) {
+			mutableState.update { it.copy(error = PlaybackError.AUDIO_FOCUS_DENIED) }
+			return@withLock
+		}
+		if (startNativePlayback(engineHandle)) {
+			mutableState.update { it.copy(isPlaying = true, error = null) }
+			ensureMonitorRunning()
+		} else {
+			abandonAudioFocus()
+			mutableState.update { it.copy(error = PlaybackError.OUTPUT_UNAVAILABLE) }
+		}
+	}
+
+	suspend fun pause() = transitionMutex.withLock {
+		pauseUnsafe(abandonFocus = true)
+	}
+
+	fun reportBackgroundPlaybackUnavailable() {
+		mutableState.update {
+			if (it.isPlaying) it else it.copy(error = PlaybackError.BACKGROUND_UNAVAILABLE)
 		}
 	}
 
@@ -220,6 +220,7 @@ class AndroidPlaybackController(context: Context) {
 	}
 
 	suspend fun seekToFrame(frame: Long) = transitionMutex.withLock {
+		if (focusTemporarilyLost) abandonAudioFocus()
 		resumeAfterFocusGain = false
 		val currentTrack = track
 		val loop = mutableState.value.loopRegion?.takeIf { it.enabled }
@@ -280,6 +281,7 @@ class AndroidPlaybackController(context: Context) {
 			if (wasPlaying) {
 				awaitPrebuffer(handle, seeked.frame)
 				if (!startNativePlayback(handle)) {
+					abandonAudioFocus()
 					mutableState.update { it.copy(isPlaying = false, error = PlaybackError.OUTPUT_UNAVAILABLE) }
 					return@withLock false
 				}
@@ -314,6 +316,9 @@ class AndroidPlaybackController(context: Context) {
 						if (startNativePlayback(handle)) {
 							mutableState.update { it.copy(isPlaying = true) }
 							ensureMonitorRunning()
+						} else {
+							abandonAudioFocus()
+							mutableState.update { it.copy(isPlaying = false, error = PlaybackError.OUTPUT_UNAVAILABLE) }
 						}
 					}
 				}
@@ -323,9 +328,7 @@ class AndroidPlaybackController(context: Context) {
 
 	suspend fun unload() = transitionMutex.withLock { shutdownTrack() }
 
-	suspend fun pauseForLifecycle() = transitionMutex.withLock {
-		focusTemporarilyLost = false
-		resumeAfterFocusGain = false
+	suspend fun pauseForTrackChange() = transitionMutex.withLock {
 		pauseUnsafe(abandonFocus = true)
 		pumpJob?.cancelAndJoin()
 		pumpJob = null
@@ -422,7 +425,10 @@ class AndroidPlaybackController(context: Context) {
 
 	private suspend fun resumeAfterFocusGainUnsafe() {
 		val handle = engineHandle
-		if (handle == 0L || mutableState.value.isEnded) return
+		if (handle == 0L || mutableState.value.isEnded) {
+			abandonAudioFocus()
+			return
+		}
 		ensurePumpRunning()
 		awaitPrebuffer(handle, mutableState.value.positionFrame)
 		if (startNativePlayback(handle)) {
@@ -721,7 +727,6 @@ class AndroidPlaybackController(context: Context) {
 							error = PlaybackError.OUTPUT_UNAVAILABLE,
 						)
 					}
-					resumeAfterFocusGain = false
 					monitorJob = null
 					abandonAudioFocus()
 					return
@@ -906,7 +911,8 @@ class AndroidPlaybackController(context: Context) {
 	}
 
 	private fun requestAudioFocus(): Boolean {
-		if (hasAudioFocus) return true
+		if (mutablePlaybackFocus.value) return true
+		val generation = ++focusGeneration
 		val attributes = AudioAttributes.Builder()
 			.setUsage(AudioAttributes.USAGE_MEDIA)
 			.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -914,17 +920,23 @@ class AndroidPlaybackController(context: Context) {
 		val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
 			.setAudioAttributes(attributes)
 			.setWillPauseWhenDucked(true)
-			.setOnAudioFocusChangeListener(focusListener, Handler(Looper.getMainLooper()))
+			.setOnAudioFocusChangeListener(
+				{ change -> scope.launch { handleFocusChange(generation, change) } },
+				Handler(Looper.getMainLooper()),
+			)
 			.build()
-		focusRequest = request
-		hasAudioFocus = audioManager.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-		return hasAudioFocus
+		val granted = audioManager.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+		if (granted) focusRequest = request
+		mutablePlaybackFocus.value = granted
+		return granted
 	}
 
 	private fun abandonAudioFocus() {
 		focusRequest?.let(audioManager::abandonAudioFocusRequest)
 		focusRequest = null
-		hasAudioFocus = false
+		focusTemporarilyLost = false
+		resumeAfterFocusGain = false
+		mutablePlaybackFocus.value = false
 	}
 
 	private companion object {

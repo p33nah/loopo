@@ -5,7 +5,7 @@ include(CTest)
 set(LOOPO_SANITIZER "" CACHE STRING "Optional host sanitizer: address or thread")
 set_property(CACHE LOOPO_SANITIZER PROPERTY STRINGS "" address thread)
 
-add_executable(loopo_native_tests native_tests.cpp)
+add_executable(loopo_native_tests native_tests.cpp ../app/src/main/cpp/PlaybackProducer.cpp)
 target_compile_features(loopo_native_tests PRIVATE cxx_std_20)
 target_include_directories(loopo_native_tests PRIVATE
 	${CMAKE_CURRENT_LIST_DIR}/../app/src/main/cpp

@@ -20,8 +20,7 @@ int64_t outputLatencyFrames(oboe::AudioStream& stream) {
 }
 
 PlaybackEngine::PlaybackEngine(int sampleRate, int channelCount, int capacityFrames)
-		: sampleRate_(sampleRate), channelCount_(channelCount), ring_(channelCount, capacityFrames),
-		  stretcher_(sampleRate, channelCount),
+		: sampleRate_(sampleRate), channelCount_(channelCount), producer_(sampleRate, channelCount, capacityFrames),
 		  callbackSourceFrames_(capacityFrames), audiblePositionHistory_(capacityFrames) {}
 
 PlaybackEngine::~PlaybackEngine() {
@@ -29,6 +28,7 @@ PlaybackEngine::~PlaybackEngine() {
 }
 
 bool PlaybackEngine::open() {
+	activeStream_.store(nullptr, std::memory_order_release);
 	outputLatencyFrames_.store(-1, std::memory_order_release);
 	oboe::AudioStreamBuilder builder;
 	builder.setDirection(oboe::Direction::Output);
@@ -40,12 +40,14 @@ bool PlaybackEngine::open() {
 	builder.setUsage(oboe::Usage::Media);
 	builder.setContentType(oboe::ContentType::Music);
 	builder.setDataCallback(shared_from_this());
+	builder.setErrorCallback(shared_from_this());
 	if (builder.openStream(stream_) != oboe::Result::OK || !stream_) return false;
 	if (stream_->getFormat() != oboe::AudioFormat::Float || stream_->getChannelCount() <= 0) {
 		stream_->close();
 		stream_.reset();
 		return false;
 	}
+	activeStream_.store(stream_.get(), std::memory_order_release);
 	outputLatencyFrames_.store(outputLatencyFrames(*stream_), std::memory_order_release);
 #if !defined(NDEBUG)
 	__android_log_print(ANDROID_LOG_DEBUG, "LoopoLatency",
@@ -57,12 +59,14 @@ bool PlaybackEngine::open() {
 }
 
 void PlaybackEngine::close() {
+	activeStream_.store(nullptr, std::memory_order_release);
 	outputLatencyFrames_.store(-1, std::memory_order_release);
-	if (!stream_) return;
-	playing_.store(false, std::memory_order_release);
-	stream_->requestStop();
-	stream_->close();
-	stream_.reset();
+	if (stream_) {
+		playing_.store(false, std::memory_order_release);
+		stream_->requestStop();
+		stream_->close();
+		stream_.reset();
+	}
 }
 
 bool PlaybackEngine::play() {
@@ -101,8 +105,7 @@ bool PlaybackEngine::resetAtFrame(int64_t sourceFrame) {
 				? stream_->requestFlush() : stream_->flush(500'000'000);
 		if (result != oboe::Result::OK) return false;
 	}
-	ring_.clear();
-	stretcher_.reset();
+	producer_.reset();
 	sourcePosition_.store(sourceFrame, std::memory_order_release);
 	basePosition_.store(sourceFrame, std::memory_order_release);
 	renderedOutputFrames_.store(0, std::memory_order_release);
@@ -112,36 +115,30 @@ bool PlaybackEngine::resetAtFrame(int64_t sourceFrame) {
 }
 
 int PlaybackEngine::prerollFrames(float playbackRate) const {
-	return stretcher_.prerollFrames(playbackRate);
+	return producer_.prerollFrames(playbackRate);
 }
 
 bool PlaybackEngine::prime(const float* samples, int frames, float playbackRate) {
 	if (inputEnded_.load(std::memory_order_acquire)) return false;
-	return stretcher_.prime(samples, frames, playbackRate);
+	return producer_.prime(samples, frames, playbackRate);
 }
 
 int PlaybackEngine::write(const float* samples, int inputFrames, int outputFrames, int64_t sourceStartFrame,
-		double sourceFramesPerOutputFrame, int64_t loopStartFrame, int64_t loopEndFrame) {
-	if (!samples || inputFrames <= 0 || inputEnded_.load(std::memory_order_acquire)) return 0;
-	const auto processed = stretcher_.process(samples, inputFrames, outputFrames);
-	if (processed != outputFrames) return 0;
-	const auto written = ring_.write(stretcher_.output(), outputFrames, sourceStartFrame,
-			sourceFramesPerOutputFrame, loopStartFrame, loopEndFrame);
-	return written == outputFrames ? inputFrames : 0;
+		int playbackRatePercent, int64_t loopStartFrame, int64_t loopEndFrame) {
+	if (inputEnded_.load(std::memory_order_acquire)) return 0;
+	return producer_.write(samples, inputFrames, outputFrames, sourceStartFrame, playbackRatePercent,
+			loopStartFrame, loopEndFrame);
 }
 
-bool PlaybackEngine::finish(float playbackRate, double outputRemainder, int64_t endFrame) {
-	if (inputEnded_.load(std::memory_order_acquire)) return false;
-	const auto tail = stretcher_.finish(playbackRate, outputRemainder);
-	if (tail.empty()) return false;
-	const auto frames = static_cast<int>(tail.size() / channelCount_);
-	if (ring_.write(tail.data(), frames, endFrame, 0.0, -1, -1) != frames) return false;
+bool PlaybackEngine::finish(int playbackRatePercent, int remainderUnits, int64_t endFrame) {
+	if (inputEnded_.load(std::memory_order_acquire) ||
+			!producer_.finish(playbackRatePercent, remainderUnits, endFrame)) return false;
 	inputEnded_.store(true, std::memory_order_release);
 	return true;
 }
 
 int PlaybackEngine::writeSpace() const {
-	return ring_.availableToWrite();
+	return producer_.writeSpace();
 }
 
 int PlaybackEngine::channelCount() const {
@@ -153,7 +150,7 @@ void PlaybackEngine::setEndOfStream(bool ended) {
 }
 
 int PlaybackEngine::queuedFrames() const {
-	return ring_.availableToRead();
+	return producer_.queuedFrames();
 }
 
 int64_t PlaybackEngine::positionFrame() const {
@@ -183,6 +180,36 @@ int64_t PlaybackEngine::underrunCount() const {
 	return underruns_.load(std::memory_order_relaxed);
 }
 
+int32_t PlaybackEngine::outputDeviceId() const {
+	if (!stream_) return -1;
+	const auto deviceId = stream_->getDeviceId();
+	return deviceId == oboe::kUnspecified ? -1 : deviceId;
+}
+
+int PlaybackEngine::takeStreamFailure() {
+	return pendingStreamFailure_.exchange(static_cast<int>(oboe::Result::OK), std::memory_order_acq_rel);
+}
+
+bool PlaybackEngine::outputNeedsReopen() const {
+	return streamNeedsReopen_.load(std::memory_order_acquire);
+}
+
+bool PlaybackEngine::reopenOutput() {
+	if (!streamNeedsReopen_.load(std::memory_order_acquire)) return stream_ != nullptr;
+	stream_.reset();
+	if (!open()) return false;
+	pendingStreamFailure_.store(static_cast<int>(oboe::Result::OK), std::memory_order_release);
+	streamNeedsReopen_.store(false, std::memory_order_release);
+	return true;
+}
+
+void PlaybackEngine::onErrorAfterClose(oboe::AudioStream* stream, oboe::Result error) {
+	if (stream != activeStream_.load(std::memory_order_acquire)) return;
+	playing_.store(false, std::memory_order_release);
+	pendingStreamFailure_.store(static_cast<int>(error), std::memory_order_release);
+	streamNeedsReopen_.store(true, std::memory_order_release);
+}
+
 bool PlaybackEngine::isPlaying() const {
 	return playing_.load(std::memory_order_acquire);
 }
@@ -204,7 +231,7 @@ oboe::DataCallbackResult PlaybackEngine::onAudioReady(oboe::AudioStream* stream,
 		return oboe::DataCallbackResult::Continue;
 	}
 
-	const auto framesRead = ring_.read(output, numFrames, outputChannels, callbackSourceFrames_.data());
+	const auto framesRead = producer_.read(output, numFrames, outputChannels, callbackSourceFrames_.data());
 	const auto outputStartFrame = renderedOutputFrames_.load(std::memory_order_relaxed);
 	auto sourcePosition = sourcePosition_.load(std::memory_order_relaxed);
 	for (int32_t frame = 0; frame < numFrames; ++frame) {
@@ -215,7 +242,7 @@ oboe::DataCallbackResult PlaybackEngine::onAudioReady(oboe::AudioStream* stream,
 	sourcePosition_.store(sourcePosition, std::memory_order_release);
 	renderedOutputFrames_.store(outputStartFrame + numFrames, std::memory_order_release);
 	if (framesRead < numFrames) {
-		if (inputEnded_.load(std::memory_order_acquire) && ring_.availableToRead() == 0) {
+		if (inputEnded_.load(std::memory_order_acquire) && producer_.queuedFrames() == 0) {
 			playing_.store(false, std::memory_order_release);
 			ended_.store(true, std::memory_order_release);
 			return oboe::DataCallbackResult::Stop;

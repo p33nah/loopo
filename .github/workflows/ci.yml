@@ -49,7 +49,7 @@ jobs:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
       - name: Install pinned Android tools
-        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
+        run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
       - name: Test, lint, and build all supported ABIs
         run: bash gradlew testDebugUnitTest createDebugUnitTestCoverageReport lintDebug assembleDebug assembleDebugAndroidTest --console=plain
       - name: Verify APK native compatibility and notices
@@ -85,7 +85,7 @@ jobs:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
       - name: Install pinned Android tools
-        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
+        run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules

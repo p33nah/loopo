@@ -1,6 +1,5 @@
 plugins {
 	alias(libs.plugins.android.application)
-	alias(libs.plugins.kotlin.android)
 	alias(libs.plugins.kotlin.compose)
 }
 
@@ -12,7 +11,7 @@ android {
 	defaultConfig {
 		applicationId = "com.p33nah.loopo"
 		minSdk = libs.versions.min.sdk.get().toInt()
-		targetSdk = libs.versions.compile.sdk.get().toInt()
+		targetSdk = libs.versions.target.sdk.get().toInt()
 		versionCode = 1
 		versionName = "0.0.1"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -76,12 +75,6 @@ android {
 	compileOptions {
 		sourceCompatibility = JavaVersion.VERSION_17
 		targetCompatibility = JavaVersion.VERSION_17
-	}
-
-	kotlin {
-		compilerOptions {
-			jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-		}
 	}
 
 	buildFeatures {

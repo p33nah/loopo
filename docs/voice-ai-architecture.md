@@ -1,23 +1,25 @@
 # Offline voice pilot
 
-With the Italian model packaged and microphone access granted, the debug build automatically listens for **Ehi Lupo** when a track is open and Loopo is in the foreground. After the phrase, Loopo pauses playback and uses the on-device Android speech recognizer for one Italian command. This requires Android 12 (API 31) or later and an on-device Italian recognition model.
+With the Italian model packaged and microphone access granted, the debug build automatically listens for **Ehi Lupo** whenever a track is loaded. It uses the same flow in the foreground, background, and with the screen locked, whether playback is running or paused. After the wake phrase, Loopo pauses the track if needed and listens for one Italian command: **riprendi**, **pausa**, or a supported playback speed. This requires Android 12 (API 31) or later and an on-device Italian recognition model.
 
-The debug study screen also offers **Pausa vocale a schermo spento**, off by default. When enabled, Loopo arms a separate microphone foreground service while the app is visible and playback is running. Once Loopo goes to the background, the service listens for **Ehi Lupo** and pauses the current track on detection. The notification shows when the service is armed. Turning the option off, pausing playback, ending the track, or changing tracks stops background capture. The release build excludes the voice controls, microphone permissions, and microphone service.
+There is no always-listening switch. Voice listening begins after the user opens a track while Loopo is visible and grants microphone access. PlaybackService becomes a media playback and microphone foreground service and owns the voice session alongside playback. The service remains active while voice commands are armed, including during pause. The release build excludes the voice controller, microphone permissions, and microphone foreground service type.
 
 ## Try a command
 
-1. Open a track. On first use, grant microphone access in the Android prompt.
-2. When **In ascolto per Ehi Lupo…** appears, the wake phrase is ready to use with playback running or paused.
-3. Say **Ehi Lupo** and wait for **Ti ascolto…**.
-4. Say **riprendi**, **pausa**, or **rallenta al settanta**. To set another speed, say **velocità al** followed by an integer percentage from 25 through 200.
+1. Install a debug APK with the Italian Vosk model, open a track, and grant microphone access.
+2. Confirm **In ascolto per Ehi Lupo…** appears while playback is running and while it is paused.
+3. Say **Ehi Lupo**, wait for **Ti ascolto…**, then say **riprendi**, **pausa**, or **velocità al settanta**. Speeds accept integer percentages from 25 through 200.
+4. Repeat after pressing Home and with the display locked. While paused, **riprendi** starts the loaded track without starting another foreground service.
 
-An unknown command, timeout, or recognition error leaves playback paused. **Riprendi** explicitly requests Play. After a command, Loopo returns to wake detection while the voice session remains active. A playback control or system Pause or Stop cancels the current voice turn. Foreground wake detection stops when the app leaves the foreground. Background detection runs only while the explicit debug option is enabled and playback is active.
+An unknown command or timeout leaves playback paused, then wake detection resumes. After one command, Loopo returns to wake detection. Manual playback controls and system Pause or Stop cancel the current voice turn. Changing or closing the track ends listening. Permission and model checks happen before microphone capture starts.
 
 ## Playback and microphone ownership
 
-The activity owns foreground voice commands. Vosk captures mono audio at 16 kHz and accepts the exact final text `ehi lupo` from the tested Italian phrase list. A shared microphone mutex serializes foreground command capture and background wake capture. The wake detector releases the microphone before requesting a pause. The microphone service calls the existing playback session to pause. The pause checks the track generation, playback state, microphone permission, activity visibility, and opt-in.
+PlaybackService owns the voice controller in the debug variant. It starts the voice session only from the visible activity and retains its foreground notification and partial wake lock while listening, even after playback focus is abandoned. The service promotes with `mediaPlayback|microphone` types only after validating the loaded track, packaged model, and microphone permission. Regular playback promotes with only `mediaPlayback`; release contains no microphone declaration.
 
-The app requests local recognition in `it-IT` and adds no network permission. It keeps microphone audio and recognition results in memory for processing. The recognizer handles one result, with a 12-second limit. The command parser accepts exact commands and checks speed bounds before passing a typed command to the player. **Comando inviato** means Loopo submitted the request. The player controls show whether the change took effect.
+Vosk captures mono audio at 16 kHz and accepts the exact final text `ehi lupo` from its phrase list. The wake detector releases the microphone before the Android on-device recognizer captures the single command. A mutex prevents overlap between the two capture paths. Recognition requests local `it-IT` speech and adds no network permission. Audio and transcripts remain in memory. The recognizer handles one result with a 12-second limit. The command parser accepts exact phrases and checks speed bounds before submitting a typed playback command. **Comando inviato** means Loopo submitted the request; the player controls show whether it took effect.
+
+The service serializes spoken Play and rate changes through its existing command path. Spoken Play calls the already-running service directly, including after pause, so it does not attempt to start a foreground service from the background. A playback control or system Pause invalidates an in-flight turn; a later wake phrase can start another turn while the session remains armed.
 
 ## Later phases
 

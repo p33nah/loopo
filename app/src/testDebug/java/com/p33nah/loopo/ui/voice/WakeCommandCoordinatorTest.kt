@@ -109,4 +109,49 @@ class WakeCommandCoordinatorTest {
 		assertTrue(job.isCancelled)
 		assertEquals(0, commandRuns)
 	}
+
+	@Test
+	fun pausedTrackCanResumeFromOneWakeTurn() = runBlocking {
+		var playing = false
+		var wakeCount = 0
+		var commandCount = 0
+		val command = VoiceCommandCoordinator(
+			pause = { playing = false; true },
+			transcribe = { TranscriptResult.Text("riprendi") },
+			dispatch = { parsed ->
+				commandCount++
+				if (parsed == VoiceCommand.Resume) playing = true
+				true
+			},
+		)
+		val wake = WakeCommandCoordinator(
+			awaitWake = { wakeCount++; WakeDetection.Detected },
+			runCommand = command::run,
+		)
+
+		val result = wake.runTurn(isCurrent = { true })
+
+		assertEquals(VoiceStatus.CommandSent, result)
+		assertEquals(1, wakeCount)
+		assertEquals(1, commandCount)
+		assertTrue(playing)
+	}
+
+	@Test
+	fun aWakeTurnDispatchesAtMostOneCommand() = runBlocking {
+		var commandCount = 0
+		val command = VoiceCommandCoordinator(
+			pause = { true },
+			transcribe = { TranscriptResult.Text("pausa") },
+			dispatch = { commandCount++; true },
+		)
+		val wake = WakeCommandCoordinator(
+			awaitWake = { WakeDetection.Detected },
+			runCommand = command::run,
+		)
+
+		wake.runTurn(isCurrent = { true })
+
+		assertEquals(1, commandCount)
+	}
 }

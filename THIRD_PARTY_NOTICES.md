@@ -11,3 +11,9 @@ Loopo uses the MIT license. The APK packages its license and the vendored DSP no
 See the original notices in `app/src/main/cpp/third_party/` and the packaged Oboe license. AndroidX, Kotlin, and their transitive dependencies are resolved by Gradle and carry their upstream notices in dependency metadata and APK packaging. Review the resolved dependency graph and notices before each public release, especially after upgrades. This table identifies direct native dependencies; it is not a complete software bill of materials.
 
 Upstream sources are [Signalsmith Stretch](https://github.com/Signalsmith-Audio/signalsmith-stretch), [Signalsmith Linear](https://github.com/Signalsmith-Audio/linear), and [Oboe](https://github.com/google/oboe).
+
+Debug builds include Vosk Android `0.3.75` and JNA `5.18.1`. The voice test build also includes `vosk-model-small-it-0.22`. Vosk and the model use Apache-2.0. JNA offers Apache-2.0 or LGPL-2.1-or-later. Loopo uses the Apache-2.0 option for JNA. See the packaged debug notice for sources and the packaged Apache 2.0 license text.
+
+- [Vosk API license](https://github.com/alphacep/vosk-api/blob/master/COPYING)
+- [Vosk model licenses](https://alphacephei.com/vosk/models)
+- [JNA 5.18.1 license](https://github.com/java-native-access/jna/blob/5.18.1/LICENSE)

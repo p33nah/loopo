@@ -49,6 +49,7 @@ class PlaybackService : Service() {
 	internal inner class Session : Binder() {
 		val study: StudyViewModel get() = this@PlaybackService.study
 		val externalPauseVersion = externalPauses.asStateFlow()
+		val trackRevision: Long get() = study.trackGeneration
 
 		fun togglePlayback() {
 			if (study.playbackState.value.isPlaying) {

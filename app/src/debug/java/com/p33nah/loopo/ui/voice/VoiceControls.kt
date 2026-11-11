@@ -12,23 +12,32 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.p33nah.loopo.platform.audio.PlaybackService
@@ -36,6 +45,8 @@ import com.p33nah.loopo.ui.StudyUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
@@ -55,8 +66,46 @@ internal fun VoiceStudy(
 	val modelAvailable = remember(appContext) { VoskWakeDetector.isModelAvailable(appContext) }
 	val localRevision = remember(session, trackUri) { MutableStateFlow(0L) }
 	var status by remember(session, trackUri) { mutableStateOf<VoiceStatus?>(null) }
+	val backgroundStatus by BackgroundVoiceState.status.collectAsState()
+	val preferences = remember(appContext) {
+		appContext.getSharedPreferences(BackgroundVoiceService.PREFERENCES, Context.MODE_PRIVATE)
+	}
+	var backgroundPauseEnabled by remember(preferences) {
+		mutableStateOf(preferences.getBoolean(BackgroundVoiceService.ENABLED, false))
+	}
+	fun setBackgroundPauseEnabled(enabled: Boolean) {
+		backgroundPauseEnabled = enabled
+		preferences.edit().putBoolean(BackgroundVoiceService.ENABLED, enabled).apply()
+		if (!enabled) stopBackgroundVoice(appContext)
+	}
 	val requestPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
 		localRevision.value += 1
+	}
+	val requestBackgroundPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+		if (it && modelAvailable) setBackgroundPauseEnabled(true)
+	}
+
+	DisposableEffect(lifecycle) {
+		val observer = LifecycleEventObserver { _, event ->
+			when (event) {
+				Lifecycle.Event.ON_RESUME -> BackgroundVoiceState.setForeground(true)
+				Lifecycle.Event.ON_PAUSE -> BackgroundVoiceState.setForeground(false)
+				else -> Unit
+			}
+		}
+		lifecycle.addObserver(observer)
+		onDispose { lifecycle.removeObserver(observer) }
+	}
+
+	LaunchedEffect(session, trackUri, backgroundPauseEnabled, modelAvailable) {
+		if (!backgroundPauseEnabled || trackUri == null || !modelAvailable) return@LaunchedEffect
+		lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+			session.study.playbackState.map { it.isPlaying }.distinctUntilChanged().collectLatest { playing ->
+				if (playing && hasMicrophonePermission(appContext)) {
+					armBackgroundVoice(appContext)
+				}
+			}
+		}
 	}
 
 	LaunchedEffect(context, lifecycle, session, trackUri, modelAvailable) {
@@ -78,7 +127,6 @@ internal fun VoiceStudy(
 						return@collectLatest
 					}
 					if (!hasMicrophonePermission(context)) {
-						val preferences = appContext.getSharedPreferences("debug_voice", Context.MODE_PRIVATE)
 						if (preferences.getBoolean("microphone_requested", false)) {
 							status = VoiceStatus.PermissionDenied
 						} else {
@@ -132,7 +180,50 @@ internal fun VoiceStudy(
 			)
 		}
 	}
-	content({ localRevision.value += 1 }, voiceStatus)
+	val controls: (@Composable () -> Unit)? = if (trackUri != null) {
+		{
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.spacedBy(4.dp),
+			) {
+				Text(
+					"Pausa vocale a schermo spento",
+					style = MaterialTheme.typography.labelSmall,
+					modifier = Modifier.weight(1f),
+				)
+				Switch(
+					checked = backgroundPauseEnabled,
+					enabled = modelAvailable,
+					modifier = Modifier.semantics { contentDescription = "Pausa vocale a schermo spento" },
+					onCheckedChange = { enabled ->
+						if (enabled && !hasMicrophonePermission(appContext)) {
+							requestBackgroundPermission.launch(Manifest.permission.RECORD_AUDIO)
+						} else {
+							setBackgroundPauseEnabled(enabled)
+						}
+					},
+				)
+			}
+		}
+	} else null
+	val backgroundText = when (backgroundStatus) {
+		VoiceStatus.WakeListening -> "Pausa vocale pronta"
+		VoiceStatus.WakeFailed, VoiceStatus.WakeUnavailable, VoiceStatus.PauseFailed, VoiceStatus.PermissionDenied ->
+			"Pausa vocale a schermo spento non disponibile"
+		else -> null
+	}
+	val voiceControls: (@Composable () -> Unit)? = if (trackUri != null) {
+		{
+			Column(Modifier.widthIn(max = 188.dp)) {
+				controls?.invoke()
+				voiceStatus?.invoke()
+				if (backgroundPauseEnabled && backgroundText != null) {
+					Text(backgroundText, style = MaterialTheme.typography.labelSmall)
+				}
+			}
+		}
+	} else null
+	content({ localRevision.value += 1 }, voiceControls)
 }
 
 private fun statusText(status: VoiceStatus) = when (status) {
@@ -155,7 +246,7 @@ private fun statusText(status: VoiceStatus) = when (status) {
 private fun hasOnDeviceRecognizer(context: Context): Boolean =
 	Build.VERSION.SDK_INT >= 31 && SpeechRecognizer.isOnDeviceRecognitionAvailable(context)
 
-private fun hasMicrophonePermission(context: Context): Boolean =
+internal fun hasMicrophonePermission(context: Context): Boolean =
 	context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
 private suspend fun transcribeOnDevice(context: Context, onListening: () -> Unit): TranscriptResult =

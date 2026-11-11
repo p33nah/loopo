@@ -16,7 +16,9 @@ To package the debug wake detector, download [`vosk-model-small-it-0.22.zip`](ht
 python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk
 ```
 
-For the device check, install the model-enabled APK, open a track, and grant Android microphone access if prompted. Check that wake detection starts automatically, including after returning to the foreground. Start playback and follow [the Italian voice steps](voice-ai-architecture.md). Check that an unrelated phrase leaves playback running, **Ehi Lupo** pauses it, **riprendi** resumes it, and leaving the foreground stops microphone capture.
+For the device check, install the model-enabled debug APK, open a track, and grant Android microphone access if prompted. With the opt-in off, leave Loopo during playback and confirm that voice capture stops. Return to Loopo and enable **Pausa vocale a schermo spento** while the track is playing. Wait for **Pausa vocale pronta**. Check the voice pause notification or Android's active-apps panel if Android hides the notification.
+
+Press Home or lock the display. Say an unrelated phrase and confirm playback continues. Then say **Ehi Lupo** and confirm playback pauses and the microphone indicator clears. Check that opt-out, track change, and playback end stop the background service. Return to Loopo and follow [the Italian voice steps](voice-ai-architecture.md) to check the foreground commands. Repeat with the speaker and Bluetooth where available. Check the release APK for the absence of the debug microphone permissions and service.
 
 On Linux and macOS, use `bash gradlew` instead of `gradlew.bat`. JVM boundary tests use Robolectric, not a physical device. Robolectric downloads an Android runtime on the first run and cannot prove vendor MediaCodec or Oboe behavior. See the [Robolectric setup](https://robolectric.org/getting-started/) for its JDK access flags.
 

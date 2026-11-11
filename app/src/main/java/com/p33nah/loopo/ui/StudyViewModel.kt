@@ -105,9 +105,7 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 		if (state.value is StudyUiState.Ready) playbackController.play()
 	}
 
-	internal suspend fun pause() {
-		playbackController.pause()
-	}
+	internal suspend fun pause(shouldPause: () -> Boolean = { true }): Boolean = playbackController.pause(shouldPause)
 
 	internal fun reportBackgroundPlaybackUnavailable() {
 		playbackController.reportBackgroundPlaybackUnavailable()

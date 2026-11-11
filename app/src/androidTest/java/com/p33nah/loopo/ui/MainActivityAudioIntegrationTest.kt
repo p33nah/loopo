@@ -24,6 +24,7 @@ import com.p33nah.loopo.domain.waveform.WaveformState
 import com.p33nah.loopo.domain.waveform.WaveformViewport
 import com.p33nah.loopo.platform.audio.PlaybackService
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -69,6 +70,32 @@ class MainActivityAudioIntegrationTest {
 				notification.actions.single().actionIntent.send()
 				waitFor("notification pause") { !reboundStudy.playbackState.value.isPlaying }
 				waitFor("playback notification removed after pause") { notifications.activeNotifications.isEmpty() }
+			}
+		} finally {
+			context.stopService(Intent(context, PlaybackService::class.java))
+			audioFile.delete()
+		}
+	}
+
+	@Test
+	fun voicePauseAcknowledgesNativeOutputAndIsIdempotent() {
+		val context = InstrumentationRegistry.getInstrumentation().targetContext
+		val audioFile = WavFixture.pcmFile(context, "voice-pause.wav", frames = 480_000)
+		try {
+			ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+				val session = awaitPlaybackSession(scenario)
+				val study = session.study
+				scenario.onActivity { study.openTrack(Uri.fromFile(audioFile), hasPersistedAccess = false) }
+				waitFor("voice pause fixture to load") { study.state.value is StudyUiState.Ready }
+				scenario.onActivity { session.requestPlay() }
+				waitFor("native playback start") { study.playbackState.value.isPlaying }
+
+				assertFalse(runBlocking { withTimeout(5_000) { session.pauseForVoice { false } } })
+				assertTrue("An obsolete voice request must leave playback running", study.playbackState.value.isPlaying)
+				repeat(2) {
+					assertTrue("Native pause must succeed", runBlocking { withTimeout(5_000) { session.pauseForVoice() } })
+					assertFalse(study.playbackState.value.isPlaying)
+				}
 			}
 		} finally {
 			context.stopService(Intent(context, PlaybackService::class.java))

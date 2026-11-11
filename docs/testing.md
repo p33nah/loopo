@@ -16,7 +16,7 @@ To package the debug wake detector, download [`vosk-model-small-it-0.22.zip`](ht
 python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk
 ```
 
-A debug build without the archive reports that offline wake detection is unavailable. For the device check, install the model-enabled APK, start playback, enable **Ehi Lupo**, and follow [the Italian voice steps](voice-ai-architecture.md). Check that an unrelated phrase leaves playback running, **Ehi Lupo** pauses it, **riprendi** resumes it, and cancelling the session stops wake detection.
+For the device check, install the model-enabled APK, open a track, and grant Android microphone access if prompted. Check that wake detection starts automatically, including after returning to the foreground. Start playback and follow [the Italian voice steps](voice-ai-architecture.md). Check that an unrelated phrase leaves playback running, **Ehi Lupo** pauses it, **riprendi** resumes it, and leaving the foreground stops microphone capture.
 
 On Linux and macOS, use `bash gradlew` instead of `gradlew.bat`. JVM boundary tests use Robolectric, not a physical device. Robolectric downloads an Android runtime on the first run and cannot prove vendor MediaCodec or Oboe behavior. See the [Robolectric setup](https://robolectric.org/getting-started/) for its JDK access flags.
 

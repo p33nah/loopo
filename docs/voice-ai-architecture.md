@@ -1,15 +1,15 @@
 # Offline voice pilot
 
-With the Italian model packaged, the debug build listens for **Ehi Lupo** while Loopo is in the foreground. After the phrase, Loopo pauses playback and uses the on-device Android speech recognizer for one Italian command. This requires Android 12 (API 31) or later and an on-device Italian recognition model. The release build excludes the voice controls, microphone permission, and wake detector.
+With the Italian model packaged and microphone access granted, the debug build automatically listens for **Ehi Lupo** when a track is open and Loopo is in the foreground. After the phrase, Loopo pauses playback and uses the on-device Android speech recognizer for one Italian command. This requires Android 12 (API 31) or later and an on-device Italian recognition model. The release build excludes the voice controls, microphone permission, and wake detector.
 
 ## Try a command
 
-1. Open a track and start playback.
-2. Tap **Ehi Lupo**. If Android asks for microphone access, grant it and tap **Ehi Lupo** again. Wait for **In ascolto per Ehi Lupo…**.
+1. Open a track. On first use, grant microphone access in the Android prompt.
+2. When **In ascolto per Ehi Lupo…** appears, the wake phrase is ready to use with playback running or paused.
 3. Say **Ehi Lupo** and wait for **Ti ascolto…**.
 4. Say **riprendi**, **pausa**, or **rallenta al settanta**. To set another speed, say **velocità al** followed by an integer percentage from 25 through 200.
 
-An unknown command, timeout, or recognition error leaves playback paused. **Riprendi** explicitly requests Play. After a command, Loopo returns to wake detection while the voice session remains active. Tap **Disattiva** to stop listening. A playback control, system Pause or Stop, track change, service disconnect, or leaving the foreground also ends the listening session.
+An unknown command, timeout, or recognition error leaves playback paused. **Riprendi** explicitly requests Play. After a command, Loopo returns to wake detection while the voice session remains active. A playback control or system Pause or Stop cancels the current voice turn. Wake detection restarts for the current foreground track. Leaving the foreground or closing the track stops microphone capture.
 
 ## Playback and microphone ownership
 

@@ -60,13 +60,38 @@ class WakeCommandCoordinatorTest {
 	}
 
 	@Test
+	fun listensAgainAfterCommandResultsAndStopsAfterAMicrophoneFailure() = runBlocking {
+		val detections = listOf(WakeDetection.Detected, WakeDetection.Detected, WakeDetection.Failed).iterator()
+		val commands = listOf(VoiceStatus.CommandSent, VoiceStatus.Failed).iterator()
+		val statuses = mutableListOf<VoiceStatus>()
+		val wake = WakeCommandCoordinator(
+			awaitWake = { onListening ->
+				onListening()
+				detections.next()
+			},
+			runCommand = { commands.next() },
+		)
+
+		wake.listen(isCurrent = { true }, onStatus = { statuses += it })
+
+		assertEquals(
+			listOf(
+				VoiceStatus.WakeListening, VoiceStatus.CommandSent,
+				VoiceStatus.WakeListening, VoiceStatus.Failed,
+				VoiceStatus.WakeListening, VoiceStatus.WakeFailed,
+			),
+			statuses,
+		)
+	}
+
+	@Test
 	fun microphoneFailureDoesNotStartCommandFlow() = runBlocking {
 		val wake = WakeCommandCoordinator(
 			awaitWake = { WakeDetection.Failed },
 			runCommand = { error("Command recognition requires a wake phrase") },
 		)
 
-		assertEquals(VoiceStatus.Failed, wake.runTurn(isCurrent = { true }))
+		assertEquals(VoiceStatus.WakeFailed, wake.runTurn(isCurrent = { true }))
 	}
 
 	@Test

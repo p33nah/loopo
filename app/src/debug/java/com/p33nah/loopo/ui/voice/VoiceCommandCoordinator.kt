@@ -13,8 +13,8 @@ internal sealed interface VoiceCommand {
 }
 
 internal enum class VoiceStatus {
-	PermissionGranted, PermissionDenied, Pausing, Listening, Paused, CommandSent, PauseFailed,
-	TimedOut, Unavailable, WakeListening, WakeUnavailable, Unrecognized, Failed, Cancelled,
+	PermissionDenied, Pausing, Listening, Paused, CommandSent, PauseFailed,
+	TimedOut, Unavailable, WakeListening, WakeUnavailable, WakeFailed, Unrecognized, Failed, Cancelled,
 }
 
 internal sealed interface TranscriptResult {

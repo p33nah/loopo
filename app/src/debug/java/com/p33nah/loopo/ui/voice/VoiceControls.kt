@@ -12,22 +12,16 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -35,14 +29,13 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.p33nah.loopo.platform.audio.PlaybackService
 import com.p33nah.loopo.ui.StudyUiState
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
@@ -56,146 +49,98 @@ internal fun VoiceStudy(
 	content: @Composable (cancelVoice: () -> Unit, voiceControls: (@Composable () -> Unit)?) -> Unit,
 ) {
 	val context = LocalContext.current
+	val appContext = context.applicationContext
 	val lifecycle = LocalLifecycleOwner.current.lifecycle
-	val scope = rememberCoroutineScope()
-	val modelAvailable = remember(context.applicationContext) { VoskWakeDetector.isModelAvailable(context) }
+	val sessionIsActive by rememberUpdatedState(isSessionActive)
+	val modelAvailable = remember(appContext) { VoskWakeDetector.isModelAvailable(appContext) }
+	val localRevision = remember(session, trackUri) { MutableStateFlow(0L) }
 	var status by remember(session, trackUri) { mutableStateOf<VoiceStatus?>(null) }
-	var activeWake by remember(session, trackUri) { mutableStateOf<WakeSession?>(null) }
-
-	fun cancelVoice() {
-		val wake = activeWake ?: return
-		activeWake = null
-		wake.job.cancel()
-		status = null
+	val requestPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+		localRevision.value += 1
 	}
 
-	fun isTrackCurrent(): Boolean {
-		val ready = session.study.state.value as? StudyUiState.Ready
-		return trackUri != null && ready?.inspection?.track?.uri == trackUri &&
-			isSessionActive() && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
-	}
-
-	val requestPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-		status = if (granted) VoiceStatus.PermissionGranted else VoiceStatus.PermissionDenied
-	}
-
-	fun armWake() {
-		if (activeWake != null) return
-		if (!isTrackCurrent()) return
-		if (!modelAvailable) return
-		if (!hasOnDeviceRecognizer(context)) {
-			status = VoiceStatus.Unavailable
-			return
-		}
-		if (!hasMicrophonePermission(context)) {
-			requestPermission.launch(Manifest.permission.RECORD_AUDIO)
-			return
-		}
-
-		val externalPauseVersion = session.externalPauseVersion.value
-		lateinit var wakeJob: Job
-		fun isWakeCurrent(): Boolean = activeWake?.job === wakeJob &&
-			isTrackCurrent() && session.externalPauseVersion.value == externalPauseVersion &&
-			hasMicrophonePermission(context)
-
-		val commandCoordinator = VoiceCommandCoordinator(
-			pause = { session.pauseForVoice(::isWakeCurrent) },
-			transcribe = { onListening ->
-				if (isWakeCurrent()) transcribeOnDevice(context, onListening) else TranscriptResult.Cancelled
-			},
-			dispatch = { command ->
-				if (!isWakeCurrent()) return@VoiceCommandCoordinator false
-				when (command) {
-					VoiceCommand.Resume -> session.requestPlay()
-					VoiceCommand.StayPaused -> Unit
-					is VoiceCommand.SetRate -> session.study.setPlaybackRate(command.rate)
-				}
-				true
-			},
-		)
-		val wakeDetector = VoskWakeDetector(context.applicationContext)
-		val wakeCoordinator = WakeCommandCoordinator(
-			awaitWake = wakeDetector::awaitWake,
-			runCommand = { onStatus -> commandCoordinator.run(onStatus) },
-		)
-		wakeJob = scope.launch(start = CoroutineStart.LAZY) {
+	LaunchedEffect(context, lifecycle, session, trackUri, modelAvailable) {
+		if (trackUri == null || !modelAvailable) return@LaunchedEffect
+		lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+			val wakeDetector = VoskWakeDetector(appContext)
 			try {
-				while (isWakeCurrent()) {
-					val outcome = wakeCoordinator.runTurn(::isWakeCurrent) { status = it }
-					if (!isWakeCurrent()) break
-					when (outcome) {
-						VoiceStatus.WakeUnavailable,
-						VoiceStatus.PermissionDenied,
-						VoiceStatus.Unavailable,
-						VoiceStatus.Failed,
-						VoiceStatus.PauseFailed -> {
-							status = outcome
-							break
-						}
-						else -> {
-							status = outcome
-							delay(1_000)
-						}
+				combine(localRevision, session.externalPauseVersion, ::Pair).collectLatest { (local, external) ->
+					fun isCurrent(): Boolean {
+						val ready = session.study.state.value as? StudyUiState.Ready
+						return ready?.inspection?.track?.uri == trackUri && sessionIsActive() &&
+							lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+							localRevision.value == local && session.externalPauseVersion.value == external
 					}
+					if (!isCurrent()) return@collectLatest
+					status = null
+					if (!hasOnDeviceRecognizer(context)) {
+						status = VoiceStatus.Unavailable
+						return@collectLatest
+					}
+					if (!hasMicrophonePermission(context)) {
+						val preferences = appContext.getSharedPreferences("debug_voice", Context.MODE_PRIVATE)
+						if (preferences.getBoolean("microphone_requested", false)) {
+							status = VoiceStatus.PermissionDenied
+						} else {
+							preferences.edit().putBoolean("microphone_requested", true).apply()
+							requestPermission.launch(Manifest.permission.RECORD_AUDIO)
+						}
+						return@collectLatest
+					}
+
+					fun canUseVoice(): Boolean = isCurrent() && hasMicrophonePermission(context)
+
+					val commandCoordinator = VoiceCommandCoordinator(
+						pause = { session.pauseForVoice(::canUseVoice) },
+						transcribe = { onListening ->
+							if (canUseVoice()) transcribeOnDevice(context, onListening) else TranscriptResult.Cancelled
+						},
+						dispatch = { command ->
+							if (!canUseVoice()) return@VoiceCommandCoordinator false
+							when (command) {
+								VoiceCommand.Resume -> session.requestPlay()
+								VoiceCommand.StayPaused -> Unit
+								is VoiceCommand.SetRate -> session.study.setPlaybackRate(command.rate)
+							}
+							true
+						},
+					)
+					val wakeCoordinator = WakeCommandCoordinator(
+						awaitWake = wakeDetector::awaitWake,
+						runCommand = commandCoordinator::run,
+					)
+					wakeCoordinator.listen(::canUseVoice) { if (isCurrent()) status = it }
 				}
 			} finally {
+				status = null
 				wakeDetector.close()
-				if (activeWake?.job === coroutineContext[Job]) activeWake = null
 			}
 		}
-		activeWake = WakeSession(wakeJob, externalPauseVersion)
-		wakeJob.start()
 	}
 
-	DisposableEffect(lifecycle, session, trackUri) {
-		val observer = LifecycleEventObserver { _, event ->
-			if (event == Lifecycle.Event.ON_PAUSE) cancelVoice()
-		}
-		lifecycle.addObserver(observer)
-		onDispose {
-			lifecycle.removeObserver(observer)
-			cancelVoice()
-		}
+	val text = when {
+		trackUri == null -> null
+		!modelAvailable -> statusText(VoiceStatus.WakeUnavailable)
+		else -> status?.let(::statusText)
 	}
-
-	LaunchedEffect(session, trackUri) {
-		session.externalPauseVersion.collect { version ->
-			if (activeWake != null && activeWake?.externalPauseVersion != version) cancelVoice()
-		}
-	}
-
-	val controls: (@Composable () -> Unit)? = if (trackUri == null) null else {
+	val voiceStatus: (@Composable () -> Unit)? = text?.let {
 		{
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				if (modelAvailable) {
-					OutlinedButton(onClick = {
-						if (activeWake != null) cancelVoice() else armWake()
-					}) {
-						Text(if (activeWake == null) "Ehi Lupo" else "Disattiva")
-					}
-				}
-				(status?.let(::statusText) ?: if (!modelAvailable) statusText(VoiceStatus.WakeUnavailable) else null)?.let {
-					Spacer(Modifier.width(8.dp))
-					Text(
-						text = it,
-						style = MaterialTheme.typography.labelMedium,
-						modifier = Modifier.widthIn(max = 180.dp).semantics { liveRegion = LiveRegionMode.Polite },
-					)
-				}
-			}
+			Text(
+				text = it,
+				style = MaterialTheme.typography.labelMedium,
+				modifier = Modifier.widthIn(max = 180.dp).semantics { liveRegion = LiveRegionMode.Polite },
+			)
 		}
 	}
-	content(::cancelVoice, controls)
+	content({ localRevision.value += 1 }, voiceStatus)
 }
 
-private data class WakeSession(val job: Job, val externalPauseVersion: Long)
-
 private fun statusText(status: VoiceStatus) = when (status) {
-	VoiceStatus.PermissionGranted -> "Permesso concesso. Tocca Ehi Lupo."
-	VoiceStatus.PermissionDenied -> "Serve il permesso microfono."
+	VoiceStatus.PermissionDenied -> "Consenti il microfono nelle impostazioni."
 	VoiceStatus.Pausing -> "Metto in pausa…"
 	VoiceStatus.Listening -> "Ti ascolto…"
 	VoiceStatus.WakeListening -> "In ascolto per Ehi Lupo…"
+	VoiceStatus.WakeFailed -> "Ascolto di Ehi Lupo non riuscito"
 	VoiceStatus.WakeUnavailable -> "Risveglio offline non disponibile"
 	VoiceStatus.Paused -> "In pausa"
 	VoiceStatus.CommandSent -> "Comando inviato"

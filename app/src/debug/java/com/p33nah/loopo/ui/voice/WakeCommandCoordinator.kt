@@ -1,6 +1,7 @@
 package com.p33nah.loopo.ui.voice
 
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 
 internal sealed interface WakeDetection {
@@ -14,6 +15,19 @@ internal class WakeCommandCoordinator(
 	private val awaitWake: suspend (onListening: () -> Unit) -> WakeDetection,
 	private val runCommand: suspend (onStatus: (VoiceStatus) -> Unit) -> VoiceStatus,
 ) {
+	suspend fun listen(isCurrent: () -> Boolean, onStatus: (VoiceStatus) -> Unit) {
+		while (isCurrent()) {
+			val outcome = runTurn(isCurrent, onStatus)
+			if (!isCurrent()) return
+			onStatus(outcome)
+			when (outcome) {
+				VoiceStatus.Paused, VoiceStatus.CommandSent, VoiceStatus.TimedOut, VoiceStatus.Unrecognized,
+				VoiceStatus.Failed, VoiceStatus.PauseFailed -> delay(1_000)
+				else -> return
+			}
+		}
+	}
+
 	suspend fun runTurn(
 		isCurrent: () -> Boolean,
 		onStatus: (VoiceStatus) -> Unit = {},
@@ -27,7 +41,7 @@ internal class WakeCommandCoordinator(
 			WakeDetection.Detected -> runCommand(onStatus)
 			WakeDetection.Unavailable -> VoiceStatus.WakeUnavailable
 			WakeDetection.PermissionDenied -> VoiceStatus.PermissionDenied
-			WakeDetection.Failed -> VoiceStatus.Failed
+			WakeDetection.Failed -> VoiceStatus.WakeFailed
 		}
 	}
 }

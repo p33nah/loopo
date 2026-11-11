@@ -50,6 +50,7 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 	private var openJob: Job? = null
 	private var saveJob: Job? = null
 	private var openGeneration = 0L
+	internal val trackGeneration: Long get() = openGeneration
 	private var activeInspection: TrackInspection.Ready? = null
 	private var pendingRestore: SessionState? = null
 	private var sessionReady = false

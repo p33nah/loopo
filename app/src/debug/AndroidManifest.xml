@@ -1,6 +1,13 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
 	<queries>
 		<intent><action android:name="android.speech.RecognitionService" /></intent>
 	</queries>
+	<application>
+		<service
+			android:name=".platform.audio.PlaybackService"
+			android:foregroundServiceType="mediaPlayback|microphone"
+			tools:replace="android:foregroundServiceType" />
+	</application>
 </manifest>

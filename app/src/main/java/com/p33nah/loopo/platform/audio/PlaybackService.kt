@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.drawable.Icon
 import android.media.MediaMetadata
 import android.media.session.MediaSession
@@ -28,8 +29,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
@@ -44,11 +44,20 @@ class PlaybackService : Service() {
 	private lateinit var wakeLock: PowerManager.WakeLock
 	private var latestStartId: Int? = null
 	private var pendingCommands = 0
-	private val externalPauses = MutableStateFlow(0L)
+	private val voiceController = PlaybackVoiceController(this)
 
 	internal inner class Session : Binder() {
 		val study: StudyViewModel get() = this@PlaybackService.study
-		val externalPauseVersion = externalPauses.asStateFlow()
+		val trackRevision: Long get() = study.trackGeneration
+		val voiceStatus: StateFlow<String?> get() = voiceController.status
+		fun armVoice() {
+			try {
+				startService(commandIntent(ACTION_VOICE_ARM))
+			} catch (_: RuntimeException) {
+				voiceController.setStatus("Ascolto vocale non disponibile")
+			}
+		}
+		fun cancelVoiceTurn() = voiceController.cancelTurn()
 
 		fun togglePlayback() {
 			if (study.playbackState.value.isPlaying) {
@@ -64,6 +73,14 @@ class PlaybackService : Service() {
 			} catch (failure: RuntimeException) {
 				reportStartFailure(failure)
 			}
+		}
+
+		fun requestVoicePlay() {
+			runCommand(study::play)
+		}
+
+		fun setVoiceRate(rate: com.p33nah.loopo.domain.model.PlaybackRate) {
+			runCommand { study.setPlaybackRate(rate) }
 		}
 
 		suspend fun pauseForVoice(isCurrent: () -> Boolean = { true }): Boolean = withContext(Dispatchers.Main.immediate) {
@@ -116,6 +133,10 @@ class PlaybackService : Service() {
 				if (startForegroundPlayback()) runCommand(study::play)
 				else scope.launch { stopWhenIdle() }
 			}
+			ACTION_VOICE_ARM -> {
+				voiceController.arm()
+				if (!voiceController.isArmed) scope.launch { stopWhenIdle() }
+			}
 			ACTION_PAUSE -> pauseFromSystem()
 			else -> scope.launch { stopWhenIdle() }
 		}
@@ -124,6 +145,7 @@ class PlaybackService : Service() {
 
 	override fun onDestroy() {
 		scope.cancel()
+		voiceController.close()
 		if (wakeLock.isHeld) wakeLock.release()
 		mediaSession.release()
 		viewModelStore.clear()
@@ -131,7 +153,7 @@ class PlaybackService : Service() {
 	}
 
 	private fun pauseFromSystem() {
-		externalPauses.value += 1
+		voiceController.cancelTurn()
 		runCommand { study.pause() }
 	}
 
@@ -149,9 +171,9 @@ class PlaybackService : Service() {
 
 	private suspend fun stopWhenIdle() {
 		val startId = latestStartId ?: return
-		if (pendingCommands != 0 || study.playbackFocus.value) return
+		if (pendingCommands != 0 || study.playbackFocus.value || voiceController.isArmed) return
 		if (mediaSession.isActive) study.saveSession()
-		if (latestStartId != startId || pendingCommands != 0 || study.playbackFocus.value) return
+		if (latestStartId != startId || pendingCommands != 0 || study.playbackFocus.value || voiceController.isArmed) return
 		if (!stopSelfResult(startId)) return
 		latestStartId = null
 		mediaSession.isActive = false
@@ -186,7 +208,15 @@ class PlaybackService : Service() {
 			.setStyle(Notification.MediaStyle().setMediaSession(mediaSession.sessionToken).setShowActionsInCompactView(0))
 			.build()
 		try {
-			startForeground(NOTIFICATION_ID, notification)
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+				val types = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK or
+					if (voiceController.isArmed && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+						ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+					} else 0
+				startForeground(NOTIFICATION_ID, notification, types)
+			} else {
+				startForeground(NOTIFICATION_ID, notification)
+			}
 		} catch (failure: RuntimeException) {
 			reportStartFailure(failure)
 			return false
@@ -211,6 +241,12 @@ class PlaybackService : Service() {
 
 	private fun commandIntent(action: String) = Intent(this, PlaybackService::class.java).setAction(action)
 
+	internal fun promoteForVoice(): Boolean = startForegroundPlayback()
+	internal fun voiceScope(): CoroutineScope = scope
+	internal val voiceSession: Session get() = Session()
+	internal val voiceStudy: StudyViewModel get() = study
+	internal fun voiceBecameIdle() { scope.launch { stopWhenIdle() } }
+
 	private fun reportStartFailure(failure: RuntimeException) {
 		if (failure !is IllegalStateException && failure !is SecurityException) throw failure
 		study.reportBackgroundPlaybackUnavailable()
@@ -221,5 +257,6 @@ class PlaybackService : Service() {
 		const val NOTIFICATION_ID = 1
 		const val ACTION_PLAY = "com.p33nah.loopo.action.PLAY"
 		const val ACTION_PAUSE = "com.p33nah.loopo.action.PAUSE"
+		const val ACTION_VOICE_ARM = "com.p33nah.loopo.debug.voice.ARM"
 	}
 }

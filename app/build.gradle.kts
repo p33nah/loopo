@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.compose)
@@ -107,6 +109,7 @@ dependencies {
 	debugImplementation("androidx.compose.ui:ui-tooling")
 	debugImplementation(platform(libs.androidx.compose.bom))
 	debugImplementation("androidx.compose.ui:ui-test-manifest")
+	debugImplementation(libs.vosk.android)
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.robolectric:robolectric:4.17")
 	testImplementation("androidx.test:core:1.7.0")
@@ -114,4 +117,47 @@ dependencies {
 	androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 	androidTestImplementation("androidx.test.ext:junit:1.3.0")
 	androidTestImplementation("androidx.test:runner:1.7.0")
+}
+
+val wakeModelPath = providers.gradleProperty("loopoWakeModel")
+val prepareWakeModel = tasks.register<PrepareWakeModel>("prepareDebugWakeModelAsset") {
+	wakeModelPath.orNull?.let { archive.fileValue(file(it)) }
+	assetsDirectory.set(layout.buildDirectory.dir("generated/loopoWake/debug/assets"))
+}
+
+androidComponents.onVariants(androidComponents.selector().withBuildType("debug")) { variant ->
+	variant.sources.assets?.addGeneratedSourceDirectory(prepareWakeModel, PrepareWakeModel::assetsDirectory)
+}
+
+abstract class PrepareWakeModel : DefaultTask() {
+	@get:InputFile
+	@get:Optional
+	@get:PathSensitive(PathSensitivity.NONE)
+	abstract val archive: RegularFileProperty
+
+	@get:OutputDirectory
+	abstract val assetsDirectory: DirectoryProperty
+
+	@TaskAction
+	fun prepare() {
+		val directory = assetsDirectory.get().asFile
+		val generatedAsset = directory.resolve("loopo-vosk-it.zip")
+		check(!generatedAsset.exists() || generatedAsset.delete()) { "Could not remove the previous wake model asset" }
+		directory.mkdirs()
+		val modelArchive = archive.orNull?.asFile ?: return
+		val digest = MessageDigest.getInstance("SHA-256")
+		modelArchive.inputStream().use { input ->
+			val buffer = ByteArray(64 * 1024)
+			while (true) {
+				val count = input.read(buffer)
+				if (count < 0) break
+				digest.update(buffer, 0, count)
+			}
+		}
+		val actualHash = digest.digest().joinToString("") { "%02x".format(it) }
+		check(actualHash == "9ec65e75861d1c6c2e457cccd932705340dcdf233f5b239f00733b4de0bf3267") {
+			"The loopoWakeModel archive has an unexpected SHA-256"
+		}
+		modelArchive.copyTo(generatedAsset)
+	}
 }

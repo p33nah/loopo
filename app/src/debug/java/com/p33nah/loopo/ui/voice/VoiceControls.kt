@@ -41,8 +41,10 @@ import com.p33nah.loopo.platform.audio.PlaybackService
 import com.p33nah.loopo.ui.StudyUiState
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 
@@ -56,13 +58,14 @@ internal fun VoiceStudy(
 	val context = LocalContext.current
 	val lifecycle = LocalLifecycleOwner.current.lifecycle
 	val scope = rememberCoroutineScope()
+	val modelAvailable = remember(context.applicationContext) { VoskWakeDetector.isModelAvailable(context) }
 	var status by remember(session, trackUri) { mutableStateOf<VoiceStatus?>(null) }
-	var activeTurn by remember(session, trackUri) { mutableStateOf<VoiceTurn?>(null) }
+	var activeWake by remember(session, trackUri) { mutableStateOf<WakeSession?>(null) }
 
 	fun cancelVoice() {
-		val turn = activeTurn ?: return
-		turn.job.cancel()
-		activeTurn = null
+		val wake = activeWake ?: return
+		activeWake = null
+		wake.job.cancel()
 		status = null
 	}
 
@@ -75,6 +78,75 @@ internal fun VoiceStudy(
 	val requestPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
 		status = if (granted) VoiceStatus.PermissionGranted else VoiceStatus.PermissionDenied
 	}
+
+	fun armWake() {
+		if (activeWake != null) return
+		if (!isTrackCurrent()) return
+		if (!modelAvailable) return
+		if (!hasOnDeviceRecognizer(context)) {
+			status = VoiceStatus.Unavailable
+			return
+		}
+		if (!hasMicrophonePermission(context)) {
+			requestPermission.launch(Manifest.permission.RECORD_AUDIO)
+			return
+		}
+
+		val externalPauseVersion = session.externalPauseVersion.value
+		lateinit var wakeJob: Job
+		fun isWakeCurrent(): Boolean = activeWake?.job === wakeJob &&
+			isTrackCurrent() && session.externalPauseVersion.value == externalPauseVersion &&
+			hasMicrophonePermission(context)
+
+		val commandCoordinator = VoiceCommandCoordinator(
+			pause = { session.pauseForVoice(::isWakeCurrent) },
+			transcribe = { onListening ->
+				if (isWakeCurrent()) transcribeOnDevice(context, onListening) else TranscriptResult.Cancelled
+			},
+			dispatch = { command ->
+				if (!isWakeCurrent()) return@VoiceCommandCoordinator false
+				when (command) {
+					VoiceCommand.Resume -> session.requestPlay()
+					VoiceCommand.StayPaused -> Unit
+					is VoiceCommand.SetRate -> session.study.setPlaybackRate(command.rate)
+				}
+				true
+			},
+		)
+		val wakeDetector = VoskWakeDetector(context.applicationContext)
+		val wakeCoordinator = WakeCommandCoordinator(
+			awaitWake = wakeDetector::awaitWake,
+			runCommand = { onStatus -> commandCoordinator.run(onStatus) },
+		)
+		wakeJob = scope.launch(start = CoroutineStart.LAZY) {
+			try {
+				while (isWakeCurrent()) {
+					val outcome = wakeCoordinator.runTurn(::isWakeCurrent) { status = it }
+					if (!isWakeCurrent()) break
+					when (outcome) {
+						VoiceStatus.WakeUnavailable,
+						VoiceStatus.PermissionDenied,
+						VoiceStatus.Unavailable,
+						VoiceStatus.Failed,
+						VoiceStatus.PauseFailed -> {
+							status = outcome
+							break
+						}
+						else -> {
+							status = outcome
+							delay(1_000)
+						}
+					}
+				}
+			} finally {
+				wakeDetector.close()
+				if (activeWake?.job === coroutineContext[Job]) activeWake = null
+			}
+		}
+		activeWake = WakeSession(wakeJob, externalPauseVersion)
+		wakeJob.start()
+	}
+
 	DisposableEffect(lifecycle, session, trackUri) {
 		val observer = LifecycleEventObserver { _, event ->
 			if (event == Lifecycle.Event.ON_PAUSE) cancelVoice()
@@ -88,70 +160,26 @@ internal fun VoiceStudy(
 
 	LaunchedEffect(session, trackUri) {
 		session.externalPauseVersion.collect { version ->
-			val turn = activeTurn
-			if (turn != null && turn.externalPauseVersion != version) cancelVoice()
+			if (activeWake != null && activeWake?.externalPauseVersion != version) cancelVoice()
 		}
-	}
-
-	fun activate() {
-		if (activeTurn != null) {
-			cancelVoice()
-			status = VoiceStatus.Cancelled
-			return
-		}
-		if (!isTrackCurrent()) return
-		if (!hasOnDeviceRecognizer(context)) {
-			status = VoiceStatus.Unavailable
-			return
-		}
-		if (!hasMicrophonePermission(context)) {
-			requestPermission.launch(Manifest.permission.RECORD_AUDIO)
-			return
-		}
-
-		val externalPauseVersion = session.externalPauseVersion.value
-		fun isTurnCurrent(): Boolean =
-			isTrackCurrent() && session.externalPauseVersion.value == externalPauseVersion
-
-		val coordinator = VoiceCommandCoordinator(
-			pause = { session.pauseForVoice(::isTurnCurrent) },
-			transcribe = { onListening ->
-				if (isTurnCurrent()) transcribeOnDevice(context, onListening) else TranscriptResult.Cancelled
-			},
-			dispatch = { command ->
-				if (!isTurnCurrent() || !hasMicrophonePermission(context)) return@VoiceCommandCoordinator false
-				when (command) {
-					VoiceCommand.Resume -> session.requestPlay()
-					VoiceCommand.StayPaused -> Unit
-					is VoiceCommand.SetRate -> session.study.setPlaybackRate(command.rate)
-				}
-				true
-			},
-		)
-		val job = scope.launch(start = CoroutineStart.LAZY) {
-			try {
-				val outcome = coordinator.run { status = it }
-				status = if (isTurnCurrent()) outcome else VoiceStatus.Cancelled
-			} finally {
-				if (activeTurn?.job === coroutineContext[Job]) activeTurn = null
-			}
-		}
-		activeTurn = VoiceTurn(job, externalPauseVersion)
-		job.start()
 	}
 
 	val controls: (@Composable () -> Unit)? = if (trackUri == null) null else {
 		{
 			Row(verticalAlignment = Alignment.CenterVertically) {
-				OutlinedButton(onClick = ::activate) {
-					Text(if (activeTurn == null) "Prova voce" else "Annulla voce")
+				if (modelAvailable) {
+					OutlinedButton(onClick = {
+						if (activeWake != null) cancelVoice() else armWake()
+					}) {
+						Text(if (activeWake == null) "Ehi Lupo" else "Disattiva")
+					}
 				}
-				status?.let {
+				(status?.let(::statusText) ?: if (!modelAvailable) statusText(VoiceStatus.WakeUnavailable) else null)?.let {
 					Spacer(Modifier.width(8.dp))
 					Text(
-						text = statusText(it),
+						text = it,
 						style = MaterialTheme.typography.labelMedium,
-						modifier = Modifier.widthIn(max = 160.dp).semantics { liveRegion = LiveRegionMode.Polite },
+						modifier = Modifier.widthIn(max = 180.dp).semantics { liveRegion = LiveRegionMode.Polite },
 					)
 				}
 			}
@@ -160,13 +188,15 @@ internal fun VoiceStudy(
 	content(::cancelVoice, controls)
 }
 
-private data class VoiceTurn(val job: Job, val externalPauseVersion: Long)
+private data class WakeSession(val job: Job, val externalPauseVersion: Long)
 
 private fun statusText(status: VoiceStatus) = when (status) {
-	VoiceStatus.PermissionGranted -> "Permesso concesso. Tocca Prova voce."
+	VoiceStatus.PermissionGranted -> "Permesso concesso. Tocca Ehi Lupo."
 	VoiceStatus.PermissionDenied -> "Serve il permesso microfono."
 	VoiceStatus.Pausing -> "Metto in pausa…"
 	VoiceStatus.Listening -> "Ti ascolto…"
+	VoiceStatus.WakeListening -> "In ascolto per Ehi Lupo…"
+	VoiceStatus.WakeUnavailable -> "Risveglio offline non disponibile"
 	VoiceStatus.Paused -> "In pausa"
 	VoiceStatus.CommandSent -> "Comando inviato"
 	VoiceStatus.PauseFailed -> "Pausa audio non riuscita"
@@ -183,24 +213,25 @@ private fun hasOnDeviceRecognizer(context: Context): Boolean =
 private fun hasMicrophonePermission(context: Context): Boolean =
 	context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
-private suspend fun transcribeOnDevice(context: Context, onListening: () -> Unit): TranscriptResult {
-	if (Build.VERSION.SDK_INT < 31 || !hasOnDeviceRecognizer(context)) return TranscriptResult.Unavailable
-	if (!hasMicrophonePermission(context)) return TranscriptResult.PermissionDenied
-	return try {
-		val recognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
+private suspend fun transcribeOnDevice(context: Context, onListening: () -> Unit): TranscriptResult =
+	VoiceMicrophoneAccess.mutex.withLock {
+		if (Build.VERSION.SDK_INT < 31 || !hasOnDeviceRecognizer(context)) return@withLock TranscriptResult.Unavailable
+		if (!hasMicrophonePermission(context)) return@withLock TranscriptResult.PermissionDenied
 		try {
-			withTimeoutOrNull(12_000) {
-				awaitTranscript(recognizer, onListening)
-			} ?: TranscriptResult.TimedOut
-		} finally {
-			recognizer.destroy()
+			val recognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
+			try {
+				withTimeoutOrNull(12_000) {
+					awaitTranscript(recognizer, onListening)
+				} ?: TranscriptResult.TimedOut
+			} finally {
+				recognizer.destroy()
+			}
+		} catch (_: SecurityException) {
+			TranscriptResult.PermissionDenied
+		} catch (_: UnsupportedOperationException) {
+			TranscriptResult.Unavailable
 		}
-	} catch (_: SecurityException) {
-		TranscriptResult.PermissionDenied
-	} catch (_: UnsupportedOperationException) {
-		TranscriptResult.Unavailable
 	}
-}
 
 private suspend fun awaitTranscript(recognizer: SpeechRecognizer, onListening: () -> Unit): TranscriptResult =
 	suspendCancellableCoroutine { continuation ->

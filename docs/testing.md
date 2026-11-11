@@ -9,6 +9,15 @@ Run the Android build, JVM tests, and lint on Windows:
 python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk
 ```
 
+To package the debug wake detector, download [`vosk-model-small-it-0.22.zip`](https://alphacephei.com/vosk/models/vosk-model-small-it-0.22.zip). The build verifies SHA-256 `9ec65e75861d1c6c2e457cccd932705340dcdf233f5b239f00733b4de0bf3267` before packaging the archive. Pass the local archive path when building:
+
+```powershell
+.\gradlew.bat assembleDebug '-PloopoWakeModel=C:/path/to/vosk-model-small-it-0.22.zip' --console=plain
+python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk
+```
+
+A debug build without the archive reports that offline wake detection is unavailable. For the device check, install the model-enabled APK, start playback, enable **Ehi Lupo**, and follow [the Italian voice steps](voice-ai-architecture.md). Check that an unrelated phrase leaves playback running, **Ehi Lupo** pauses it, **riprendi** resumes it, and cancelling the session stops wake detection.
+
 On Linux and macOS, use `bash gradlew` instead of `gradlew.bat`. JVM boundary tests use Robolectric, not a physical device. Robolectric downloads an Android runtime on the first run and cannot prove vendor MediaCodec or Oboe behavior. See the [Robolectric setup](https://robolectric.org/getting-started/) for its JDK access flags.
 
 Run the host C++ checks with a C++20 compiler and CMake:

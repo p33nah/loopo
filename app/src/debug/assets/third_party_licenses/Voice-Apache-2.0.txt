@@ -1,0 +1,14 @@
+Vosk Android 0.3.75
+Apache License 2.0
+https://github.com/alphacep/vosk-api/blob/master/COPYING
+
+Vosk Italian model (vosk-model-small-it-0.22, when included)
+Apache License 2.0
+https://alphacephei.com/vosk/models
+
+Java Native Access 5.18.1
+Apache-2.0 OR LGPL-2.1-or-later
+Loopo uses Apache-2.0 for this distribution.
+https://github.com/java-native-access/jna/blob/5.18.1/LICENSE
+
+The Apache License 2.0 text is included in this directory as Oboe-Apache-2.0.txt.

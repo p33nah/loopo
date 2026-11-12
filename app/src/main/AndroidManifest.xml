@@ -2,6 +2,9 @@
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+	<uses-permission android:name="android.permission.INTERNET" />
 
 	<application
 		android:allowBackup="false"
@@ -12,7 +15,7 @@
 		<service
 			android:name=".platform.audio.PlaybackService"
 			android:exported="false"
-			android:foregroundServiceType="mediaPlayback" />
+			android:foregroundServiceType="mediaPlayback|microphone" />
 		<activity
 			android:name=".MainActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden"

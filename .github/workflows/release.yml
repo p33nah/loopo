@@ -72,11 +72,17 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 app/build/outputs/apk/release/app-release.apk
           python3 scripts/verify_apk.py app/build/outputs/apk/release/app-release.apk
           cp app/build/outputs/apk/release/app-release.apk "loopo-$RELEASE_TAG.apk"
-          sha256sum "loopo-$RELEASE_TAG.apk" > SHA256SUMS
+      - name: Prepare Italian offline voice model asset
+        run: |
+          curl --fail --location --retry 3 \
+            https://alphacephei.com/vosk/models/vosk-model-small-it-0.22.zip \
+            --output loopo-vosk-it-0.22.zip
+          echo "9ec65e75861d1c6c2e457cccd932705340dcdf233f5b239f00733b4de0bf3267  loopo-vosk-it-0.22.zip" | sha256sum --check
+          sha256sum "loopo-$RELEASE_TAG.apk" loopo-vosk-it-0.22.zip > SHA256SUMS
       - name: Create reviewable draft
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$RELEASE_TAG" "loopo-$RELEASE_TAG.apk" SHA256SUMS LICENSE --draft --verify-tag --title "Loopo $RELEASE_TAG" --generate-notes
+        run: gh release create "$RELEASE_TAG" "loopo-$RELEASE_TAG.apk" loopo-vosk-it-0.22.zip SHA256SUMS LICENSE --draft --verify-tag --title "Loopo $RELEASE_TAG" --generate-notes
       - name: Remove temporary key
         if: always()
         run: rm -f "$RUNNER_TEMP/loopo.jks"

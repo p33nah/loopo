@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 
 
-def verify(apk: Path) -> None:
+def verify(apk: Path, *, allow_model: bool = False) -> None:
     expected_abis = {"armeabi-v7a", "arm64-v8a", "x86_64"}
     with zipfile.ZipFile(apk) as archive, apk.open("rb") as raw:
         native = [entry for entry in archive.infolist() if entry.filename.endswith(".so")]
@@ -15,6 +15,9 @@ def verify(apk: Path) -> None:
         assert actual_abis == expected_abis, f"Unexpected ABI set: {actual_abis}"
         for abi in expected_abis:
             assert f"lib/{abi}/libloopo_native.so" in archive.namelist(), f"Missing engine for {abi}"
+            assert f"lib/{abi}/libvosk.so" in archive.namelist(), f"Missing Vosk runtime for {abi}"
+        if not allow_model:
+            assert not any(name.endswith("loopo-vosk-it-0.22.zip") for name in archive.namelist()), "APK must not bundle the large Vosk model archive"
         for entry in native:
             data = archive.read(entry)
             assert data[:4] == b"\x7fELF", f"Invalid ELF: {entry.filename}"
@@ -48,7 +51,7 @@ def verify(apk: Path) -> None:
                 data_offset = entry.header_offset + 30 + name_length + extra_length
                 assert data_offset % 16384 == 0, f"ZIP alignment: {entry.filename}"
             print(f"Verified {required_alignment // 1024} KB ELF and packaging alignment: {entry.filename}")
-        for notice in ("Signalsmith-Stretch.txt", "Signalsmith-Linear.txt", "Loopo-MIT.txt", "Oboe-Apache-2.0.txt"):
+        for notice in ("Signalsmith-Stretch.txt", "Signalsmith-Linear.txt", "Loopo-MIT.txt", "Oboe-Apache-2.0.txt", "Voice-Apache-2.0.txt"):
             assert f"assets/third_party_licenses/{notice}" in archive.namelist(), f"Missing license: {notice}"
     print(f"Verified {apk.name} for {', '.join(sorted(actual_abis))}")
 
@@ -56,4 +59,6 @@ def verify(apk: Path) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("apk", type=Path)
-    verify(parser.parse_args().apk)
+    parser.add_argument("--allow-model", action="store_true", help="allow the optional Vosk model archive in a debug test APK")
+    arguments = parser.parse_args()
+    verify(arguments.apk, allow_model=arguments.allow_model)

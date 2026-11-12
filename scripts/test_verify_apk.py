@@ -32,7 +32,7 @@ class VerifyApkTest(unittest.TestCase):
         self.addCleanup(self.directory.cleanup)
         self.apk = Path(self.directory.name) / "test.apk"
 
-    def package(self, *, wrong_machine=False, unaligned=False, missing_abi=False, missing_notice=False):
+    def package(self, *, wrong_machine=False, unaligned=False, missing_abi=False, missing_notice=False, missing_vosk=False, with_model=False):
         with zipfile.ZipFile(self.apk, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             for abi in ("armeabi-v7a", "arm64-v8a", "x86_64"):
                 if missing_abi and abi == "x86_64":
@@ -40,9 +40,13 @@ class VerifyApkTest(unittest.TestCase):
                 data = elf(abi, machine=62 if wrong_machine and abi == "arm64-v8a" else None,
                            alignment=4096 if unaligned and abi == "arm64-v8a" else None)
                 archive.writestr(f"lib/{abi}/libloopo_native.so", data)
-            for notice in ("Signalsmith-Stretch.txt", "Signalsmith-Linear.txt", "Loopo-MIT.txt", "Oboe-Apache-2.0.txt"):
+                if not missing_vosk:
+                    archive.writestr(f"lib/{abi}/libvosk.so", data)
+            for notice in ("Signalsmith-Stretch.txt", "Signalsmith-Linear.txt", "Loopo-MIT.txt", "Oboe-Apache-2.0.txt", "Voice-Apache-2.0.txt"):
                 if not missing_notice or notice != "Loopo-MIT.txt":
                     archive.writestr(f"assets/third_party_licenses/{notice}", "license fixture")
+            if with_model:
+                archive.writestr("assets/loopo-vosk-it-0.22.zip", "debug fixture")
 
     def check(self):
         with contextlib.redirect_stdout(io.StringIO()):
@@ -71,6 +75,18 @@ class VerifyApkTest(unittest.TestCase):
         self.package(missing_notice=True)
         with self.assertRaisesRegex(AssertionError, "Missing license: Loopo-MIT"):
             self.check()
+
+    def test_missing_vosk_runtime_fails(self):
+        self.package(missing_vosk=True)
+        with self.assertRaisesRegex(AssertionError, "Missing Vosk runtime"):
+            self.check()
+
+    def test_release_rejects_model_archive_but_debug_flag_allows_it(self):
+        self.package(with_model=True)
+        with self.assertRaisesRegex(AssertionError, "must not bundle"):
+            self.check()
+        with contextlib.redirect_stdout(io.StringIO()):
+            verify(self.apk, allow_model=True)
 
 
 if __name__ == "__main__":

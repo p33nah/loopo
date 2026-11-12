@@ -2,27 +2,30 @@
 
 Use JDK 17, SDK Platform 37.0, Build Tools 36.0.0, NDK 27.0.12077973, and CMake 3.22.1. The Gradle wrapper pins Gradle 9.9.0 and verifies the distribution checksum. Test dependencies are pinned in `app/build.gradle.kts`. Playback accepts mono or stereo PCM at 8 to 192 kHz and rejects unsupported configurations before native allocation.
 
-Run the Android build, JVM tests, and lint on Windows:
+Run JVM tests, lint, debug and release packaging, and instrumentation APK compilation on Windows:
 
 ```powershell
-.\gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest --console=plain
-python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk
+.\gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleRelease assembleDebugAndroidTest --console=plain
+python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk --allow-model
+python scripts/verify_apk.py app/build/outputs/apk/release/app-release-unsigned.apk
 ```
 
-To package the debug wake detector, download [`vosk-model-small-it-0.22.zip`](https://alphacephei.com/vosk/models/vosk-model-small-it-0.22.zip). The build verifies SHA-256 `9ec65e75861d1c6c2e457cccd932705340dcdf233f5b239f00733b4de0bf3267` before packaging the archive. Pass the local archive path when building:
+The release APK contains the Vosk runtime but must not contain `loopo-vosk-it-0.22.zip`. The debug build can bundle the official [`vosk-model-small-it-0.22.zip`](https://alphacephei.com/vosk/models/vosk-model-small-it-0.22.zip) for testing; Gradle verifies SHA-256 `9ec65e75861d1c6c2e457cccd932705340dcdf233f5b239f00733b4de0bf3267`:
 
 ```powershell
 .\gradlew.bat assembleDebug '-PloopoWakeModel=C:/path/to/vosk-model-small-it-0.22.zip' --console=plain
-python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk
+python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk --allow-model
 ```
 
-For the device check, install the model-enabled debug APK, open a track, and grant microphone access if prompted. Confirm the high-contrast **In ascolto per Ehi Lupo…** appears during playback and pause. Confirm that passive wake detection has no board outline.
+The acoustic fixture strategy uses live, consenting Italian speakers on physical devices rather than storing voice recordings in the repository. Record only the prompt, device/room condition, transcript shown by Loopo, resulting rate/play state, and pass/fail; do not retain raw audio. At minimum, repeat **Ehi Lupo** three times, then test **riprendi**, **pausa**, **aumenta la velocità a ottanta**, **aumenta del cinque per cento la velocità**, **rallenta al settanta e poi riprendi**, an unknown phrase, and an out-of-range request. Repeat in quiet and ordinary room noise, at normal speaking distance and with a second speaker when possible. This is manual acoustic evidence; parser and action-plan cases remain deterministic automated tests.
+
+For a debug device check, install the model-enabled APK, open a track, and confirm voice is off without a permission prompt. Tap the wolf/music mark and grant microphone access. Verify the toggle animation and passive **In ascolto per Ehi Lupo…** state. Confirm that passive wake detection has no board outline. With the release APK, verify first-activation download progress, cancel, retry, successful install, then enable voice again in airplane mode to confirm cached offline use. Check insufficient storage and invalid/missing model errors if available.
 
 Say **Ehi Lupo**. Wait for **Ti ascolto…** and the board outline. Then try **riprendi**, **pausa**, **velocità al settanta**, **aumenta a 80 la velocità**, **aumenta la velocità a 80**, **aumenta del 5% la velocità**, and **aumenta la velocità del 5%**. Starting at 70%, confirm that either relative word order selects 75% and leaves playback paused. Starting at 75%, confirm that either absolute word order selects 80% and leaves playback paused. Note the exact recognized transcript in the feedback if a command is rejected.
 
 Say **velocità al settanta e poi riprendi**. Confirm that Play starts after the rate transition. Confirm that speed-only commands stay paused. Try an unknown phrase, a recognition failure or timeout, and an out-of-range relative result. Confirm that playback stays paused and that the board shows an error and the recognized text when available. Confirm that the top status returns to passive wake listening and the board result clears after four seconds. A new command or cancellation clears it sooner. The outline must disappear when recognition ends.
 
-Repeat after pressing Home, with the display locked, and while already paused. Confirm **riprendi** starts playback from each state. Confirm that manual controls and notification Pause cancel an active turn. Change tracks during a turn and confirm that the stale turn cannot resume playback. Close the track and confirm that capture stops. Check that the foreground service and wake lock end when voice is no longer armed. Repeat with speaker and Bluetooth where available. Check the release APK for the absence of debug microphone permissions and voice code. A compiled instrumentation APK is not device evidence.
+Repeat after pressing Home, with the display locked, and while already paused. Confirm **riprendi** starts playback from each state. Confirm that manual controls and notification Pause cancel an active turn. Change tracks during a turn and confirm that the stale turn cannot resume playback. Close the track and confirm that capture stops. Toggle voice off and confirm the microphone indicator and foreground service stop when playback is paused. Repeat with speaker and Bluetooth where available. Voice permission and Vosk code are expected in release; only the large model archive is excluded. A compiled instrumentation APK is not device evidence.
 
 On Linux and macOS, use `bash gradlew` instead of `gradlew.bat`. JVM boundary tests use Robolectric, not a physical device. Robolectric downloads an Android runtime on the first run and cannot prove vendor MediaCodec or Oboe behavior. See the [Robolectric setup](https://robolectric.org/getting-started/) for its JDK access flags.
 

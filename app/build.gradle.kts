@@ -82,6 +82,7 @@ android {
 	buildFeatures {
 		compose = true
 		prefab = true
+		buildConfig = true
 	}
 
 	externalNativeBuild {
@@ -109,7 +110,7 @@ dependencies {
 	debugImplementation("androidx.compose.ui:ui-tooling")
 	debugImplementation(platform(libs.androidx.compose.bom))
 	debugImplementation("androidx.compose.ui:ui-test-manifest")
-	debugImplementation(libs.vosk.android)
+	implementation(libs.vosk.android)
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.robolectric:robolectric:4.17")
 	testImplementation("androidx.test:core:1.7.0")
@@ -141,7 +142,7 @@ abstract class PrepareWakeModel : DefaultTask() {
 	@TaskAction
 	fun prepare() {
 		val directory = assetsDirectory.get().asFile
-		val generatedAsset = directory.resolve("loopo-vosk-it.zip")
+		val generatedAsset = directory.resolve("loopo-vosk-it-0.22.zip")
 		check(!generatedAsset.exists() || generatedAsset.delete()) { "Could not remove the previous wake model asset" }
 		directory.mkdirs()
 		val modelArchive = archive.orNull?.asFile ?: return

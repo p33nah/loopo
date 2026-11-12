@@ -2,7 +2,7 @@
 
 Loopo is an offline Android app for studying music from local audio files. It opens MP3, WAV, and FLAC files through Android's document picker, draws a waveform, supports A/B loops with crossfade, and provides pitch-preserving playback speed from 25% to 200% in 1% steps.
 
-The app uses Kotlin and Jetpack Compose for its interface, Android's media decoders for PCM input, Oboe for low-latency output, and Signalsmith Stretch for time stretching. DSP runs in the producer worker before the output ring buffer. The Oboe callback only reads prepared PCM.
+The app uses Kotlin and Jetpack Compose for its interface, Android's media decoders for PCM input, Oboe for low-latency output, and Signalsmith Stretch for time stretching. DSP runs in the producer worker before the output ring buffer. The Oboe callback only reads prepared PCM. Optional voice commands are Italian-only and use Vosk offline after the model is downloaded the first time the user enables voice.
 
 ## Build
 

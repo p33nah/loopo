@@ -59,6 +59,11 @@ class PlaybackService : Service() {
 				voiceController.setStatus("Ascolto vocale non disponibile")
 			}
 		}
+		fun disarmVoice() {
+			voiceController.close()
+			voiceBecameIdle()
+		}
+		fun voicePermissionDenied(message: String = "Il microfono è necessario per usare i comandi vocali.") = voiceController.setStatus(message)
 		fun cancelVoiceTurn() = voiceController.cancelTurn()
 
 		fun togglePlayback() {
@@ -264,7 +269,10 @@ class PlaybackService : Service() {
 	internal fun voiceScope(): CoroutineScope = scope
 	internal val voiceSession: Session get() = Session()
 	internal val voiceStudy: StudyViewModel get() = study
-	internal fun voiceBecameIdle() { scope.launch { stopWhenIdle() } }
+	internal fun voiceBecameIdle() {
+		if (!taskRemoved && study.playbackFocus.value) startForegroundPlayback()
+		scope.launch { stopWhenIdle() }
+	}
 
 	private fun reportStartFailure(failure: RuntimeException) {
 		if (failure !is IllegalStateException && failure !is SecurityException) throw failure

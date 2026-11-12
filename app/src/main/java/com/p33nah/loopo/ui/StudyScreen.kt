@@ -1,6 +1,7 @@
 package com.p33nah.loopo.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,6 +59,7 @@ import com.p33nah.loopo.domain.audio.PlaybackSnapshot
 import com.p33nah.loopo.domain.waveform.WaveformViewport
 import com.p33nah.loopo.domain.waveform.WaveformPhase
 import com.p33nah.loopo.domain.waveform.WaveformState
+import com.p33nah.loopo.platform.audio.VoiceUiState
 import com.p33nah.loopo.ui.theme.Accent
 import com.p33nah.loopo.ui.theme.Background
 import com.p33nah.loopo.ui.theme.Card
@@ -80,6 +83,7 @@ fun StudyScreen(
 	onSetLoopRegion: (LoopRegion) -> Unit,
 	onSetPlaybackRate: (PlaybackRate) -> Unit,
 	voiceControls: (@Composable () -> Unit)? = null,
+	voiceFeedback: VoiceUiState = VoiceUiState.Idle,
 ) {
 	val readyTrack = (state as? StudyUiState.Ready)?.inspection?.track
 	val trackActionLabel = when (state) {
@@ -110,7 +114,10 @@ fun StudyScreen(
 				onViewportChange = onViewportChange,
 				onSeekToFrame = onSeekToFrame,
 				onSetLoopRegion = onSetLoopRegion,
-				modifier = Modifier.weight(1f),
+				modifier = Modifier.weight(1f)
+					.then(if (voiceFeedback.showCommandListeningBorder) Modifier.border(BorderStroke(2.dp, Accent), RoundedCornerShape(20.dp)) else Modifier)
+					.semantics { stateDescription = if (voiceFeedback.showCommandListeningBorder) "In ascolto del comando" else "" }
+					.testTag("study-board"),
 			)
 			is StudyUiState.Error -> ErrorStudy(state.reason, onOpenTrack, Modifier.weight(1f))
 		}

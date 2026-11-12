@@ -4,8 +4,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class PlaybackVoiceController(service: PlaybackService) : PlaybackVoiceSession {
-	private val empty = MutableStateFlow<String?>(null)
-	override val status: StateFlow<String?> = empty
+	private val empty = MutableStateFlow(VoiceUiState.Idle)
+	override val status: StateFlow<VoiceUiState> = empty
 	override val isArmed: Boolean = false
 	override fun arm() = Unit
 	override fun cancelTurn() = Unit

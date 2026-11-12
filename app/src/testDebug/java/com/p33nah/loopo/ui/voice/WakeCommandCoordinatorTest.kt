@@ -120,7 +120,7 @@ class WakeCommandCoordinatorTest {
 			transcribe = { TranscriptResult.Text("riprendi") },
 			dispatch = { parsed ->
 				commandCount++
-				if (parsed == VoiceCommand.Resume) playing = true
+				if (parsed == VoiceAction.Resume) playing = true
 				true
 			},
 		)

@@ -106,6 +106,21 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 		if (state.value is StudyUiState.Ready) playbackController.play()
 	}
 
+	internal suspend fun applyVoiceRate(rate: PlaybackRate): Boolean {
+		if (state.value !is StudyUiState.Ready) return false
+		playbackController.setPlaybackRate(rate)
+		requestSaveSoon()
+		val applied = playbackController.state.value
+		return applied.playbackRate == rate && applied.error == null && !applied.isPlaying
+	}
+
+	internal suspend fun playForVoice(): Boolean {
+		if (state.value !is StudyUiState.Ready) return false
+		playbackController.play()
+		val result = playbackController.state.value
+		return result.isPlaying && result.error == null
+	}
+
 	internal suspend fun pause(shouldPause: () -> Boolean = { true }): Boolean = playbackController.pause(shouldPause)
 
 	internal fun reportBackgroundPlaybackUnavailable() {

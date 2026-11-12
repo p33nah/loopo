@@ -70,7 +70,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 
 			val trackUri = (state as? StudyUiState.Ready)?.inspection?.track?.uri
 			LoopoTheme {
-				VoiceStudy(session, trackUri, isSessionActive = { playbackSession === session }) { cancelVoice, voiceControls ->
+				VoiceStudy(session, trackUri, isSessionActive = { playbackSession === session }) { cancelVoice, voiceControls, voiceFeedback ->
 					StudyScreen(
 						state = state,
 						playback = playback,
@@ -98,6 +98,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 							viewModel.setPlaybackRate(rate)
 						},
 						voiceControls = voiceControls,
+						voiceFeedback = voiceFeedback,
 					)
 				}
 			}

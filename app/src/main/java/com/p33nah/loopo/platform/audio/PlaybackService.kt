@@ -136,6 +136,7 @@ class PlaybackService : Service() {
 
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 		latestStartId = startId
+		if (intent?.action == ACTION_PLAY || intent?.action == ACTION_VOICE_ARM) taskRemoved = false
 		when (intent?.action) {
 			ACTION_PLAY -> {
 				if (startForegroundPlayback()) runCommand(study::play)
@@ -181,7 +182,7 @@ class PlaybackService : Service() {
 		val startId = latestStartId ?: return
 		if (pendingCommands != 0) return
 		if (!taskRemoved && (study.playbackFocus.value || voiceController.isArmed)) return
-		if (mediaSession.isActive) study.saveSession()
+		if (mediaSession.isActive && !taskRemoved) study.saveSession()
 		if (latestStartId != startId || pendingCommands != 0) return
 		if (!taskRemoved && (study.playbackFocus.value || voiceController.isArmed)) return
 		if (!stopSelfResult(startId)) return

@@ -44,6 +44,7 @@ class PlaybackService : Service() {
 	private lateinit var wakeLock: PowerManager.WakeLock
 	private var latestStartId: Int? = null
 	private var pendingCommands = 0
+	private var taskRemoved = false
 	private val voiceController = PlaybackVoiceController(this)
 
 	internal inner class Session : Binder() {
@@ -127,6 +128,7 @@ class PlaybackService : Service() {
 	override fun onBind(intent: Intent): IBinder = Session()
 
 	override fun onTaskRemoved(rootIntent: Intent?) {
+		taskRemoved = true
 		voiceController.close()
 		runCommand { study.pause() }
 	}
@@ -176,9 +178,11 @@ class PlaybackService : Service() {
 
 	private suspend fun stopWhenIdle() {
 		val startId = latestStartId ?: return
-		if (pendingCommands != 0 || study.playbackFocus.value || voiceController.isArmed) return
+		if (pendingCommands != 0) return
+		if (!taskRemoved && (study.playbackFocus.value || voiceController.isArmed)) return
 		if (mediaSession.isActive) study.saveSession()
-		if (latestStartId != startId || pendingCommands != 0 || study.playbackFocus.value || voiceController.isArmed) return
+		if (latestStartId != startId || pendingCommands != 0) return
+		if (!taskRemoved && (study.playbackFocus.value || voiceController.isArmed)) return
 		if (!stopSelfResult(startId)) return
 		latestStartId = null
 		mediaSession.isActive = false

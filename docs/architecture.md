@@ -23,7 +23,7 @@ flowchart LR
 
 `PlaybackService` retains the study view model while the activity is bound or playback is active. A Play command promotes the service to the Android `mediaPlayback` foreground type before the controller requests audio focus. The service holds a partial wake lock and publishes the current track and Pause action through its media notification. When the activity stops, it saves a checkpoint and leaves playback running. A new activity binds to the same study session while playback continues.
 
-When Android removes Loopo's task from Recents, `PlaybackService.onTaskRemoved()` closes voice capture and pauses playback. The pause releases audio focus, so the existing idle path removes the notification, releases the wake lock, and stops the service. Home and screen lock do not trigger this task-removal path.
+When Android removes Loopo's task from Recents, `PlaybackService.onTaskRemoved()` closes voice capture, marks the service for terminal shutdown, and pauses playback. After pending commands finish, the service removes its notification, releases the wake lock, and stops even if Android has not yet cleared its audio-focus or voice-listening state. Home and screen lock do not trigger this task-removal path.
 
 The controller retains audio focus through seek, rate changes, and temporary focus loss when it can resume playback. When focus is abandoned and playback commands have finished, the service saves the session, removes the notification, and releases the wake lock. A service recreated after process death restores a paused session through the existing storage flow.
 

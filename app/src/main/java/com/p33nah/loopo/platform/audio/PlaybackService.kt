@@ -126,6 +126,11 @@ class PlaybackService : Service() {
 
 	override fun onBind(intent: Intent): IBinder = Session()
 
+	override fun onTaskRemoved(rootIntent: Intent?) {
+		voiceController.close()
+		runCommand { study.pause() }
+	}
+
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 		latestStartId = startId
 		when (intent?.action) {

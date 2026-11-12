@@ -104,14 +104,24 @@ class MainActivityAudioIntegrationTest {
 				task.finishAndRemoveTask()
 
 				waitFor("playback pause after task dismissal") { !study.playbackState.value.isPlaying }
+				waitFor(
+					"playback service stop after task dismissal",
+					diagnostic = {
+						val running = activityManager.getRunningServices(Int.MAX_VALUE)
+							.filter { it.service.className == PlaybackService::class.java.name }
+						val titles = notifications.activeNotifications.map {
+							it.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+						}
+						"runningServices=${running.size}, notificationTitles=$titles"
+					},
+				) {
+					activityManager.getRunningServices(Int.MAX_VALUE).none {
+						it.service.className == PlaybackService::class.java.name
+					}
+				}
 				waitFor("playback notification removal after task dismissal") {
 					notifications.activeNotifications.none {
 						it.notification.extras.getCharSequence(Notification.EXTRA_TITLE) == audioFile.name
-					}
-				}
-				waitFor("playback service stop after task dismissal") {
-					activityManager.getRunningServices(Int.MAX_VALUE).none {
-						it.service.className == PlaybackService::class.java.name
 					}
 				}
 			}

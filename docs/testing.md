@@ -18,7 +18,7 @@ python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk
 
 For the device check, install the model-enabled debug APK, open a track, and grant microphone access if prompted. Confirm the high-contrast **In ascolto per Ehi Lupo…** appears during playback and pause. Confirm that passive wake detection has no board outline.
 
-Say **Ehi Lupo**. Wait for **Ti ascolto…** and the board outline. Then try **riprendi**, **pausa**, **velocità al settanta**, **aumenta a 80 la velocità**, and **aumenta del 5% la velocità**. Starting at 70%, confirm that the relative form selects 75% and leaves playback paused.
+Say **Ehi Lupo**. Wait for **Ti ascolto…** and the board outline. Then try **riprendi**, **pausa**, **velocità al settanta**, **aumenta a 80 la velocità**, **aumenta la velocità a 80**, **aumenta del 5% la velocità**, and **aumenta la velocità del 5%**. Starting at 70%, confirm that either relative word order selects 75% and leaves playback paused. Starting at 75%, confirm that either absolute word order selects 80% and leaves playback paused. Note the exact recognized transcript in the feedback if a command is rejected.
 
 Say **velocità al settanta e poi riprendi**. Confirm that Play starts after the rate transition. Confirm that speed-only commands stay paused. Try an unknown phrase, a recognition failure or timeout, and an out-of-range relative result. Confirm that playback stays paused and that the board shows an error and the recognized text when available. Confirm that the top status returns to passive wake listening and the board result clears after four seconds. A new command or cancellation clears it sooner. The outline must disappear when recognition ends.
 

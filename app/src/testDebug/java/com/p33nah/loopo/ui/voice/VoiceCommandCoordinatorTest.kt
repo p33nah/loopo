@@ -50,6 +50,8 @@ class VoiceCommandCoordinatorTest {
 		assertNull((relative.actions.single() as VoiceAction.AdjustRate).delta.resolve(198))
 		val absolute = ItalianVoiceCommandParser.parse("aumenta a 80 la velocità")!!
 		assertEquals(VoiceAction.SetRate(PlaybackRate(80)), absolute.actions.single())
+		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(80))), ItalianVoiceCommandParser.parse("aumenta la velocità a 80")?.actions)
+		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(80))), ItalianVoiceCommandParser.parse("aumenta la velocità a ottanta per cento")?.actions)
 
 		val actions = mutableListOf<VoiceAction>()
 		val result = VoiceCommandCoordinator(
@@ -146,6 +148,7 @@ class ItalianVoiceCommandParserTest {
 		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(70))), ItalianVoiceCommandParser.parse("rallenta al settanta per cento")?.actions)
 		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(125))), ItalianVoiceCommandParser.parse("velocità al 125%")?.actions)
 		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(83))), ItalianVoiceCommandParser.parse("velocità al ottantatré")?.actions)
+		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(100))), ItalianVoiceCommandParser.parse("velocità al cento")?.actions)
 		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(200))), ItalianVoiceCommandParser.parse("velocità al duecento")?.actions)
 	}
 
@@ -155,5 +158,63 @@ class ItalianVoiceCommandParserTest {
 		assertNull(ItalianVoiceCommandParser.parse("velocità al 24"))
 		assertNull(ItalianVoiceCommandParser.parse("velocità al 201"))
 		assertNull(ItalianVoiceCommandParser.parse("aumenta del 5 la velocità"))
+	}
+
+	@Test
+	fun parsesAbsoluteSpeedByMeaningAcrossWordOrders() {
+		val expected = listOf(VoiceAction.SetRate(PlaybackRate(80)))
+		for (phrase in listOf(
+			"aumenta la velocità a 80",
+			"aumenta a 80 la velocità",
+			"aumenta a ottanta la velocità",
+			"aumenta la velocità a ottanta per cento",
+			"velocità all’ottanta",
+			"porta la velocità all'ottanta per cento",
+		)) {
+			assertEquals(phrase, expected, ItalianVoiceCommandParser.parse(phrase)?.actions)
+		}
+	}
+
+	@Test
+	fun parsesRelativeSpeedInEitherOrderAndKeepsPercentUnit() {
+		val increase = VoiceAction.AdjustRate(RateDeltaPercent.from(5)!!)
+		val decrease = VoiceAction.AdjustRate(RateDeltaPercent.from(-10)!!)
+		for (phrase in listOf("aumenta del 5% la velocità", "aumenta la velocità del cinque per cento")) {
+			assertEquals(phrase, listOf(increase), ItalianVoiceCommandParser.parse(phrase)?.actions)
+		}
+		assertEquals(
+			listOf(VoiceAction.AdjustRate(RateDeltaPercent.from(100)!!)),
+			ItalianVoiceCommandParser.parse("aumenta del cento per cento la velocità")?.actions,
+		)
+		for (phrase in listOf("diminuisci di 10 per cento la velocità", "diminuisci la velocità del dieci per cento")) {
+			assertEquals(phrase, listOf(decrease), ItalianVoiceCommandParser.parse(phrase)?.actions)
+		}
+	}
+
+	@Test
+	fun rejectsAmbiguousOrUnsafeSpeedUtterancesAsAWhole() {
+		for (phrase in listOf(
+			"non aumentare la velocità a 80",
+			"aumenta la velocità forse a 80",
+			"aumenta la velocità a 80 o 90",
+			"aumenta la velocità a 80 e diminuisci di 5 per cento",
+			"aumenta la velocità a 80 e poi pausa",
+			"aumenta la velocità a 80 riprendi",
+			"aumenta la velocità a 80 con il loop",
+			"aumenta la velocità del 5",
+			"aumenta 80 la velocità",
+			"velocità a la 80",
+			"velocità a 80 la la",
+			"velocità 80",
+			"velocità al -80",
+			"aumenta del +5% la velocità",
+			"velocità al 201",
+		)) {
+			assertNull(phrase, ItalianVoiceCommandParser.parse(phrase))
+		}
+		assertEquals(
+			listOf(VoiceAction.SetRate(PlaybackRate(80)), VoiceAction.Resume),
+			ItalianVoiceCommandParser.parse("aumenta la velocità a 80 e poi continua")?.actions,
+		)
 	}
 }

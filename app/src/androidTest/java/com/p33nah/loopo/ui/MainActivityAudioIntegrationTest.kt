@@ -1,5 +1,6 @@
 package com.p33nah.loopo.ui
 
+import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Intent
@@ -70,6 +71,60 @@ class MainActivityAudioIntegrationTest {
 				notification.actions.single().actionIntent.send()
 				waitFor("notification pause") { !reboundStudy.playbackState.value.isPlaying }
 				waitFor("playback notification removed after pause") { notifications.activeNotifications.isEmpty() }
+			}
+		} finally {
+			context.stopService(Intent(context, PlaybackService::class.java))
+			audioFile.delete()
+		}
+	}
+
+	@Test
+	fun removingTheAppTaskStopsPlaybackAndForegroundService() {
+		val context = InstrumentationRegistry.getInstrumentation().targetContext
+		val audioFile = WavFixture.pcmFile(context, "dismiss-task.wav", frames = 480_000)
+		val notifications = context.getSystemService(NotificationManager::class.java)
+		val activityManager = context.getSystemService(ActivityManager::class.java)
+		try {
+			ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+				val session = awaitPlaybackSession(scenario)
+				val study = session.study
+				scenario.onActivity { study.openTrack(Uri.fromFile(audioFile), hasPersistedAccess = false) }
+				waitFor("task-dismissal playback fixture to load") { study.state.value is StudyUiState.Ready }
+				session.requestPlay()
+				waitFor("playback start before task dismissal") { study.playbackState.value.isPlaying }
+				waitFor("foreground playback notification") {
+					notifications.activeNotifications.any {
+						it.notification.extras.getCharSequence(Notification.EXTRA_TITLE) == audioFile.name
+					}
+				}
+
+				val task = activityManager.appTasks.first {
+					it.taskInfo?.baseIntent?.component?.className == MainActivity::class.java.name
+				}
+				task.finishAndRemoveTask()
+
+				waitFor("service task-removal callback") { session.isTaskRemoved }
+				waitFor("playback pause after task dismissal") { !study.playbackState.value.isPlaying }
+				waitFor(
+					"playback service stop after task dismissal",
+					diagnostic = {
+						val running = activityManager.getRunningServices(Int.MAX_VALUE)
+							.filter { it.service.className == PlaybackService::class.java.name }
+						val titles = notifications.activeNotifications.map {
+							it.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+						}
+						"taskRemoved=${session.isTaskRemoved}, runningServices=${running.size}, notificationTitles=$titles"
+					},
+				) {
+					activityManager.getRunningServices(Int.MAX_VALUE).none {
+						it.service.className == PlaybackService::class.java.name
+					}
+				}
+				waitFor("playback notification removal after task dismissal") {
+					notifications.activeNotifications.none {
+						it.notification.extras.getCharSequence(Notification.EXTRA_TITLE) == audioFile.name
+					}
+				}
 			}
 		} finally {
 			context.stopService(Intent(context, PlaybackService::class.java))

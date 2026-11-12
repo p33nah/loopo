@@ -44,11 +44,13 @@ class PlaybackService : Service() {
 	private lateinit var wakeLock: PowerManager.WakeLock
 	private var latestStartId: Int? = null
 	private var pendingCommands = 0
+	private var taskRemoved = false
 	private val voiceController = PlaybackVoiceController(this)
 
 	internal inner class Session : Binder() {
 		val study: StudyViewModel get() = this@PlaybackService.study
 		val trackRevision: Long get() = study.trackGeneration
+		val isTaskRemoved: Boolean get() = taskRemoved
 		val voiceStatus: StateFlow<String?> get() = voiceController.status
 		fun armVoice() {
 			try {
@@ -126,8 +128,15 @@ class PlaybackService : Service() {
 
 	override fun onBind(intent: Intent): IBinder = Session()
 
+	override fun onTaskRemoved(rootIntent: Intent?) {
+		taskRemoved = true
+		voiceController.close()
+		runCommand { study.pause() }
+	}
+
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 		latestStartId = startId
+		if (intent?.action == ACTION_PLAY || intent?.action == ACTION_VOICE_ARM) taskRemoved = false
 		when (intent?.action) {
 			ACTION_PLAY -> {
 				if (startForegroundPlayback()) runCommand(study::play)
@@ -171,10 +180,12 @@ class PlaybackService : Service() {
 
 	private suspend fun stopWhenIdle() {
 		val startId = latestStartId ?: return
-		if (pendingCommands != 0 || study.playbackFocus.value || voiceController.isArmed) return
-		if (mediaSession.isActive) study.saveSession()
-		if (latestStartId != startId || pendingCommands != 0 || study.playbackFocus.value || voiceController.isArmed) return
-		if (!stopSelfResult(startId)) return
+		if (pendingCommands != 0) return
+		if (!taskRemoved && (study.playbackFocus.value || voiceController.isArmed)) return
+		if (mediaSession.isActive && !taskRemoved) study.saveSession()
+		if (latestStartId != startId || pendingCommands != 0) return
+		if (!taskRemoved && (study.playbackFocus.value || voiceController.isArmed)) return
+		if (taskRemoved) stopSelf() else if (!stopSelfResult(startId)) return
 		latestStartId = null
 		mediaSession.isActive = false
 		stopForeground(STOP_FOREGROUND_REMOVE)

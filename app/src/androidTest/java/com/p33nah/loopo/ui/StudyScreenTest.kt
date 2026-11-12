@@ -1,5 +1,6 @@
 package com.p33nah.loopo.ui
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -124,6 +125,7 @@ class StudyScreenTest {
 						),
 					),
 					viewport = WaveformViewport.full(track.durationFrames),
+					voiceControls = { Text(voiceFeedback.message.orEmpty()) },
 					onOpenTrack = {},
 					onViewportChange = {},
 					onTogglePlayback = { toggles += Unit },

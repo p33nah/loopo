@@ -7,6 +7,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,13 +27,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.p33nah.loopo.platform.audio.PlaybackService
+import com.p33nah.loopo.platform.audio.VoiceUiState
+import com.p33nah.loopo.platform.audio.VoiceTone
+import com.p33nah.loopo.ui.theme.Accent
+import com.p33nah.loopo.ui.theme.TextPrimary
 
 @Composable
 internal fun VoiceStudy(
 	session: PlaybackService.Session,
 	trackUri: Uri?,
 	isSessionActive: () -> Boolean,
-	content: @Composable (cancelVoice: () -> Unit, voiceControls: (@Composable () -> Unit)?) -> Unit,
+	content: @Composable (cancelVoice: () -> Unit, voiceControls: (@Composable () -> Unit)?, feedback: VoiceUiState) -> Unit,
 ) {
 	val context = LocalContext.current
 	val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -62,17 +68,22 @@ internal fun VoiceStudy(
 
 	val voiceControls: (@Composable () -> Unit)? = if (trackUri == null) null else {
 		{
-			Text(
-				text = status ?: when {
-					!modelAvailable -> "Risveglio offline non disponibile"
-					!hasOnDeviceRecognizer(context) -> "Voce offline in italiano non disponibile"
-					!hasMicrophonePermission(context) -> "Consenti il microfono per attivare i comandi vocali."
-					else -> "Avvio ascolto vocale…"
-				},
-				style = MaterialTheme.typography.labelMedium,
-				modifier = Modifier.widthIn(max = 188.dp).semantics { liveRegion = LiveRegionMode.Polite },
-			)
+			Column(Modifier.widthIn(max = 210.dp)) {
+				Text(
+					text = status.message ?: when {
+						!modelAvailable -> "Risveglio offline non disponibile"
+						!hasOnDeviceRecognizer(context) -> "Voce offline in italiano non disponibile"
+						!hasMicrophonePermission(context) -> "Consenti il microfono per attivare i comandi vocali."
+						else -> "Avvio ascolto vocale…"
+					},
+					style = MaterialTheme.typography.labelMedium,
+					color = if (status.tone == VoiceTone.Error) Accent else TextPrimary,
+					maxLines = 2,
+					overflow = TextOverflow.Ellipsis,
+					modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+				)
+			}
 		}
 	}
-	content({ session.cancelVoiceTurn() }, voiceControls)
+	content({ session.cancelVoiceTurn() }, voiceControls, status)
 }

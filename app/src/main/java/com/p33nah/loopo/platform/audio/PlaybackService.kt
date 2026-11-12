@@ -51,7 +51,7 @@ class PlaybackService : Service() {
 		val study: StudyViewModel get() = this@PlaybackService.study
 		val trackRevision: Long get() = study.trackGeneration
 		val isTaskRemoved: Boolean get() = taskRemoved
-		val voiceStatus: StateFlow<String?> get() = voiceController.status
+		val voiceStatus: StateFlow<VoiceUiState> get() = voiceController.status
 		fun armVoice() {
 			try {
 				startService(commandIntent(ACTION_VOICE_ARM))
@@ -77,13 +77,12 @@ class PlaybackService : Service() {
 			}
 		}
 
-		fun requestVoicePlay() {
-			runCommand(study::play)
+		suspend fun requestVoicePlay(isCurrent: () -> Boolean): Boolean = runVoiceCommand {
+			if (isCurrent()) study.playForVoice() else false
 		}
 
-		fun setVoiceRate(rate: com.p33nah.loopo.domain.model.PlaybackRate) {
-			runCommand { study.setPlaybackRate(rate) }
-		}
+		suspend fun setVoiceRate(rate: com.p33nah.loopo.domain.model.PlaybackRate, isCurrent: () -> Boolean): Boolean =
+			runVoiceCommand { if (isCurrent()) study.applyVoiceRate(rate) else false }
 
 		suspend fun pauseForVoice(isCurrent: () -> Boolean = { true }): Boolean = withContext(Dispatchers.Main.immediate) {
 			val result = CompletableDeferred<Boolean>()
@@ -91,6 +90,15 @@ class PlaybackService : Service() {
 			val job = runCommand {
 				result.complete(study.pause { request.isActive && isCurrent() })
 			}
+			job.invokeOnCompletion { failure ->
+				if (failure != null) result.completeExceptionally(failure)
+			}
+			result.await()
+		}
+
+		private suspend fun <T> runVoiceCommand(command: suspend () -> T): T = withContext(Dispatchers.Main.immediate) {
+			val result = CompletableDeferred<T>()
+			val job = runCommand { result.complete(command()) }
 			job.invokeOnCompletion { failure ->
 				if (failure != null) result.completeExceptionally(failure)
 			}

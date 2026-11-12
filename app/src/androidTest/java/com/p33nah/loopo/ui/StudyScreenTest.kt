@@ -1,5 +1,6 @@
 package com.p33nah.loopo.ui
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +12,9 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,6 +30,9 @@ import com.p33nah.loopo.domain.waveform.WaveformData
 import com.p33nah.loopo.domain.waveform.WaveformLevel
 import com.p33nah.loopo.domain.waveform.WaveformState
 import com.p33nah.loopo.domain.waveform.WaveformViewport
+import com.p33nah.loopo.platform.audio.VoicePhase
+import com.p33nah.loopo.platform.audio.VoiceTone
+import com.p33nah.loopo.platform.audio.VoiceUiState
 import com.p33nah.loopo.ui.theme.LoopoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -82,6 +88,7 @@ class StudyScreenTest {
 
 	@Test
 	fun readyTransportLoopSeekAndRateExposeCurrentStateAndCallbacks() {
+		var voiceFeedback by mutableStateOf(VoiceUiState.Idle)
 		val track = TrackInfo(
 			id = TrackId("test-track"),
 			uri = android.net.Uri.parse("content://test/audio.wav"),
@@ -101,6 +108,7 @@ class StudyScreenTest {
 			LoopoTheme {
 				StudyScreen(
 					state = StudyUiState.Ready(TrackInspection.Ready(track, true)),
+					voiceFeedback = voiceFeedback,
 					playback = PlaybackSnapshot(
 						positionFrame = 4_800,
 						isPlaying = true,
@@ -117,6 +125,7 @@ class StudyScreenTest {
 						),
 					),
 					viewport = WaveformViewport.full(track.durationFrames),
+					voiceControls = { Text(voiceFeedback.message.orEmpty()) },
 					onOpenTrack = {},
 					onViewportChange = {},
 					onTogglePlayback = { toggles += Unit },
@@ -128,6 +137,27 @@ class StudyScreenTest {
 		}
 
 		compose.onNodeWithText("prova.wav").assertIsDisplayed()
+		voiceFeedback = VoiceUiState(VoicePhase.Listening, "Ti ascolto…", VoiceTone.Neutral)
+		compose.waitForIdle()
+		compose.onNodeWithTag("study-board").assert(
+			SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "In ascolto del comando"),
+		)
+		voiceFeedback = VoiceUiState(
+			phase = VoicePhase.WakeListening,
+			message = "In ascolto per Ehi Lupo…",
+			resultMessage = "Comando non riconosciuto. Ho sentito: «prova».",
+			resultTone = VoiceTone.Error,
+		)
+		compose.waitForIdle()
+		compose.onNodeWithTag("study-board").assert(
+			SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, ""),
+		)
+		compose.onNodeWithTag("voice-result-banner").assertIsDisplayed()
+		compose.onNodeWithText("Comando non riconosciuto. Ho sentito: «prova».").assertIsDisplayed()
+		compose.onNodeWithText("In ascolto per Ehi Lupo…").assertIsDisplayed()
+		voiceFeedback = voiceFeedback.clearResult()
+		compose.waitForIdle()
+		compose.onAllNodesWithTag("voice-result-banner").assertCountEquals(0)
 		compose.onNodeWithText("100% · 1.00x").assertIsDisplayed()
 		compose.onNodeWithText("Pausa").performClick()
 		assertEquals(1, toggles.size)

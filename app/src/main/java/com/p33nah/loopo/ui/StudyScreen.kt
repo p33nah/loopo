@@ -43,10 +43,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.p33nah.loopo.R
@@ -60,6 +63,7 @@ import com.p33nah.loopo.domain.waveform.WaveformViewport
 import com.p33nah.loopo.domain.waveform.WaveformPhase
 import com.p33nah.loopo.domain.waveform.WaveformState
 import com.p33nah.loopo.platform.audio.VoiceUiState
+import com.p33nah.loopo.platform.audio.VoiceTone
 import com.p33nah.loopo.ui.theme.Accent
 import com.p33nah.loopo.ui.theme.Background
 import com.p33nah.loopo.ui.theme.Card
@@ -111,6 +115,7 @@ fun StudyScreen(
 				waveform = waveform,
 				playback = playback,
 				viewport = viewport,
+				voiceFeedback = voiceFeedback,
 				onViewportChange = onViewportChange,
 				onSeekToFrame = onSeekToFrame,
 				onSetLoopRegion = onSetLoopRegion,
@@ -249,6 +254,7 @@ private fun TrackStudy(
 	waveform: WaveformState,
 	playback: PlaybackSnapshot,
 	viewport: WaveformViewport?,
+	voiceFeedback: VoiceUiState,
 	onViewportChange: (WaveformViewport) -> Unit,
 	onSeekToFrame: (Long) -> Unit,
 	onSetLoopRegion: (LoopRegion) -> Unit,
@@ -261,6 +267,27 @@ private fun TrackStudy(
 		if (!playback.isLoopCommandPending) draftLoop = playback.loopRegion ?: defaultLoop
 	}
 	Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+		voiceFeedback.resultMessage?.let { result ->
+			val bannerColor = when (voiceFeedback.resultTone) {
+				VoiceTone.Error -> Accent.copy(alpha = 0.18f)
+				VoiceTone.Success -> Color(0xFF174A3A)
+				VoiceTone.Neutral -> Card
+			}
+			Surface(
+				color = bannerColor,
+				shape = RoundedCornerShape(12.dp),
+				modifier = Modifier.fillMaxWidth().testTag("voice-result-banner"),
+			) {
+				Text(
+					text = result,
+					color = TextPrimary,
+					fontSize = 14.sp,
+					fontWeight = FontWeight.Medium,
+					modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+						.semantics { liveRegion = LiveRegionMode.Polite },
+				)
+			}
+		}
 		Surface(color = Card, shape = RoundedCornerShape(17.dp), modifier = Modifier.fillMaxWidth().weight(1f)) {
 			Box(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
 				WaveformCanvas(

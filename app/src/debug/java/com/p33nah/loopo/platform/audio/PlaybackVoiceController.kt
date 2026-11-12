@@ -15,6 +15,7 @@ import com.p33nah.loopo.ui.voice.transcribeOnDevice
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -27,6 +28,7 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 	private val mutableStatus = MutableStateFlow(VoiceUiState.Idle)
 	private val cancellationRevision = MutableStateFlow(0L)
 	private var job: Job? = null
+	private var feedbackExpiryJob: Job? = null
 	private var sessionToken = 0L
 	@Volatile private var armed = false
 
@@ -52,22 +54,33 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 			setFeedback(VoicePhase.Feedback, "Ascolto vocale non disponibile", VoiceTone.Error)
 			return
 		}
-		setFeedback(VoicePhase.WakeListening, "In ascolto per Ehi Lupo…")
+		mutableStatus.value = VoiceUiState(VoicePhase.WakeListening, "In ascolto per Ehi Lupo…")
 		startWatching(token)
 	}
 
-	override fun cancelTurn() { cancellationRevision.value += 1 }
+	override fun cancelTurn() {
+		cancellationRevision.value += 1
+		clearTransientResult()
+	}
 
 	override fun close() {
 		armed = false
 		sessionToken += 1
 		job?.cancel()
 		job = null
+		feedbackExpiryJob?.cancel()
+		feedbackExpiryJob = null
 		mutableStatus.value = VoiceUiState.Idle
 	}
 
 	override fun setStatus(value: String?) {
-		mutableStatus.value = if (value == null) VoiceUiState.Idle else VoiceUiState(VoicePhase.Feedback, value, VoiceTone.Error)
+		if (value == null) {
+			feedbackExpiryJob?.cancel()
+			feedbackExpiryJob = null
+			mutableStatus.value = VoiceUiState.Idle
+		} else {
+			setFeedback(VoicePhase.Feedback, value, VoiceTone.Error)
+		}
 	}
 
 	private fun startWatching(token: Long) {
@@ -143,10 +156,6 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 
 	private fun showStatus(status: VoiceStatus) {
 		val previous = mutableStatus.value
-		if (status == VoiceStatus.WakeListening && previous.phase == VoicePhase.Feedback) {
-			mutableStatus.value = previous.copy(phase = VoicePhase.WakeListening)
-			return
-		}
 		val message = when (status) {
 			VoiceStatus.PermissionDenied -> "Consenti il microfono nelle impostazioni."
 			VoiceStatus.Pausing -> "Metto in pausa…"
@@ -164,14 +173,16 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 			VoiceStatus.Failed -> "Il comando non è stato applicato. La riproduzione resta in pausa."
 			VoiceStatus.Cancelled -> "Comando annullato."
 		}
-		val transcript = previous.recognizedTranscript
+		val transcript = if (status == VoiceStatus.Pausing) null else previous.recognizedTranscript
 		val isError = status in setOf(VoiceStatus.PermissionDenied, VoiceStatus.WakeFailed, VoiceStatus.WakeUnavailable,
 			VoiceStatus.PauseFailed, VoiceStatus.TimedOut, VoiceStatus.Unavailable, VoiceStatus.Unrecognized,
 			VoiceStatus.Failed, VoiceStatus.Cancelled)
-		val finalMessage = when (status) {
+		val resultMessage = when (status) {
 			VoiceStatus.CommandSent, VoiceStatus.Paused -> transcript?.let { "Ho sentito: «$it». $message." } ?: message
 			VoiceStatus.Unrecognized, VoiceStatus.Failed, VoiceStatus.TimedOut -> transcript?.let { "$message Ho sentito: «$it»." } ?: message
-			else -> message
+			VoiceStatus.WakeFailed, VoiceStatus.WakeUnavailable, VoiceStatus.PauseFailed,
+			VoiceStatus.Unavailable, VoiceStatus.PermissionDenied, VoiceStatus.Cancelled -> message
+			else -> null
 		}
 		val phase = when (status) {
 			VoiceStatus.WakeListening -> VoicePhase.WakeListening
@@ -182,11 +193,49 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 			VoiceStatus.WakeUnavailable, VoiceStatus.WakeFailed, VoiceStatus.Unavailable,
 			VoiceStatus.PermissionDenied, VoiceStatus.Unrecognized, VoiceStatus.Failed, VoiceStatus.Cancelled -> VoicePhase.Feedback
 		}
-		setFeedback(phase, finalMessage, if (isError) VoiceTone.Error else if (status == VoiceStatus.CommandSent || status == VoiceStatus.Paused) VoiceTone.Success else VoiceTone.Neutral,
-			transcript)
+		val tone = if (isError) VoiceTone.Error else if (status == VoiceStatus.CommandSent || status == VoiceStatus.Paused) VoiceTone.Success else VoiceTone.Neutral
+		mutableStatus.value = previous.withPhase(
+			phase = phase,
+			message = message,
+			tone = if (phase == VoicePhase.Feedback) tone else VoiceTone.Neutral,
+		).copy(
+			recognizedTranscript = transcript,
+			resultMessage = if (status == VoiceStatus.WakeListening) previous.resultMessage else resultMessage,
+			resultTone = if (status == VoiceStatus.WakeListening) previous.resultTone else tone,
+		)
+		when {
+			resultMessage != null -> showTransientResult(resultMessage)
+			status == VoiceStatus.WakeListening -> Unit
+			else -> clearTransientResult()
+		}
 	}
 
 	private fun setFeedback(phase: VoicePhase, message: String, tone: VoiceTone = VoiceTone.Neutral, transcript: String? = null) {
-		mutableStatus.value = VoiceUiState(phase, message, tone, transcript)
+		mutableStatus.value = VoiceUiState(
+			phase = phase,
+			message = message,
+			tone = tone,
+			recognizedTranscript = transcript,
+			resultMessage = message,
+			resultTone = tone,
+		)
+		showTransientResult(message)
 	}
+
+	private fun showTransientResult(message: String) {
+		feedbackExpiryJob?.cancel()
+		feedbackExpiryJob = service.voiceScope().launch {
+			delay(RESULT_DURATION_MS)
+			val current = mutableStatus.value
+			if (current.resultMessage == message) mutableStatus.value = current.clearResult()
+		}
+	}
+
+	private fun clearTransientResult() {
+		feedbackExpiryJob?.cancel()
+		feedbackExpiryJob = null
+		mutableStatus.value = mutableStatus.value.clearResult()
+	}
+
+	private companion object { const val RESULT_DURATION_MS = 4_000L }
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -139,11 +140,22 @@ class StudyScreenTest {
 		compose.onNodeWithTag("study-board").assert(
 			SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "In ascolto del comando"),
 		)
-		voiceFeedback = VoiceUiState(VoicePhase.WakeListening, "Comando non riconosciuto", VoiceTone.Error)
+		voiceFeedback = VoiceUiState(
+			phase = VoicePhase.WakeListening,
+			message = "In ascolto per Ehi Lupo…",
+			resultMessage = "Comando non riconosciuto. Ho sentito: «prova».",
+			resultTone = VoiceTone.Error,
+		)
 		compose.waitForIdle()
 		compose.onNodeWithTag("study-board").assert(
 			SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, ""),
 		)
+		compose.onNodeWithTag("voice-result-banner").assertIsDisplayed()
+		compose.onNodeWithText("Comando non riconosciuto. Ho sentito: «prova».").assertIsDisplayed()
+		compose.onNodeWithText("In ascolto per Ehi Lupo…").assertIsDisplayed()
+		voiceFeedback = voiceFeedback.clearResult()
+		compose.waitForIdle()
+		compose.onAllNodesWithTag("voice-result-banner").assertCountEquals(0)
 		compose.onNodeWithText("100% · 1.00x").assertIsDisplayed()
 		compose.onNodeWithText("Pausa").performClick()
 		assertEquals(1, toggles.size)

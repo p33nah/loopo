@@ -98,9 +98,9 @@ class MainActivityAudioIntegrationTest {
 					}
 				}
 
-				var taskId = -1
-				scenario.onActivity { taskId = it.taskId }
-				val task = activityManager.appTasks.first { it.taskInfo?.taskId == taskId }
+				val task = activityManager.appTasks.first {
+					it.taskInfo?.baseIntent?.component?.className == MainActivity::class.java.name
+				}
 				task.finishAndRemoveTask()
 
 				waitFor("playback pause after task dismissal") { !study.playbackState.value.isPlaying }

@@ -50,6 +50,7 @@ class PlaybackService : Service() {
 	internal inner class Session : Binder() {
 		val study: StudyViewModel get() = this@PlaybackService.study
 		val trackRevision: Long get() = study.trackGeneration
+		val isTaskRemoved: Boolean get() = taskRemoved
 		val voiceStatus: StateFlow<String?> get() = voiceController.status
 		fun armVoice() {
 			try {

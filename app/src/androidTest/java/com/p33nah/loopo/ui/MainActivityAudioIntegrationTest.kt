@@ -103,6 +103,7 @@ class MainActivityAudioIntegrationTest {
 				}
 				task.finishAndRemoveTask()
 
+				waitFor("service task-removal callback") { session.isTaskRemoved }
 				waitFor("playback pause after task dismissal") { !study.playbackState.value.isPlaying }
 				waitFor(
 					"playback service stop after task dismissal",
@@ -112,7 +113,7 @@ class MainActivityAudioIntegrationTest {
 						val titles = notifications.activeNotifications.map {
 							it.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
 						}
-						"runningServices=${running.size}, notificationTitles=$titles"
+						"taskRemoved=${session.isTaskRemoved}, runningServices=${running.size}, notificationTitles=$titles"
 					},
 				) {
 					activityManager.getRunningServices(Int.MAX_VALUE).none {

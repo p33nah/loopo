@@ -113,8 +113,7 @@ class MainActivityAudioIntegrationTest {
 						val titles = notifications.activeNotifications.map {
 							it.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
 						}
-						"taskRemoved=${session.isTaskRemoved}, stopState=${session.taskRemovalStopState}, " +
-							"runningServices=${running.size}, notificationTitles=$titles"
+						"taskRemoved=${session.isTaskRemoved}, runningServices=${running.size}, notificationTitles=$titles"
 					},
 				) {
 					activityManager.getRunningServices(Int.MAX_VALUE).none {

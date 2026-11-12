@@ -45,14 +45,12 @@ class PlaybackService : Service() {
 	private var latestStartId: Int? = null
 	private var pendingCommands = 0
 	private var taskRemoved = false
-	private var taskRemovalStopState = "not requested"
 	private val voiceController = PlaybackVoiceController(this)
 
 	internal inner class Session : Binder() {
 		val study: StudyViewModel get() = this@PlaybackService.study
 		val trackRevision: Long get() = study.trackGeneration
 		val isTaskRemoved: Boolean get() = taskRemoved
-		val taskRemovalStopState: String get() = this@PlaybackService.taskRemovalStopState
 		val voiceStatus: StateFlow<String?> get() = voiceController.status
 		fun armVoice() {
 			try {
@@ -132,7 +130,6 @@ class PlaybackService : Service() {
 
 	override fun onTaskRemoved(rootIntent: Intent?) {
 		taskRemoved = true
-		taskRemovalStopState = "requested"
 		voiceController.close()
 		runCommand { study.pause() }
 	}
@@ -182,29 +179,17 @@ class PlaybackService : Service() {
 	}
 
 	private suspend fun stopWhenIdle() {
-		val startId = latestStartId ?: run {
-			if (taskRemoved) taskRemovalStopState = "missing start ID"
-			return
-		}
-		if (pendingCommands != 0) {
-			if (taskRemoved) taskRemovalStopState = "pending commands: $pendingCommands"
-			return
-		}
+		val startId = latestStartId ?: return
+		if (pendingCommands != 0) return
 		if (!taskRemoved && (study.playbackFocus.value || voiceController.isArmed)) return
 		if (mediaSession.isActive && !taskRemoved) study.saveSession()
-		if (latestStartId != startId || pendingCommands != 0) {
-			if (taskRemoved) taskRemovalStopState = "start ID or command changed"
-			return
-		}
+		if (latestStartId != startId || pendingCommands != 0) return
 		if (!taskRemoved && (study.playbackFocus.value || voiceController.isArmed)) return
-		val stopped = stopSelfResult(startId)
-		if (taskRemoved) taskRemovalStopState = "stopSelfResult=$stopped"
-		if (!stopped) return
+		if (taskRemoved) stopSelf() else if (!stopSelfResult(startId)) return
 		latestStartId = null
 		mediaSession.isActive = false
 		stopForeground(STOP_FOREGROUND_REMOVE)
 		if (wakeLock.isHeld) wakeLock.release()
-		if (taskRemoved) taskRemovalStopState = "foreground removed"
 	}
 
 	@SuppressLint("WakelockTimeout")

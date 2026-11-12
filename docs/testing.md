@@ -47,6 +47,48 @@ bash gradlew connectedDebugAndroidTest --console=plain
 
 CI runs x86_64 Android emulators at API 26 and API 36. Device integration tests must run the native library as well as the Kotlin code. Generated fixture input through a view-model entry point exercises application integration, but does not exercise the external document-picker UI or persisted provider grants.
 
+## Android 15 16 KB runtime
+
+APK alignment and runtime behavior are separate checks. Android's [16 KB page-size guidance](https://developer.android.com/guide/practices/page-sizes) describes the runtime requirement and the Android 15 x86_64 `google_apis_ps16k` emulator image. Use this image to exercise native loading and app behavior under a 16 KB kernel; a virtual audio HAL failure means it cannot verify audible output.
+
+Install the emulator and image, create an AVD, and start it:
+
+```powershell
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+$env:PATH = "$env:ANDROID_HOME\cmdline-tools\latest\bin;$env:ANDROID_HOME\platform-tools;$env:ANDROID_HOME\emulator;$env:PATH"
+sdkmanager.bat "emulator" "system-images;android-35;google_apis_ps16k;x86_64"
+avdmanager.bat create avd --name Loopo16kApi35 --device pixel_6 --package "system-images;android-35;google_apis_ps16k;x86_64"
+emulator.exe -avd Loopo16kApi35 -no-window -no-boot-anim -no-snapshot -gpu swiftshader_indirect
+```
+
+With the emulator booted, select only that device when other ADB devices are connected, then record its runtime identity before installing/running tests:
+
+```powershell
+$env:ANDROID_SERIAL = "emulator-5554"
+adb -s $env:ANDROID_SERIAL shell getconf PAGE_SIZE
+adb -s $env:ANDROID_SERIAL shell getprop ro.build.version.release
+adb -s $env:ANDROID_SERIAL shell getprop ro.build.version.sdk
+adb -s $env:ANDROID_SERIAL shell getprop ro.product.cpu.abi
+adb -s $env:ANDROID_SERIAL shell getprop ro.build.fingerprint
+.\gradlew.bat connectedDebugAndroidTest --console=plain
+```
+
+`getconf PAGE_SIZE` must print `16384`. Replace `emulator-5554` with the actual ADB serial. The device selector matters: without `ANDROID_SERIAL`, Gradle runs connected tests on every available device. For an isolated instrumentation case, pass its fully qualified class and method:
+
+```powershell
+.\gradlew.bat connectedDebugAndroidTest `
+  '-Pandroid.testInstrumentationRunnerArguments.class=com.p33nah.loopo.platform.audio.NativePlaybackBridgeTest' `
+  --console=plain
+```
+
+Check packaging separately against the same APK:
+
+```powershell
+python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk --allow-model
+```
+
+This verifier reports ELF segment and uncompressed ZIP alignment by ABI. Preserve the commit/tree, APK SHA-256, image fingerprint, page-size output, full instrumentation result, and filtered logcat errors together. In particular, record emulator audio-HAL I/O errors: a passing native bridge/controller test proves execution and control paths, but does not prove that the virtual audio device can sustain playback.
+
 Generate the JVM coverage report with `:app:createDebugUnitTestCoverageReport`. Generate the connected-device report with `:app:createDebugAndroidTestCoverageReport`. Reports live under `app/build/reports/coverage/`. [AGP coverage reporting](https://developer.android.com/studio/test/coverage-report) measures Kotlin and Java execution. It does not measure C++ coverage or prove assertions are sufficient. Do not report a combined application coverage percentage from only the JVM report.
 
 Run `python scripts/check_coverage.py app/build/reports/coverage/test/debug/report.xml` to check that pure JVM and Robolectric classes both contribute execution data. The unit-test agent includes classes without a code-source location, restricted to the application package. Without that setting, Robolectric tests can pass while their application classes appear unexecuted in the report. This check validates measurement, not a release-coverage target.

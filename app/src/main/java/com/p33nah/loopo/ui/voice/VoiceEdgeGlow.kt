@@ -11,6 +11,8 @@ import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.RectF
 import android.graphics.SweepGradient
+import android.hardware.input.InputManager
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.Gravity
@@ -44,6 +46,15 @@ internal fun VoiceEdgeCue.colorArgb(): Int = when (this) {
 	VoiceEdgeCue.Hidden -> 0
 }
 
+internal const val FALLBACK_OVERLAY_TOUCH_ALPHA = 0.8f
+
+internal fun overlayTouchAlpha(sdkInt: Int, systemMaximum: Float?): Float =
+	if (sdkInt >= Build.VERSION_CODES.S && systemMaximum != null) {
+		systemMaximum.coerceIn(0f, 1f)
+	} else {
+		FALLBACK_OVERLAY_TOUCH_ALPHA
+	}
+
 @Composable
 internal fun VoiceEdgeGlowInApp(phase: VoicePhase, modifier: Modifier = Modifier) {
 	val cue = phase.toVoiceEdgeCue()
@@ -61,7 +72,6 @@ internal class VoiceEdgeGlowOverlay(context: Context) {
 	private val windowManager = appContext.getSystemService(WindowManager::class.java)
 	private val view = VoiceEdgeGlowView(appContext)
 	private var phase = VoicePhase.Idle
-	private var attached = false
 
 	fun update(nextPhase: VoicePhase) {
 		phase = nextPhase
@@ -73,7 +83,7 @@ internal class VoiceEdgeGlowOverlay(context: Context) {
 		}
 
 		view.render(cue)
-		if (!attached) attach()
+		if (!view.isAttachedToWindow) attach()
 	}
 
 	fun refreshPermission() = update(phase)
@@ -85,21 +95,8 @@ internal class VoiceEdgeGlowOverlay(context: Context) {
 	}
 
 	private fun attach() {
-		val layout = WindowManager.LayoutParams(
-			WindowManager.LayoutParams.MATCH_PARENT,
-			WindowManager.LayoutParams.MATCH_PARENT,
-			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-				WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-				WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-			PixelFormat.TRANSLUCENT,
-		).apply {
-			gravity = Gravity.TOP or Gravity.START
-			title = "Loopo voice listening glow"
-		}
 		try {
-			windowManager.addView(view, layout)
-			attached = true
+			windowManager.addView(view, voiceEdgeOverlayLayoutParams(appContext))
 		} catch (_: SecurityException) {
 			view.render(VoiceEdgeCue.Hidden)
 		} catch (_: WindowManager.BadTokenException) {
@@ -108,14 +105,33 @@ internal class VoiceEdgeGlowOverlay(context: Context) {
 	}
 
 	private fun detach() {
-		if (!attached) return
+		if (!view.isAttachedToWindow) return
 		try {
 			windowManager.removeViewImmediate(view)
 		} catch (_: IllegalArgumentException) {
 			// The system can remove the overlay itself when special access is revoked.
-		} finally {
-			attached = false
 		}
+	}
+}
+
+internal fun voiceEdgeOverlayLayoutParams(context: Context): WindowManager.LayoutParams {
+	val systemMaximum = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+		context.getSystemService(InputManager::class.java).maximumObscuringOpacityForTouch
+	} else {
+		null
+	}
+	return WindowManager.LayoutParams(
+		WindowManager.LayoutParams.MATCH_PARENT,
+		WindowManager.LayoutParams.MATCH_PARENT,
+		WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+		WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+			WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+			WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+		PixelFormat.TRANSLUCENT,
+	).apply {
+		alpha = overlayTouchAlpha(Build.VERSION.SDK_INT, systemMaximum)
+		gravity = Gravity.TOP or Gravity.START
+		title = "Loopo voice listening glow"
 	}
 }
 

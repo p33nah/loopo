@@ -106,7 +106,8 @@ internal object ItalianVoiceCommandParser {
 	private val rateWords = setOf("velocita", "ritmo")
 	private val playbackWords = setOf("riprendi", "continua", "play", "pausa", "ferma")
 	private val resumePhrases = setOf(
-		listOf("riprendi"), listOf("continua"), listOf("play"), listOf("riparti"), listOf("avvia"),
+		listOf("riprendi"), listOf("continua"), listOf("play"), listOf("parti"), listOf("riparti"), listOf("avvia"),
+		listOf("fai", "play"),
 		listOf("avvia", "la", "riproduzione"), listOf("riavvia", "la", "riproduzione"),
 	)
 	private val pausePhrases = setOf(

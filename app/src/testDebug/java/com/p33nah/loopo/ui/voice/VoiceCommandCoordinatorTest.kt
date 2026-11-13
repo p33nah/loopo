@@ -16,6 +16,27 @@ import org.junit.Test
 
 class VoiceCommandCoordinatorTest {
 	@Test
+	fun appliesReportedAbsoluteRateAndResumePhrasesAsCompleteTurns() = runBlocking {
+		val cases = listOf(
+			"velocità a ottanta percento e poi riprendi" to listOf(VoiceAction.SetRate(PlaybackRate(80)), VoiceAction.Resume),
+			"velocità a settantacinque" to listOf(VoiceAction.SetRate(PlaybackRate(75))),
+			"velocità a 80 e poi parti" to listOf(VoiceAction.SetRate(PlaybackRate(80)), VoiceAction.Resume),
+			"velocità a 75 e poi fai play" to listOf(VoiceAction.SetRate(PlaybackRate(75)), VoiceAction.Resume),
+		)
+		for ((phrase, expectedActions) in cases) {
+			val actions = mutableListOf<VoiceAction>()
+			val result = VoiceCommandCoordinator(
+				pause = { true },
+				transcribe = { TranscriptResult.Text(phrase) },
+				dispatch = { actions += it; true },
+			).run()
+
+			assertEquals(phrase, VoiceStatus.CommandSent, result)
+			assertEquals(phrase, expectedActions, actions)
+		}
+	}
+
+	@Test
 	fun pausesBeforeListeningThenDispatchesACompleteOrderedTurn() = runBlocking {
 		val events = mutableListOf<String>()
 		val coordinator = VoiceCommandCoordinator(

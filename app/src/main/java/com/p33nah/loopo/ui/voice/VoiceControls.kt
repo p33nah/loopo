@@ -188,7 +188,7 @@ internal fun VoiceControlButton(status: VoiceUiState, onClick: () -> Unit) {
 				status.enabled -> Accent
 				else -> Muted
 			}),
-			modifier = Modifier.size(24.dp).scale(if (status.enabled && status.phase != VoicePhase.Feedback) pulse else 1f),
+			modifier = Modifier.size(32.dp).scale(if (status.enabled && status.phase != VoicePhase.Feedback) pulse else 1f),
 		)
 	}
 }

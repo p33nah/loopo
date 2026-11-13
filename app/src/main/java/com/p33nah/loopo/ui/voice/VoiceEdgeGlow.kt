@@ -2,6 +2,7 @@ package com.p33nah.loopo.ui.voice
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PixelFormat
@@ -160,21 +161,26 @@ internal class VoiceEdgeGlowView(context: Context) : View(context) {
 		super.onDraw(canvas)
 		if (cue == VoiceEdgeCue.Hidden || width <= 0 || height <= 0) return
 
-		paint.color = cueColor()
-		paint.alpha = 32
+		val cueColor = cueColor()
+		paint.color = cueColor
+		paint.alpha = 26
 		paint.strokeWidth = 34f * density
 		canvas.drawPath(path, paint)
 
-		paint.alpha = 80
+		paint.alpha = 64
 		paint.strokeWidth = 26f * density
 		canvas.drawPath(path, paint)
-		paint.alpha = 125
+		paint.alpha = 100
 		paint.strokeWidth = 16f * density
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+			paint.setShadowLayer(9f, 0f, 0f, Color.argb(80, Color.red(cueColor), Color.green(cueColor), Color.blue(cueColor)))
+		}
 		canvas.drawPath(path, paint)
-		paint.alpha = 190
+		paint.clearShadowLayer()
+		paint.alpha = 152
 		paint.strokeWidth = 7f * density
 		canvas.drawPath(path, paint)
-		paint.alpha = 240
+		paint.alpha = 192
 		paint.strokeWidth = 2f * density
 		canvas.drawPath(path, paint)
 	}

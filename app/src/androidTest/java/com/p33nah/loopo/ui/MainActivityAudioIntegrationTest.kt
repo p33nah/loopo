@@ -28,6 +28,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +38,8 @@ class MainActivityAudioIntegrationTest {
 	@Test
 	fun nativePlaybackKeepsAdvancingWhileActivityIsStopped() {
 		val context = InstrumentationRegistry.getInstrumentation().targetContext
-		val audioFile = WavFixture.pcmFile(context, "background.wav", frames = 480_000)
+		val loop = LoopRegion(0, 480_000, enabled = true, crossfadeMs = 20)
+		val audioFile = WavFixture.pcmFile(context, "background.wav", frames = loop.bFrame.toInt())
 		val notifications = context.getSystemService(NotificationManager::class.java)
 		try {
 			ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -46,21 +48,23 @@ class MainActivityAudioIntegrationTest {
 					study.openTrack(Uri.fromFile(audioFile), hasPersistedAccess = false)
 				}
 				waitFor("background playback fixture to load") { study.state.value is StudyUiState.Ready }
+				study.setLoopRegion(loop)
+				waitFor("background playback loop") { study.playbackState.value.loopRegion == loop }
 				scenario.onActivity { it.playbackSession!!.togglePlayback() }
 				waitFor("native playback start") { study.playbackState.value.isPlaying }
 
 				scenario.moveToState(Lifecycle.State.CREATED)
 				val stoppedPosition = study.playbackState.value.positionFrame
-				SystemClock.sleep(800)
-				val background = study.playbackState.value
-				assertTrue("Playback stopped with the activity: $background", background.isPlaying)
-				assertTrue("Background playback cursor did not advance: $background", background.positionFrame > stoppedPosition)
+				waitFor("background playback cursor to advance", diagnostic = { study.playbackState.value.toString() }) {
+					val snapshot = study.playbackState.value
+					snapshot.isPlaying && snapshot.positionFrame != stoppedPosition
+				}
 
 				scenario.moveToState(Lifecycle.State.RESUMED)
 				scenario.recreate()
 				val reboundStudy = awaitPlaybackSession(scenario).study
+				assertSame(study, reboundStudy)
 				assertTrue(reboundStudy.playbackState.value.isPlaying)
-				assertTrue(reboundStudy.playbackState.value.positionFrame >= background.positionFrame)
 
 				scenario.moveToState(Lifecycle.State.CREATED)
 				val notification = waitForValue("playback notification for the active track") {

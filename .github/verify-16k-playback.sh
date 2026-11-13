@@ -5,8 +5,6 @@ cp "$ANDROID_HOME/emulator/source.properties" evidence/emulator.txt
 adb shell "su 0 setprop bionic.linker.16kb.app_compat.enabled false"
 adb shell "su 0 setprop pm.16kb.app_compat.disabled true"
 adb shell 'getprop bionic.linker.16kb.app_compat.enabled; getprop pm.16kb.app_compat.disabled' >> evidence/runtime.txt
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb install -r -t app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 if [[ ${JIT_ENABLED} == false ]]; then
   adb shell 'su 0 stop; su 0 setprop dalvik.vm.usejit false; su 0 setprop dalvik.vm.usejitprofiles false; su 0 start'
   ready=
@@ -21,6 +19,11 @@ if [[ ${JIT_ENABLED} == false ]]; then
   adb shell input keyevent 82
 fi
 adb shell 'getprop dalvik.vm.usejit; getprop dalvik.vm.usejitprofiles; getprop ro.zygote' >> evidence/runtime.txt
+adb shell 'getprop sys.boot_completed; cat /proc/meminfo' >> evidence/runtime.txt
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r -t app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell cmd package resolve-activity -n com.p33nah.loopo/.MainActivity | tee evidence/activity.txt
+sleep 20
 status=0
 for run in 1 2; do
   adb logcat -b main -b system -b crash -c

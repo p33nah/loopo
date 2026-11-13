@@ -167,7 +167,7 @@ internal fun VoiceControlButton(status: VoiceUiState, onClick: () -> Unit) {
 	)
 	IconButton(
 		onClick = onClick,
-		modifier = Modifier.testTag("voice-toggle").semantics {
+		modifier = Modifier.size(56.dp).testTag("voice-toggle").semantics {
 			contentDescription = if (status.enabled) "Disattiva i comandi vocali" else "Attiva i comandi vocali"
 			stateDescription = when {
 				!status.enabled -> "Disattivati"
@@ -188,7 +188,7 @@ internal fun VoiceControlButton(status: VoiceUiState, onClick: () -> Unit) {
 				status.enabled -> Accent
 				else -> Muted
 			}),
-			modifier = Modifier.size(32.dp).scale(if (status.enabled && status.phase != VoicePhase.Feedback) pulse else 1f),
+			modifier = Modifier.size(48.dp).scale(if (status.enabled && status.phase != VoicePhase.Feedback) pulse else 1f),
 		)
 	}
 }

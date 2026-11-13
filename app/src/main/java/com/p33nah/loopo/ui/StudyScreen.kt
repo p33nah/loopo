@@ -419,12 +419,7 @@ private fun LoopControls(
 				}
 			},
 		) { Text("Loop") }
-		if (voiceControls != null) {
-			Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-				voiceControls()
-				Text("Voce", color = Muted, fontSize = 11.sp)
-			}
-		}
+		voiceControls?.invoke()
 		if (SHOW_FADE_CONTROLS) Spacer(Modifier.weight(1f))
 		val appliedMs = effectiveCrossfadeFrames * 1_000 / track.sampleRate.coerceAtLeast(1)
 		val fadeLabel = if (appliedMs < region.crossfadeMs) "${appliedMs} ms" else "Fade ${region.crossfadeMs} ms"

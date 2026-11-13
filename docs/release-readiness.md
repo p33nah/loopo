@@ -42,6 +42,18 @@ The APK verifier separately confirmed 16 KB ELF and ZIP alignment for every ARM6
 
 The emulator demonstrates native library loading and several playback-control paths under a 16 KB page size. Its audio backend did not provide stable end-to-end playback, and the app-level suite was not consistently green. This gate remains open until the runtime checks pass on a functioning 16 KB audio target; ARM64 physical-device verification is also outstanding.
 
+### 16 KB runtime follow-up (2026-11-13)
+
+Built the Loopo source from `27daad2f33764731d9832e3c42e8d12535eaac22` on Windows. The debug APK SHA-256 was `3B281EB969C14AAEB6C7574C0B4BB83301FB043A1C16E729F5E2ECC712165EF5`. Emulator 37.2.13 ran the same Android 15 x86_64 image listed above and reported `16384` bytes per page. Both the debug and unsigned release APKs passed `zipalign -c -P 16 4` and the ELF and ZIP checks in `scripts/verify_apk.py`.
+
+- The guest's `tinyplay` failed to play a generated WAV directly through VirtIO Sound with the default host backend and with `QEMU_AUDIO_DRV=wav`. Disabling `VirtioSndCard` left this image without a recognized sound card.
+- With the WAV backend, Windows captured PCM from the instrumentation runs. The capture contained the 440 Hz fixture tone. Logcat also reported repeated Ranchu audio HAL `pcm_writei` I/O errors, so the capture proves that some audio reached the virtual output.
+- The first instrumentation attempt ended before any test with an Android startup ANR. A later attempt passed 14 tests before ART aborted in `Profile Saver` at `copied_methods_start <= methods->size()`. The session test passed on the next attempt. The underlying cause of the ART assertion and the earlier JIT SIGSEGV is still unknown.
+- Another full Windows run passed 20 of 21 tests. The background playback case failed with `positionFrame=480000`, `isEnded=true`, and `error=null`. Its 10-second fixture ended before the assertion. The test now loops the fixture and waits for the source cursor to change while the activity is stopped.
+- On [Linux with 16 KiB pages](https://github.com/p33nah/loopo/actions/runs/43420251078), Android 15 instrumentation terminated twice before completing a test. Android 16 completed 21 of 21 tests on its second attempt, with 440 Hz PCM in the QEMU capture. That run disabled Android's 16 KiB backcompat settings. The APK hashes, runtime fingerprints, instrumented results, and filtered logcat are in the run artifacts.
+
+The Android 15 emulator has demonstrated native loading, transport controls and partial PCM output at 16 KiB. The issue stays open pending repeatable Android 15 playback with stable audio. ARM64 runtime and physical audio routes remain unverified.
+
 Time/frame conversions now use checked arithmetic. Remaining source risks include delayed detection of truncated WAV payloads, best-effort session saving during abrupt process death, and playback transitions not covered by automated evidence. Resolve reproduced defects with focused regressions. Keep assumptions about vendor codecs and output routes labeled until physical evidence exists.
 
 PR #17 established the test and release infrastructure. Each follow-up records its current-head CI evidence in the linked issue and PR. Update this record with actual test outputs, physical-device results, and signed-artifact checks before tagging the first version.

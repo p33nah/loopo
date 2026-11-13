@@ -57,14 +57,20 @@ class MainActivityAudioIntegrationTest {
 				val stoppedPosition = study.playbackState.value.positionFrame
 				waitFor("background playback cursor to advance", diagnostic = { study.playbackState.value.toString() }) {
 					val snapshot = study.playbackState.value
-					snapshot.isPlaying && snapshot.positionFrame != stoppedPosition
+					snapshot.isPlaying && !snapshot.isEnded && snapshot.positionFrame != stoppedPosition
 				}
 
 				scenario.moveToState(Lifecycle.State.RESUMED)
 				scenario.recreate()
 				val reboundStudy = awaitPlaybackSession(scenario).study
 				assertSame(study, reboundStudy)
-				assertTrue(reboundStudy.playbackState.value.isPlaying)
+				val rebound = reboundStudy.playbackState.value
+				assertTrue("Playback stopped after recreation: $rebound", rebound.isPlaying && !rebound.isEnded)
+				assertEquals(loop, rebound.loopRegion)
+				waitFor("playback cursor to advance after recreation", diagnostic = { reboundStudy.playbackState.value.toString() }) {
+					val snapshot = reboundStudy.playbackState.value
+					snapshot.isPlaying && !snapshot.isEnded && snapshot.positionFrame != rebound.positionFrame
+				}
 
 				scenario.moveToState(Lifecycle.State.CREATED)
 				val notification = waitForValue("playback notification for the active track") {

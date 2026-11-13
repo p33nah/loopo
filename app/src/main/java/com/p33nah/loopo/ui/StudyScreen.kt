@@ -105,7 +105,7 @@ fun StudyScreen(
 			VoiceEdgeGlowInApp(voiceFeedback.phase, Modifier.fillMaxSize())
 		}
 		Column(
-			modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 12.dp),
+			modifier = Modifier.fillMaxSize().padding(start = 44.dp, top = 12.dp, end = 28.dp, bottom = 12.dp),
 			verticalArrangement = Arrangement.spacedBy(12.dp),
 		) {
 			TopBar(

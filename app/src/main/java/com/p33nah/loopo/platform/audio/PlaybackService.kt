@@ -22,6 +22,7 @@ import com.p33nah.loopo.MainActivity
 import com.p33nah.loopo.R
 import com.p33nah.loopo.ui.StudyUiState
 import com.p33nah.loopo.ui.StudyViewModel
+import com.p33nah.loopo.ui.voice.VoiceEdgeGlowOverlay
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,7 @@ class PlaybackService : Service() {
 	private lateinit var study: StudyViewModel
 	private lateinit var mediaSession: MediaSession
 	private lateinit var wakeLock: PowerManager.WakeLock
+	private lateinit var voiceEdgeGlowOverlay: VoiceEdgeGlowOverlay
 	private var latestStartId: Int? = null
 	private var pendingCommands = 0
 	private var taskRemoved = false
@@ -52,6 +54,7 @@ class PlaybackService : Service() {
 		val trackRevision: Long get() = study.trackGeneration
 		val isTaskRemoved: Boolean get() = taskRemoved
 		val voiceStatus: StateFlow<VoiceUiState> get() = voiceController.status
+		fun refreshVoiceOverlayPermission() = voiceEdgeGlowOverlay.refreshPermission()
 		fun armVoice() {
 			try {
 				startService(commandIntent(ACTION_VOICE_ARM))
@@ -61,6 +64,7 @@ class PlaybackService : Service() {
 		}
 		fun disarmVoice() {
 			voiceController.close()
+			voiceEdgeGlowOverlay.close()
 			voiceBecameIdle()
 		}
 		fun voicePermissionDenied(message: String = "Il microfono è necessario per usare i comandi vocali.") = voiceController.setStatus(message)
@@ -124,6 +128,7 @@ class PlaybackService : Service() {
 				override fun onStop() = pauseFromSystem()
 			})
 		}
+		voiceEdgeGlowOverlay = VoiceEdgeGlowOverlay(this)
 		getSystemService(NotificationManager::class.java).createNotificationChannel(
 			NotificationChannel(CHANNEL_ID, getString(R.string.playback_channel), NotificationManager.IMPORTANCE_LOW),
 		)
@@ -137,6 +142,9 @@ class PlaybackService : Service() {
 				if (mediaSession.isActive) publishPlaybackState(playing)
 			}
 		}
+		scope.launch {
+			voiceController.status.collect { status -> voiceEdgeGlowOverlay.update(status.phase) }
+		}
 	}
 
 	override fun onBind(intent: Intent): IBinder = Session()
@@ -144,6 +152,7 @@ class PlaybackService : Service() {
 	override fun onTaskRemoved(rootIntent: Intent?) {
 		taskRemoved = true
 		voiceController.close()
+		voiceEdgeGlowOverlay.close()
 		runCommand { study.pause() }
 	}
 
@@ -168,6 +177,7 @@ class PlaybackService : Service() {
 	override fun onDestroy() {
 		scope.cancel()
 		voiceController.close()
+		voiceEdgeGlowOverlay.close()
 		if (wakeLock.isHeld) wakeLock.release()
 		mediaSession.release()
 		viewModelStore.clear()

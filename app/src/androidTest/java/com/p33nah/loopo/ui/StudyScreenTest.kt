@@ -13,10 +13,13 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.click
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.p33nah.loopo.data.audio.TrackInspection
 import com.p33nah.loopo.domain.audio.PlaybackSnapshot
@@ -112,6 +115,8 @@ class StudyScreenTest {
 					playback = PlaybackSnapshot(
 						positionFrame = 4_800,
 						isPlaying = true,
+						underrunCount = 2,
+						estimatedLatencyMillis = 14.0,
 						loopRegion = defaultLoop,
 					),
 					waveform = WaveformState.Ready(
@@ -139,6 +144,7 @@ class StudyScreenTest {
 		compose.onNodeWithText("prova.wav").assertIsDisplayed()
 		voiceFeedback = VoiceUiState(VoicePhase.Listening, "Ti ascolto…", VoiceTone.Neutral)
 		compose.waitForIdle()
+		compose.onNodeWithTag("voice-edge-glow").assertIsDisplayed()
 		compose.onNodeWithTag("study-board").assert(
 			SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "In ascolto del comando"),
 		)
@@ -149,6 +155,7 @@ class StudyScreenTest {
 			resultTone = VoiceTone.Error,
 		)
 		compose.waitForIdle()
+		compose.onNodeWithTag("voice-edge-glow").assertIsDisplayed()
 		compose.onNodeWithTag("study-board").assert(
 			SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, ""),
 		)
@@ -161,7 +168,7 @@ class StudyScreenTest {
 		compose.onNodeWithText("100% · 1.00x").assertIsDisplayed()
 		compose.onNodeWithText("Pausa").performClick()
 		assertEquals(1, toggles.size)
-		compose.onNodeWithText("Loop").performClick()
+		compose.onNodeWithText("Loop").performTouchInput { click() }
 		assertEquals(true, loops.last().enabled)
 		compose.onNodeWithText("Loop").assert(
 			SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Loop attivo"),
@@ -170,10 +177,13 @@ class StudyScreenTest {
 		assertEquals(4_800L, loops.last().aFrame)
 
 		val sliders = compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo))
-		sliders.assertCountEquals(3)
-		sliders.get(1).performSemanticsAction(SemanticsActions.SetProgress) { action -> check(action(0.5f)) }
+		compose.onAllNodesWithText("Fade", substring = true).assertCountEquals(0)
+		compose.onAllNodesWithText("dropout", substring = true).assertCountEquals(0)
+		compose.onAllNodesWithText("stima", substring = true).assertCountEquals(0)
+		sliders.assertCountEquals(2)
+		sliders.get(0).performSemanticsAction(SemanticsActions.SetProgress) { action -> check(action(0.5f)) }
 		assertEquals(24_000L, seeks.last())
-		sliders.get(2).performSemanticsAction(SemanticsActions.SetProgress) { action -> check(action(73f)) }
+		sliders.get(1).performSemanticsAction(SemanticsActions.SetProgress) { action -> check(action(73f)) }
 		assertEquals(PlaybackRate(73), rates.last())
 		compose.onNodeWithText("1x").performClick()
 		assertEquals(PlaybackRate.NORMAL, rates.last())

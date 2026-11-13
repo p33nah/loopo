@@ -72,7 +72,11 @@ import com.p33nah.loopo.ui.theme.LoopA
 import com.p33nah.loopo.ui.theme.LoopB
 import com.p33nah.loopo.ui.theme.Muted
 import com.p33nah.loopo.ui.theme.TextPrimary
+import com.p33nah.loopo.ui.voice.VoiceEdgeGlowInApp
 import kotlin.math.roundToInt
+
+private const val SHOW_FADE_CONTROLS = false
+private const val SHOW_PLAYBACK_DIAGNOSTICS = false
 
 @Composable
 fun StudyScreen(
@@ -88,6 +92,7 @@ fun StudyScreen(
 	onSetPlaybackRate: (PlaybackRate) -> Unit,
 	voiceControls: (@Composable () -> Unit)? = null,
 	voiceFeedback: VoiceUiState = VoiceUiState.Idle,
+	overlayPermissionGranted: Boolean = false,
 ) {
 	val readyTrack = (state as? StudyUiState.Ready)?.inspection?.track
 	val trackActionLabel = when (state) {
@@ -95,44 +100,54 @@ fun StudyScreen(
 		is StudyUiState.Loading -> "Apri brano"
 		else -> null
 	}
-	Column(
-		modifier = Modifier.fillMaxSize().background(Background).padding(horizontal = 28.dp, vertical = 12.dp),
-		verticalArrangement = Arrangement.spacedBy(12.dp),
-	) {
-		TopBar(readyTrack, trackActionLabel, onOpenTrack, voiceControls)
-		when (state) {
-			StudyUiState.Empty -> EmptyStudy(onOpenTrack, Modifier.weight(1f))
-			is StudyUiState.Loading -> LoadingStudy(state.displayName, Modifier.weight(1f))
-			is StudyUiState.RecoveryRequired -> RecoveryStudy(
-				state.displayName,
-				state.message,
-				onOpenTrack,
-				Modifier.weight(1f),
-			)
-			is StudyUiState.Ready -> TrackStudy(
-				inspection = state.inspection,
-				sessionWarning = state.sessionWarning,
-				waveform = waveform,
-				playback = playback,
-				viewport = viewport,
-				voiceFeedback = voiceFeedback,
-				onViewportChange = onViewportChange,
-				onSeekToFrame = onSeekToFrame,
-				onSetLoopRegion = onSetLoopRegion,
-				modifier = Modifier.weight(1f)
-					.then(if (voiceFeedback.showCommandListeningBorder) Modifier.border(BorderStroke(2.dp, Accent), RoundedCornerShape(20.dp)) else Modifier)
-					.semantics { stateDescription = if (voiceFeedback.showCommandListeningBorder) "In ascolto del comando" else "" }
-					.testTag("study-board"),
-			)
-			is StudyUiState.Error -> ErrorStudy(state.reason, onOpenTrack, Modifier.weight(1f))
+	Box(Modifier.fillMaxSize().background(Background)) {
+		if (!overlayPermissionGranted) {
+			VoiceEdgeGlowInApp(voiceFeedback.phase, Modifier.fillMaxSize())
 		}
-		TransportBar(
-			track = (state as? StudyUiState.Ready)?.inspection?.track,
-			playback = playback,
-			onTogglePlayback = onTogglePlayback,
-			onSeekToFrame = onSeekToFrame,
-			onSetPlaybackRate = onSetPlaybackRate,
-		)
+		Column(
+			modifier = Modifier.fillMaxSize().padding(start = 44.dp, top = 12.dp, end = 28.dp, bottom = 12.dp),
+			verticalArrangement = Arrangement.spacedBy(12.dp),
+		) {
+			TopBar(
+				readyTrack,
+				trackActionLabel,
+				onOpenTrack,
+				voiceControls = voiceControls,
+			)
+			when (state) {
+				StudyUiState.Empty -> EmptyStudy(onOpenTrack, Modifier.weight(1f))
+				is StudyUiState.Loading -> LoadingStudy(state.displayName, Modifier.weight(1f))
+				is StudyUiState.RecoveryRequired -> RecoveryStudy(
+					state.displayName,
+					state.message,
+					onOpenTrack,
+					Modifier.weight(1f),
+				)
+				is StudyUiState.Ready -> TrackStudy(
+					inspection = state.inspection,
+					sessionWarning = state.sessionWarning,
+					waveform = waveform,
+					playback = playback,
+					viewport = viewport,
+					voiceFeedback = voiceFeedback,
+					onViewportChange = onViewportChange,
+					onSeekToFrame = onSeekToFrame,
+					onSetLoopRegion = onSetLoopRegion,
+					modifier = Modifier.weight(1f)
+						.then(if (voiceFeedback.showCommandListeningBorder) Modifier.border(BorderStroke(2.dp, Accent), RoundedCornerShape(20.dp)) else Modifier)
+						.semantics { stateDescription = if (voiceFeedback.showCommandListeningBorder) "In ascolto del comando" else "" }
+						.testTag("study-board"),
+				)
+				is StudyUiState.Error -> ErrorStudy(state.reason, onOpenTrack, Modifier.weight(1f))
+			}
+			TransportBar(
+				track = (state as? StudyUiState.Ready)?.inspection?.track,
+				playback = playback,
+				onTogglePlayback = onTogglePlayback,
+				onSeekToFrame = onSeekToFrame,
+				onSetPlaybackRate = onSetPlaybackRate,
+			)
+		}
 	}
 }
 
@@ -401,33 +416,30 @@ private fun LoopControls(
 		) { Text("Loop") }
 		Spacer(Modifier.weight(1f))
 		val appliedMs = effectiveCrossfadeFrames * 1_000 / track.sampleRate.coerceAtLeast(1)
-		Text(
-			if (appliedMs < region.crossfadeMs) "${appliedMs} ms" else "Fade ${region.crossfadeMs} ms",
-			color = Muted,
-			fontSize = 11.sp,
-			maxLines = 1,
-			modifier = Modifier.widthIn(min = 64.dp),
-		)
-		Slider(
-			value = fadeDraft,
-			onValueChange = {
-				fadeDraft = it
-				onRegionChange(region.copy(crossfadeMs = it.toInt().coerceIn(0, 100)))
-			},
-			onValueChangeFinished = {
-				val next = region.copy(crossfadeMs = fadeDraft.toInt().coerceIn(0, 100))
-				onRegionChange(next)
-				onCommit(next)
-			},
-			valueRange = 0f..100f,
-			enabled = enabled,
-			colors = SliderDefaults.colors(
-				thumbColor = Accent,
-				activeTrackColor = Accent,
-				inactiveTrackColor = Line,
-			),
-			modifier = Modifier.widthIn(max = 220.dp).fillMaxWidth().heightIn(min = 48.dp),
-		)
+		val fadeLabel = if (appliedMs < region.crossfadeMs) "${appliedMs} ms" else "Fade ${region.crossfadeMs} ms"
+		if (SHOW_FADE_CONTROLS) {
+			Text(fadeLabel, color = Muted, fontSize = 11.sp, maxLines = 1, modifier = Modifier.widthIn(min = 64.dp))
+			Slider(
+				value = fadeDraft,
+				onValueChange = {
+					fadeDraft = it
+					onRegionChange(region.copy(crossfadeMs = it.toInt().coerceIn(0, 100)))
+				},
+				onValueChangeFinished = {
+					val next = region.copy(crossfadeMs = fadeDraft.toInt().coerceIn(0, 100))
+					onRegionChange(next)
+					onCommit(next)
+				},
+				valueRange = 0f..100f,
+				enabled = enabled,
+				colors = SliderDefaults.colors(
+					thumbColor = Accent,
+					activeTrackColor = Accent,
+					inactiveTrackColor = Line,
+				),
+				modifier = Modifier.widthIn(max = 220.dp).fillMaxWidth().heightIn(min = 48.dp),
+			)
+		}
 	}
 }
 
@@ -552,7 +564,9 @@ private fun TransportBar(
 		}
 		val latency = playback.estimatedLatencyMillis?.let { "  ·  stima ${it.toInt()} ms" }.orEmpty()
 		val status = playback.error?.message() ?: if (track == null) "Nessun brano aperto" else "dropout ${playback.underrunCount}$latency"
-		Text(status, color = if (playback.error == null) Muted else Accent, fontSize = 10.sp, modifier = Modifier.align(Alignment.End))
+		if (playback.error != null || track == null || SHOW_PLAYBACK_DIAGNOSTICS) {
+			Text(status, color = if (playback.error == null) Muted else Accent, fontSize = 10.sp, modifier = Modifier.align(Alignment.End))
+		}
 	}
 }
 

@@ -12,7 +12,7 @@ Vosk recognizes both wake phrase and command audio at mono 16 kHz on API 26+. On
 
 The UI reports download, passive wake listening, active command listening, success, timeout, recognition errors, and the recognized transcript where available. Result feedback stays visible for four seconds. The command-listening outline disappears when capture ends. Voice status and transcripts are in-memory only.
 
-`PlaybackService` also observes its existing voice status flow to draw the listening glow above other apps. A shared Android view renders the edge sweep inside Loopo when overlay access is unavailable and in a non-touchable `TYPE_APPLICATION_OVERLAY` window when access is granted. Wake listening uses marker A's `LoopA` color; command capture uses marker B's `LoopB` color. The voice toggle asks for overlay access only during its explicit activation flow. Declining it does not block microphone capture.
+`PlaybackService` also observes its existing voice status flow to draw the listening glow above other apps. A shared Android view renders a static layered edge glow inside Loopo when overlay access is unavailable and in a non-touchable `TYPE_APPLICATION_OVERLAY` window when access is granted. Wake listening uses marker A's `LoopA` color; command capture uses marker B's `LoopB` color. The voice toggle asks for overlay access only during its explicit activation flow. Declining it does not block microphone capture.
 
 The overlay does not turn on or keep on the display and does not set lock-screen bypass flags. A display that is off cannot show the glow. Android's keyguard can cover application overlays while the display is locked; Loopo leaves that behavior to the system. Recheck locked-screen visibility on each target device.
 

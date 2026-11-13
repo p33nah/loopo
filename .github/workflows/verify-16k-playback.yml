@@ -16,8 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         api: [35, 36]
+        jit: [true, false]
+        exclude:
+          - api: 36
+            jit: false
     env:
       QEMU_AUDIO_DRV: wav
+      JIT_ENABLED: ${{ matrix.jit }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78
@@ -48,6 +53,7 @@ jobs:
         with:
           api-level: ${{ matrix.api }}
           arch: x86_64
+          profile: pixel_6
           target: google_apis_ps16k
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim
@@ -55,5 +61,5 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: always()
         with:
-          name: playback-16k-api-${{ matrix.api }}
+          name: playback-16k-api-${{ matrix.api }}-jit-${{ matrix.jit }}
           path: evidence/

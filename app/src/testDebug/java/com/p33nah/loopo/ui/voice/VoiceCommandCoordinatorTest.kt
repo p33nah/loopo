@@ -153,6 +153,47 @@ class ItalianVoiceCommandParserTest {
 	}
 
 	@Test
+	fun acceptsCommonCommandSynonymsAndFlexibleRatePhrasing() {
+		assertEquals(listOf(VoiceAction.Resume), ItalianVoiceCommandParser.parse("riparti")?.actions)
+		assertEquals(listOf(VoiceAction.Resume), ItalianVoiceCommandParser.parse("avvia la riproduzione")?.actions)
+		assertEquals(listOf(VoiceAction.StayPaused), ItalianVoiceCommandParser.parse("metti in pausa")?.actions)
+		assertEquals(listOf(VoiceAction.StayPaused), ItalianVoiceCommandParser.parse("interrompi la riproduzione")?.actions)
+
+		assertEquals(
+			listOf(VoiceAction.SetRate(PlaybackRate(75))),
+			ItalianVoiceCommandParser.parse("regola il ritmo sul 75 percento")?.actions,
+		)
+		assertEquals(
+			listOf(VoiceAction.SetRate(PlaybackRate(75))),
+			ItalianVoiceCommandParser.parse("imposta il ritmo al settantacinque per cento")?.actions,
+		)
+		assertEquals(
+			listOf(VoiceAction.AdjustRate(RateDeltaPercent.from(5)!!)),
+			ItalianVoiceCommandParser.parse("incrementa di 5 punti percentuali il ritmo")?.actions,
+		)
+		assertEquals(
+			listOf(VoiceAction.AdjustRate(RateDeltaPercent.from(-10)!!)),
+			ItalianVoiceCommandParser.parse("riduci il ritmo di dieci punti percentuali")?.actions,
+		)
+		assertEquals(
+			listOf(VoiceAction.SetRate(PlaybackRate(75)), VoiceAction.Resume),
+			ItalianVoiceCommandParser.parse("regola il ritmo sul 75 percento e poi avvia la riproduzione")?.actions,
+		)
+	}
+
+	@Test
+	fun rejectsUnclearSynonymCommandsWithoutDispatchablePlans() {
+		for (phrase in listOf(
+			"metti in pausa o riparti",
+			"riduci il ritmo di cinque",
+			"incrementa il ritmo di cinque o dieci punti percentuali",
+			"forse regola il ritmo sul 75 percento",
+		)) {
+			assertNull(phrase, ItalianVoiceCommandParser.parse(phrase))
+		}
+	}
+
+	@Test
 	fun rejectsUnsupportedClausesAndOutOfRangeRates() {
 		assertNull(ItalianVoiceCommandParser.parse("riprendi e rallenta al settanta"))
 		assertNull(ItalianVoiceCommandParser.parse("velocità al 24"))

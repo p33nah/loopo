@@ -98,15 +98,25 @@ internal object ItalianVoiceCommandParser {
 	private val punctuation = Regex("[^\\p{L}\\p{N}%]+")
 	private val signedNumber = Regex("[-+](?=\\d)")
 	private val chain = Regex("\\be poi\\b")
-	private val increaseWords = setOf("aumenta", "accelera", "alza")
-	private val decreaseWords = setOf("diminuisci", "rallenta")
-	private val setWords = setOf("imposta", "porta", "metti")
-	private val targetWords = setOf("a", "al", "alla")
+	private val increaseWords = setOf("aumenta", "accelera", "alza", "incrementa")
+	private val decreaseWords = setOf("diminuisci", "rallenta", "riduci")
+	private val setWords = setOf("imposta", "porta", "metti", "regola")
+	private val targetWords = setOf("a", "al", "alla", "su", "sul", "sulla", "sullo", "sull")
 	private val relativeWords = setOf("di", "del")
 	private val rateWords = setOf("velocita", "ritmo")
 	private val playbackWords = setOf("riprendi", "continua", "play", "pausa", "ferma")
+	private val resumePhrases = setOf(
+		listOf("riprendi"), listOf("continua"), listOf("play"), listOf("riparti"), listOf("avvia"),
+		listOf("avvia", "la", "riproduzione"), listOf("riavvia", "la", "riproduzione"),
+	)
+	private val pausePhrases = setOf(
+		listOf("pausa"), listOf("ferma"), listOf("interrompi"), listOf("metti", "in", "pausa"),
+		listOf("ferma", "la", "riproduzione"), listOf("interrompi", "la", "riproduzione"),
+	)
+	private val articles = setOf("il", "lo", "la")
+	private val rateUnits = setOf("%", "percento", "per", "cento", "punto", "punti", "percentuale", "percentuali")
 	private val commandWords = increaseWords + decreaseWords + setWords + targetWords + relativeWords + rateWords +
-		setOf("la", "per", "cento", "percento", "%", "non", "e", "poi") + playbackWords
+		articles + rateUnits + setOf("non", "e", "poi") + playbackWords
 
 	fun parse(raw: String): VoicePlan? {
 		if (signedNumber.containsMatchIn(raw)) return null
@@ -127,8 +137,8 @@ internal object ItalianVoiceCommandParser {
 		.replace(spaces, " ").trim()
 
 	private fun parseAction(tokens: List<String>): VoiceAction? = when (tokens) {
-		listOf("riprendi"), listOf("continua"), listOf("play") -> VoiceAction.Resume
-		listOf("pausa"), listOf("ferma") -> VoiceAction.StayPaused
+		in resumePhrases -> VoiceAction.Resume
+		in pausePhrases -> VoiceAction.StayPaused
 		else -> parseRate(tokens)
 	}
 
@@ -149,12 +159,13 @@ internal object ItalianVoiceCommandParser {
 		val unitLength = when {
 			tokens.getOrNull(unitStart) == "%" || tokens.getOrNull(unitStart) == "percento" -> 1
 			tokens.drop(unitStart).take(2) == listOf("per", "cento") -> 2
+			tokens.drop(unitStart).take(2) in listOf(listOf("punto", "percentuale"), listOf("punti", "percentuali")) -> 2
 			else -> 0
 		}
 		val hasPercent = unitLength > 0
 		if (tokens.indices.any { index ->
 				index != numberIndex && index !in unitStart until unitStart + unitLength &&
-					tokens[index] in setOf("%", "percento", "per", "cento")
+					tokens[index] in rateUnits
 			}) return null
 
 		val targetCount = tokens.count { it in targetWords }
@@ -163,7 +174,7 @@ internal object ItalianVoiceCommandParser {
 		if (other.count { it in targetWords || it in relativeWords } != 1) return null
 		val hasRateNoun = rateNounCount == 1
 		val verb = verbs.singleOrNull()
-		val articleIndexes = tokens.withIndex().filter { it.value == "la" }.map { it.index }
+		val articleIndexes = tokens.withIndex().filter { it.value in articles }.map { it.index }
 		val nounIndex = tokens.indexOfFirst { it in rateWords }
 		if (articleIndexes.size > 1 || (articleIndexes.singleOrNull() != null && articleIndexes.single() + 1 != nounIndex)) return null
 

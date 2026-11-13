@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -113,7 +112,7 @@ fun StudyScreen(
 				readyTrack,
 				trackActionLabel,
 				onOpenTrack,
-				voiceControls = voiceControls.takeUnless { state is StudyUiState.Ready },
+				voiceControls = voiceControls,
 			)
 			when (state) {
 				StudyUiState.Empty -> EmptyStudy(onOpenTrack, Modifier.weight(1f))
@@ -131,7 +130,6 @@ fun StudyScreen(
 					playback = playback,
 					viewport = viewport,
 					voiceFeedback = voiceFeedback,
-					voiceControls = voiceControls,
 					onViewportChange = onViewportChange,
 					onSeekToFrame = onSeekToFrame,
 					onSetLoopRegion = onSetLoopRegion,
@@ -272,7 +270,6 @@ private fun TrackStudy(
 	playback: PlaybackSnapshot,
 	viewport: WaveformViewport?,
 	voiceFeedback: VoiceUiState,
-	voiceControls: (@Composable () -> Unit)?,
 	onViewportChange: (WaveformViewport) -> Unit,
 	onSeekToFrame: (Long) -> Unit,
 	onSetLoopRegion: (LoopRegion) -> Unit,
@@ -344,7 +341,6 @@ private fun TrackStudy(
 			enabled = !playback.isLoopCommandPending,
 			onRegionChange = { draftLoop = it },
 			onCommit = onSetLoopRegion,
-			voiceControls = voiceControls,
 		)
 		if (!inspection.hasPersistedAccess) {
 			Text("Il file potrebbe dover essere riaperto dopo la chiusura dell'app.", color = Accent, fontSize = 11.sp)
@@ -364,14 +360,13 @@ private fun LoopControls(
 	enabled: Boolean,
 	onRegionChange: (LoopRegion) -> Unit,
 	onCommit: (LoopRegion) -> Unit,
-	voiceControls: (@Composable () -> Unit)?,
 ) {
 	var fadeDraft by remember(track.id) { mutableFloatStateOf(region.crossfadeMs.toFloat()) }
 	LaunchedEffect(track.id, region.crossfadeMs) { fadeDraft = region.crossfadeMs.toFloat() }
-	FlowRow(
-		modifier = Modifier.fillMaxWidth().testTag("loop-and-voice-controls"),
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		verticalAlignment = Alignment.CenterVertically,
 		horizontalArrangement = Arrangement.spacedBy(4.dp),
-		verticalArrangement = Arrangement.spacedBy(4.dp),
 	) {
 		TextButton(
 			onClick = {
@@ -383,7 +378,7 @@ private fun LoopControls(
 			shape = RoundedCornerShape(10.dp),
 			colors = ButtonDefaults.textButtonColors(containerColor = Card, contentColor = LoopA),
 			contentPadding = PaddingValues(horizontal = 8.dp),
-			modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 88.dp),
+			modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 104.dp),
 		) { Text("A · ${region.aFrame.formatLoopTime(track.sampleRate)}", maxLines = 1, softWrap = false) }
 		TextButton(
 			onClick = {
@@ -395,7 +390,7 @@ private fun LoopControls(
 			shape = RoundedCornerShape(10.dp),
 			colors = ButtonDefaults.textButtonColors(containerColor = Card, contentColor = LoopB),
 			contentPadding = PaddingValues(horizontal = 8.dp),
-			modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 88.dp),
+			modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 104.dp),
 		) { Text("B · ${region.bFrame.formatLoopTime(track.sampleRate)}", maxLines = 1, softWrap = false) }
 		OutlinedButton(
 			onClick = {
@@ -419,8 +414,7 @@ private fun LoopControls(
 				}
 			},
 		) { Text("Loop") }
-		voiceControls?.invoke()
-		if (SHOW_FADE_CONTROLS) Spacer(Modifier.weight(1f))
+		Spacer(Modifier.weight(1f))
 		val appliedMs = effectiveCrossfadeFrames * 1_000 / track.sampleRate.coerceAtLeast(1)
 		val fadeLabel = if (appliedMs < region.crossfadeMs) "${appliedMs} ms" else "Fade ${region.crossfadeMs} ms"
 		if (SHOW_FADE_CONTROLS) {

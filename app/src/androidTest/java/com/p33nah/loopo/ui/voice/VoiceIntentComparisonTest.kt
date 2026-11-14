@@ -1,9 +1,8 @@
 package com.p33nah.loopo.ui.voice
 
-import android.util.Log
 import android.os.Build
-import android.os.Bundle
 import android.os.SystemClock
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.p33nah.loopo.domain.model.PlaybackRate
@@ -25,6 +24,15 @@ class VoiceIntentComparisonTest {
 	)
 
 	private enum class Outcome { CORRECT, MISSED, WRONG_PLAN, FALSE_ACCEPTANCE }
+
+	private data class Result(val case: Case, val plan: VoicePlan?) {
+		val outcome: Outcome = when {
+			plan?.actions == case.expected -> Outcome.CORRECT
+			case.expected == null -> Outcome.FALSE_ACCEPTANCE
+			plan == null -> Outcome.MISSED
+			else -> Outcome.WRONG_PLAN
+		}
+	}
 
 	@Test
 	fun replaySameTranscriptsThroughBothInterpreters() {
@@ -53,6 +61,20 @@ class VoiceIntentComparisonTest {
 		assertTrue("Synthetic prompts must be disjoint from training examples",
 			syntheticCases.isNotEmpty() && syntheticCases.none { canonical(it.prompt) in trainingText })
 
+		val generatedCases = assets.open("voice-intent-ab/generated-evaluation.txt").bufferedReader().useLines { lines ->
+			lines.map { line ->
+				val (category, expected, prompt, transcript) = line.split('|', limit = 4)
+				Case("generated / $category", parseExpected(expected), transcript, prompt)
+			}.toList()
+		}
+		val reserved = trainingText + (cases + syntheticCases).flatMap { listOf(canonical(it.prompt), canonical(it.transcript)) }
+		val generatedText = generatedCases.map { canonical(it.transcript) }
+		assertEquals(generatedText.size, generatedText.toSet().size)
+		assertTrue("Generated transcripts must be disjoint from the original sets",
+			generatedCases.none { canonical(it.prompt) in reserved || canonical(it.transcript) in reserved })
+		assertEquals(setOf("clean", "paraphrase", "grammar", "asr-like", "typo-1", "typo-2", "negative"),
+			generatedCases.map { it.category.substringAfter(" / ") }.toSet())
+
 		val fitStarted = SystemClock.elapsedRealtimeNanos()
 		val classifier = ItalianIntentClassifier(training)
 		val fitMillis = (SystemClock.elapsedRealtimeNanos() - fitStarted) / 1_000_000.0
@@ -61,42 +83,41 @@ class VoiceIntentComparisonTest {
 		val report = StringBuilder("Android ${Build.VERSION.SDK_INT}, ${Build.MODEL}, ${Build.SUPPORTED_ABIS.first()}\n")
 		report.appendLine("${training.size} training examples, ${classifier.weightCount} sparse weights")
 		report.appendLine("Classifier fit: %.1f ms (one cold construction)".format(Locale.ROOT, fitMillis))
-		report.appendLine("${cases.size} written transcripts, ${syntheticCases.size} Vosk transcripts")
+		report.appendLine("${cases.size} written transcripts, ${syntheticCases.size} Vosk transcripts, ${generatedCases.size} generated transcripts")
 		report.appendLine("Each row reports correct, missed, wrong plan, false acceptance.")
-		for ((category, categoryCases) in (cases + syntheticCases).groupBy { it.category }) {
+		for ((category, categoryCases) in (cases + syntheticCases + generatedCases).groupBy { it.category }) {
 			report.appendLine("$category (${categoryCases.size})")
 			for ((name, interpreter) in listOf("A parser" to parser, "B classifier" to candidate)) {
-				val outcomes = categoryCases.groupingBy { case -> outcome(case, interpreter(case.transcript)) }.eachCount()
-				report.appendLine("  $name: ${Outcome.entries.joinToString { (outcomes[it] ?: 0).toString() }}")
-			}
-		}
-		for (case in cases + syntheticCases) {
-			val a = parser(case.transcript)?.actions
-			val b = candidate(case.transcript)?.actions
-			if (a != case.expected || b != case.expected) {
-				report.appendLine("${case.category} | prompt=${case.prompt} | transcript=${case.transcript} | expected=${case.expected} | A=$a | B=$b")
+				val results = categoryCases.map { case -> Result(case, interpreter(case.transcript)) }
+				val byOutcome = results.groupBy { it.outcome }
+				report.appendLine("  $name: ${Outcome.entries.joinToString { byOutcome[it].orEmpty().size.toString() }}")
+				for (outcome in listOf(Outcome.WRONG_PLAN, Outcome.FALSE_ACCEPTANCE, Outcome.MISSED)) {
+					for ((case, plan) in byOutcome[outcome].orEmpty().take(2)) {
+						report.appendLine("    $outcome | prompt=${case.prompt} | transcript=${case.transcript} | expected=${case.expected} | actual=${plan?.actions}")
+					}
+				}
 			}
 		}
 
-		val transcripts = (cases + syntheticCases).map { it.transcript }
+		val timingTranscripts = (cases + syntheticCases).map { it.transcript }
 		repeat(WARMUP_BATCHES) {
-			checksum(transcripts, parser)
-			checksum(transcripts, candidate)
+			checksum(timingTranscripts, parser)
+			checksum(timingTranscripts, candidate)
 		}
-		val expectedA = checksum(transcripts, parser)
-		val expectedB = checksum(transcripts, candidate)
+		val expectedA = checksum(timingTranscripts, parser)
+		val expectedB = checksum(timingTranscripts, candidate)
 		val samplesA = mutableListOf<Double>()
 		val samplesB = mutableListOf<Double>()
 		repeat(BATCHES) { batch ->
 			if (batch % 2 == 0) {
-				samplesA += measureBatch(transcripts, parser, expectedA)
-				samplesB += measureBatch(transcripts, candidate, expectedB)
+				samplesA += measureBatch(timingTranscripts, parser, expectedA)
+				samplesB += measureBatch(timingTranscripts, candidate, expectedB)
 			} else {
-				samplesB += measureBatch(transcripts, candidate, expectedB)
-				samplesA += measureBatch(transcripts, parser, expectedA)
+				samplesB += measureBatch(timingTranscripts, candidate, expectedB)
+				samplesA += measureBatch(timingTranscripts, parser, expectedA)
 			}
 		}
-		report.appendLine("$BATCHES alternating batches per interpreter, $REPEATS corpus passes per batch")
+		report.appendLine("$BATCHES alternating batches per interpreter, $REPEATS passes over ${timingTranscripts.size} original cases per batch")
 		report.appendLine(timing("A parser", samplesA))
 		report.appendLine(timing("B classifier", samplesB))
 		report.lineSequence().filter(String::isNotBlank).forEach { Log.i("LoopoVoiceAB", it) }
@@ -107,7 +128,7 @@ class VoiceIntentComparisonTest {
 
 	private fun parseExpected(text: String): List<VoiceAction>? {
 		if (text == "reject") return null
-		return text.split(',').map { action ->
+		val actions = text.split(',').map { action ->
 			when (action.substringBefore(':')) {
 				"resume" -> VoiceAction.Resume
 				"pause" -> VoiceAction.StayPaused
@@ -116,13 +137,7 @@ class VoiceIntentComparisonTest {
 				else -> error("Unknown expected action $action")
 			}
 		}
-	}
-
-	private fun outcome(case: Case, plan: VoicePlan?): Outcome = when {
-		plan?.actions == case.expected -> Outcome.CORRECT
-		case.expected == null -> Outcome.FALSE_ACCEPTANCE
-		plan == null -> Outcome.MISSED
-		else -> Outcome.WRONG_PLAN
+		return checkNotNull(VoicePlan.validated(actions)) { "Invalid expected plan: $text" }.actions
 	}
 
 	private fun checksum(transcripts: List<String>, interpret: (String) -> VoicePlan?): Int =

@@ -35,13 +35,17 @@ class VoiceIntentComparisonTest {
 	}
 
 	@Test
-	fun replaySameTranscriptsThroughBothInterpreters() {
+	fun replaySameTranscriptsThroughAllInterpreters() {
 		val assets = InstrumentationRegistry.getInstrumentation().context.assets
-		val training = assets.open("voice-intent-ab/training.txt").bufferedReader().use { it.readLines() }
-			.filter(String::isNotBlank).map { line ->
+		fun readTraining(name: String) = assets.open("voice-intent-ab/$name").bufferedReader().useLines { lines ->
+			lines.map { line ->
 				val (label, transcript) = line.split('|', limit = 2)
 				ItalianIntent.valueOf(label) to transcript
-			}
+			}.toList()
+		}
+		val training = readTraining("training.txt")
+		val extraTraining = readTraining("training-extra.txt")
+		val expandedTraining = training + extraTraining
 		val cases = assets.open("voice-intent-ab/evaluation.txt").bufferedReader().use { it.readLines() }
 			.filter(String::isNotBlank).map { line ->
 				val (category, expected, transcript) = line.split('|', limit = 3)
@@ -75,19 +79,36 @@ class VoiceIntentComparisonTest {
 		assertEquals(setOf("clean", "paraphrase", "grammar", "asr-like", "typo-1", "typo-2", "negative"),
 			generatedCases.map { it.category.substringAfter(" / ") }.toSet())
 
-		val fitStarted = SystemClock.elapsedRealtimeNanos()
-		val classifier = ItalianIntentClassifier(training)
-		val fitMillis = (SystemClock.elapsedRealtimeNanos() - fitStarted) / 1_000_000.0
-		val parser = ItalianVoiceCommandParser::parse
-		val candidate = classifier::interpret
+		val holdout = assets.open("voice-intent-ab/training-holdout.txt").bufferedReader().useLines { lines ->
+			lines.map { line ->
+				val (category, expected, transcript) = line.split('|', limit = 3)
+				Case("holdout / $category", parseExpected(expected), transcript)
+			}.toList()
+		}
+		val originalCases = cases + syntheticCases + generatedCases
+		val allCases = originalCases + holdout
+		val expandedText = expandedTraining.map { canonical(it.second) }.toSet()
+		assertEquals("Duplicate training examples", expandedTraining.size, expandedText.size)
+		assertTrue("Training must exclude evaluation prompts and transcripts",
+			allCases.none { canonical(it.prompt) in expandedText || canonical(it.transcript) in expandedText })
+		val previousText = originalCases
+			.flatMap { listOf(canonical(it.prompt), canonical(it.transcript)) }.toSet()
+		assertEquals(setOf("clean", "paraphrase", "noisy", "negative"),
+			holdout.map { it.category.substringAfter(" / ") }.toSet())
+		assertEquals("Duplicate holdout examples", holdout.size, holdout.map { canonical(it.transcript) }.toSet().size)
+		assertTrue("Holdout must exclude the previous evaluation data", holdout.none { canonical(it.transcript) in previousText })
+
 		val report = StringBuilder("Android ${Build.VERSION.SDK_INT}, ${Build.MODEL}, ${Build.SUPPORTED_ABIS.first()}\n")
-		report.appendLine("${training.size} training examples, ${classifier.weightCount} sparse weights")
-		report.appendLine("Classifier fit: %.1f ms (one cold construction)".format(Locale.ROOT, fitMillis))
-		report.appendLine("${cases.size} written transcripts, ${syntheticCases.size} Vosk transcripts, ${generatedCases.size} generated transcripts")
+		val interpreters = listOf(
+			"A parser" to ItalianVoiceCommandParser::parse,
+			"B original" to fit("B original", training, report)::interpret,
+			"C expanded" to fit("C expanded", expandedTraining, report)::interpret,
+		)
+		report.appendLine("${cases.size} written transcripts, ${syntheticCases.size} Vosk transcripts, ${generatedCases.size} generated transcripts, ${holdout.size} holdout transcripts")
 		report.appendLine("Each row reports correct, missed, wrong plan, false acceptance.")
-		for ((category, categoryCases) in (cases + syntheticCases + generatedCases).groupBy { it.category }) {
+		for ((category, categoryCases) in allCases.groupBy { it.category }) {
 			report.appendLine("$category (${categoryCases.size})")
-			for ((name, interpreter) in listOf("A parser" to parser, "B classifier" to candidate)) {
+			for ((name, interpreter) in interpreters) {
 				val results = categoryCases.map { case -> Result(case, interpreter(case.transcript)) }
 				val byOutcome = results.groupBy { it.outcome }
 				report.appendLine("  $name: ${Outcome.entries.joinToString { byOutcome[it].orEmpty().size.toString() }}")
@@ -101,26 +122,32 @@ class VoiceIntentComparisonTest {
 
 		val timingTranscripts = (cases + syntheticCases).map { it.transcript }
 		repeat(WARMUP_BATCHES) {
-			checksum(timingTranscripts, parser)
-			checksum(timingTranscripts, candidate)
+			for ((_, interpret) in interpreters) checksum(timingTranscripts, interpret)
 		}
-		val expectedA = checksum(timingTranscripts, parser)
-		val expectedB = checksum(timingTranscripts, candidate)
-		val samplesA = mutableListOf<Double>()
-		val samplesB = mutableListOf<Double>()
+		val checksums = interpreters.associate { (name, interpret) -> name to checksum(timingTranscripts, interpret) }
+		val samples = interpreters.associate { (name, _) -> name to mutableListOf<Double>() }
 		repeat(BATCHES) { batch ->
-			if (batch % 2 == 0) {
-				samplesA += measureBatch(timingTranscripts, parser, expectedA)
-				samplesB += measureBatch(timingTranscripts, candidate, expectedB)
-			} else {
-				samplesB += measureBatch(timingTranscripts, candidate, expectedB)
-				samplesA += measureBatch(timingTranscripts, parser, expectedA)
+			val offset = batch % interpreters.size
+			for ((name, interpret) in interpreters.drop(offset) + interpreters.take(offset)) {
+				samples.getValue(name) += measureBatch(timingTranscripts, interpret, checksums.getValue(name))
 			}
 		}
-		report.appendLine("$BATCHES alternating batches per interpreter, $REPEATS passes over ${timingTranscripts.size} original cases per batch")
-		report.appendLine(timing("A parser", samplesA))
-		report.appendLine(timing("B classifier", samplesB))
+		report.appendLine("$BATCHES rotated batches per interpreter, $REPEATS passes over ${timingTranscripts.size} original cases per batch")
+		for ((name, timings) in samples) report.appendLine(timing(name, timings))
 		report.lineSequence().filter(String::isNotBlank).forEach { Log.i("LoopoVoiceAB", it) }
+	}
+
+	private fun fit(
+		name: String,
+		training: List<Pair<ItalianIntent, String>>,
+		report: StringBuilder,
+	): ItalianIntentClassifier {
+		val start = SystemClock.elapsedRealtimeNanos()
+		val classifier = ItalianIntentClassifier(training)
+		val elapsed = (SystemClock.elapsedRealtimeNanos() - start) / 1_000_000.0
+		report.appendLine("%s: %d training examples, %d sparse weights, %.1f ms fit"
+			.format(Locale.ROOT, name, training.size, classifier.weightCount, elapsed))
+		return classifier
 	}
 
 	private fun canonical(text: String): String = Normalizer.normalize(text.lowercase(Locale.ITALIAN), Normalizer.Form.NFD)

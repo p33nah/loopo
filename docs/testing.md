@@ -117,7 +117,7 @@ Record each physical-device run with commit, APK SHA-256, Android version, ABI, 
 
 ## Compare Italian command interpreters
 
-The test APK compares the current parser with a supervised nearest-centroid classifier. The classifier learns one sparse weight vector per intent from `training.txt`. Its inputs are word and character trigram features. A separate extractor supplies the rate or delta, and both interpreters return the app's typed voice plans. The test compares the complete action list, including any resume step.
+The test APK compares the current parser with two fits of the same supervised nearest-centroid classifier. B trains on the 57 examples in `training.txt`. C adds the 112 examples in `training-extra.txt`, including 32 phrases that resemble commands but refer to another action or object. Its inputs are word and character trigram features. A separate extractor supplies the rate or delta, and both interpreters return the app's typed voice plans. The test compares the complete action list, including any resume step.
 
 `evaluation.txt` contains written commands and simulated transcription errors. `vosk-synthetic.txt` contains 12 prompts spoken by Microsoft Elsa Desktop and Microsoft Cosimo, with transcripts produced by the Windows Vosk 0.3.45 runtime. The replay used the same pinned Italian model as Loopo, with mono 16 kHz PCM in 100 ms chunks and an unconstrained recognizer. It flushes the recognizer at the end of each clip if no endpoint has returned text. The app uses the Android runtime and live microphone endpointing. The synthetic sample tests interpretation of Vosk output and cannot establish microphone or wake accuracy.
 
@@ -130,6 +130,8 @@ python scripts/generate_voice_evaluation.py
 python scripts/generate_voice_evaluation.py --check
 ```
 
+`training-holdout.txt` contains 60 independently written evaluation cases for the training comparison. Both fits receive the same evaluation inputs. The test checks for duplicate training examples and excludes matching evaluation prompts or transcripts after normalization.
+
 Build and install the app and test APKs on one Android target. Run the paired replay and read its report.
 
 ```powershell
@@ -140,6 +142,6 @@ adb shell am instrument -w -e class com.p33nah.loopo.ui.voice.VoiceIntentCompari
 adb logcat -d -s LoopoVoiceAB:I '*:S'
 ```
 
-The report counts exact plans and correct rejections together. It reports missed commands, wrong plans, and accepted negative cases separately. Timing covers warmed interpretation and result hashing. It excludes model training, Vosk, and playback. Each side runs 15 batches in alternating order over the original 92 cases. The generated corpus contributes to the accuracy comparison. The p95 describes batch averages, not individual command latency. The report also prints one cold classifier construction time and the number of fitted weights. The training text is 1,915 bytes before compression. The 726 fitted double coefficients account for 5,808 bytes of numeric values. This count excludes map entries, feature strings, and object overhead.
+The report counts exact plans and correct rejections together. It reports missed commands, wrong plans, and accepted negative cases separately. Timing covers warmed interpretation and result hashing. It excludes model training, Vosk, and playback. Each interpreter runs 15 batches in rotating order over the original 92 cases. The generated corpus contributes to the accuracy comparison. The p95 describes batch averages, not individual command latency. The report prints one fit time and the number of fitted weights for each classifier. B fits 726 double coefficients and C fits 1,473. The coefficient count excludes map entries, feature strings, and object overhead.
 
-Keep the training set fixed when comparing results. Read the generated categories separately because many rows share a template. The synthetic corpus measures interpretation of text. Microphone accuracy and device resource use require separate measurements.
+Keep the evaluation sets fixed when comparing training data. Read the generated categories separately because many rows share a template. The synthetic corpus measures interpretation of text. Microphone accuracy and device resource use require separate measurements.

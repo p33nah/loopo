@@ -37,23 +37,38 @@ internal class ItalianIntentClassifier(training: List<Pair<ItalianIntent, String
 		val amounts = findAmounts(tokens)
 		if (amounts.size > 1) return null
 		val amount = amounts.singleOrNull()
-		val features = features(maskAmount(tokens, amount))
+		val scores = scores(maskAmount(tokens, amount))
+		val (intent, score) = scores.first()
+		val competing = scores[1].second
+		if (score < MIN_SIMILARITY || score - competing < MIN_MARGIN) return null
+		return action(intent, amount)
+	}
+
+	internal fun interpretConstrained(intent: ItalianIntent, words: List<String>, amount: Amount?): VoiceAction? {
+		val features = if (amount == null) words else words + amount.kind.feature
+		val scores = scores(features).toMap()
+		val score = scores.getValue(intent)
+		if (score < MIN_SIMILARITY || score <= scores.getValue(ItalianIntent.REJECT)) return null
+		return action(intent, amount)
+	}
+
+	private fun scores(tokens: List<String>): List<Pair<ItalianIntent, Double>> {
+		val features = features(tokens)
 		val norm = sqrt(features.size.toDouble())
-		val scores = weights.map { (intent, centroid) ->
+		return weights.map { (intent, centroid) ->
 			intent to features.sumOf { centroid[it] ?: 0.0 } / norm
 		}.sortedByDescending { it.second }
-		val (intent, score) = scores.first()
-		if (score < MIN_SIMILARITY || score - scores[1].second < MIN_MARGIN) return null
-		return when (intent) {
-			ItalianIntent.RESUME -> if (amount == null) VoiceAction.Resume else null
-			ItalianIntent.PAUSE -> if (amount == null) VoiceAction.StayPaused else null
-			ItalianIntent.SET_RATE -> amount?.takeIf { it.kind == AmountKind.TARGET }
-				?.value?.takeIf { it in PlaybackRate.MIN_PERCENT..PlaybackRate.MAX_PERCENT }
-				?.let { VoiceAction.SetRate(PlaybackRate(it)) }
-			ItalianIntent.INCREASE_RATE -> relativeAction(amount, 1)
-			ItalianIntent.DECREASE_RATE -> relativeAction(amount, -1)
-			ItalianIntent.REJECT -> null
-		}
+	}
+
+	private fun action(intent: ItalianIntent, amount: Amount?): VoiceAction? = when (intent) {
+		ItalianIntent.RESUME -> if (amount == null) VoiceAction.Resume else null
+		ItalianIntent.PAUSE -> if (amount == null) VoiceAction.StayPaused else null
+		ItalianIntent.SET_RATE -> amount?.takeIf { it.kind == AmountKind.TARGET }
+			?.value?.takeIf { it in PlaybackRate.MIN_PERCENT..PlaybackRate.MAX_PERCENT }
+			?.let { VoiceAction.SetRate(PlaybackRate(it)) }
+		ItalianIntent.INCREASE_RATE -> relativeAction(amount, 1)
+		ItalianIntent.DECREASE_RATE -> relativeAction(amount, -1)
+		ItalianIntent.REJECT -> null
 	}
 
 	private fun relativeAction(amount: Amount?, sign: Int): VoiceAction? =
@@ -61,11 +76,11 @@ internal class ItalianIntentClassifier(training: List<Pair<ItalianIntent, String
 			?.let { RateDeltaPercent.from(it.value * sign) }
 			?.let(VoiceAction::AdjustRate)
 
-	private enum class AmountKind(val feature: String) {
+	internal enum class AmountKind(val feature: String) {
 		TARGET("@target"), DELTA("@delta"), UNSPECIFIED("@amount"),
 	}
 
-	private data class Amount(
+	internal data class Amount(
 		val value: Int,
 		val start: Int,
 		val end: Int,
@@ -73,7 +88,7 @@ internal class ItalianIntentClassifier(training: List<Pair<ItalianIntent, String
 		val hasUnit: Boolean,
 	)
 
-	private companion object {
+	internal companion object {
 		const val MIN_SIMILARITY = 0.22
 		const val MIN_MARGIN = 0.03
 		val signedOrDecimal = Regex("[-+−]\\s*\\d|\\d[.,]\\d")
@@ -111,21 +126,28 @@ internal class ItalianIntentClassifier(training: List<Pair<ItalianIntent, String
 
 		fun words(text: String): List<String> = normalize(text).split(' ')
 
-		fun findAmounts(tokens: List<String>): List<Amount> {
+		fun findAmounts(tokens: List<String>, splitHundreds: Boolean = false): List<Amount> {
 			val amounts = mutableListOf<Amount>()
 			var index = 0
 			while (index < tokens.size) {
 				val token = tokens[index]
 				val next = tokens.getOrNull(index + 1)
-				val joined = if (token in tens && token.isNotEmpty() && next in ones.drop(1)) {
-					numbers.getValue(token) + ones.indexOf(next)
-				} else null
-				val value = joined ?: numbers[token] ?: token.toIntOrNull()
+				val unitAfterDecade = next != null && next in ones && next != "zero"
+				val hundreds = if (splitHundreds && token == "cento") numbers[next]?.takeIf { it in 1..99 } else null
+				val joined = when {
+					token in tens && token.isNotEmpty() && unitAfterDecade ->
+						numbers.getValue(token) + ones.indexOf(next)
+					hundreds != null -> 100 + hundreds
+					else -> null
+				}
+				val tail = tokens.getOrNull(index + 2)
+				val splitHundredUnit = if (hundreds != null && next in tens && tail in ones && tail != "zero") ones.indexOf(tail) else 0
+				val value = joined?.plus(splitHundredUnit) ?: numbers[token] ?: token.toIntOrNull()
 				if (value == null || (token == "cento" && tokens.getOrNull(index - 1) == "per")) {
 					index++
 					continue
 				}
-				val numberEnd = index + if (joined == null) 1 else 2
+				val numberEnd = index + if (joined == null) 1 else if (splitHundredUnit == 0) 2 else 3
 				val unitEnd = when {
 					tokens.getOrNull(numberEnd) in setOf("%", "percento") -> numberEnd + 1
 					tokens.getOrNull(numberEnd) == "per" && tokens.getOrNull(numberEnd + 1) == "cento" -> numberEnd + 2

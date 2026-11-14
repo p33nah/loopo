@@ -117,7 +117,7 @@ Record each physical-device run with commit, APK SHA-256, Android version, ABI, 
 
 ## Compare Italian command interpreters
 
-The test APK compares the current parser with two fits of the same supervised nearest-centroid classifier. B trains on the 57 examples in `training.txt`. C adds the 112 examples in `training-extra.txt`, including 32 phrases that resemble commands but refer to another action or object. Its inputs are word and character trigram features. A separate extractor supplies the rate or delta, and both interpreters return the app's typed voice plans. The test compares the complete action list, including any resume step.
+The test APK compares the current parser with two fits of the same supervised nearest-centroid classifier and a guarded variant. B trains on the 57 examples in `training.txt`. C adds the 112 examples in `training-extra.txt`, including 32 phrases that resemble commands but refer to another action or object. Its inputs are word and character trigram features. A separate extractor supplies the rate or delta, and both interpreters return the app's typed voice plans. The test compares the complete action list, including any resume step.
 
 `evaluation.txt` contains written commands and simulated transcription errors. `vosk-synthetic.txt` contains 12 prompts spoken by Microsoft Elsa Desktop and Microsoft Cosimo, with transcripts produced by the Windows Vosk 0.3.45 runtime. The replay used the same pinned Italian model as Loopo, with mono 16 kHz PCM in 100 ms chunks and an unconstrained recognizer. It flushes the recognizer at the end of each clip if no endpoint has returned text. The app uses the Android runtime and live microphone endpointing. The synthetic sample tests interpretation of Vosk output and cannot establish microphone or wake accuracy.
 
@@ -130,7 +130,11 @@ python scripts/generate_voice_evaluation.py
 python scripts/generate_voice_evaluation.py --check
 ```
 
-`training-holdout.txt` contains 60 independently written evaluation cases for the training comparison. Both fits receive the same evaluation inputs. The test checks for duplicate training examples and excludes matching evaluation prompts or transcripts after normalization.
+`training-holdout.txt` contains 60 independently written evaluation cases for the training comparison. All interpreters receive the same evaluation inputs. The test checks for duplicate training examples and excludes matching evaluation prompts or transcripts after normalization.
+
+D keeps existing parser results and checks parser rejections for a supported command and a compatible amount. The checks cover the whole phrase, including each clause of a sequence. D permits a single-character edit to a known command word at the start of a clause when the correction resolves to one action. It keeps numbers exact, with support for split Italian number words. The classifier may veto a candidate plan. It cannot change the grounded action, amount, or direction. D reuses the weights from C.
+
+`guarded-holdout.txt` includes separately authored challenges and regression cases added during review. The replay asserts that D preserves successful parser commands, recovers commands the parser rejected, and proposes no wrong plans or false acceptances on these corpora. The candidate runs only in the test APK.
 
 Build and install the app and test APKs on one Android target. Run the paired replay and read its report.
 

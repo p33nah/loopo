@@ -86,7 +86,13 @@ class VoiceIntentComparisonTest {
 			}.toList()
 		}
 		val originalCases = cases + syntheticCases + generatedCases
-		val allCases = originalCases + holdout
+		val challenge = assets.open("voice-intent-ab/guarded-holdout.txt").bufferedReader().useLines { lines ->
+			lines.map { line ->
+				val (category, expected, transcript) = line.split('|', limit = 3)
+				Case("challenge / $category", parseExpected(expected), transcript)
+			}.toList()
+		}
+		val allCases = originalCases + holdout + challenge
 		val expandedText = expandedTraining.map { canonical(it.second) }.toSet()
 		assertEquals("Duplicate training examples", expandedTraining.size, expandedText.size)
 		assertTrue("Training must exclude evaluation prompts and transcripts",
@@ -98,13 +104,22 @@ class VoiceIntentComparisonTest {
 		assertEquals("Duplicate holdout examples", holdout.size, holdout.map { canonical(it.transcript) }.toSet().size)
 		assertTrue("Holdout must exclude the previous evaluation data", holdout.none { canonical(it.transcript) in previousText })
 
+		val challengeText = challenge.map { canonical(it.transcript) }.toSet()
+		val holdoutText = holdout.map { canonical(it.transcript) }.toSet()
+		assertEquals("Duplicate challenge examples", challenge.size, challengeText.size)
+		assertTrue("Challenge must exclude the previous evaluation data",
+			challengeText.none { it in previousText || it in holdoutText })
 		val report = StringBuilder("Android ${Build.VERSION.SDK_INT}, ${Build.MODEL}, ${Build.SUPPORTED_ABIS.first()}\n")
+		val original = fit("B original", training, report)
+		val expanded = fit("C expanded", expandedTraining, report)
+		val guarded = GuardedItalianInterpreter(expanded)
 		val interpreters = listOf(
 			"A parser" to ItalianVoiceCommandParser::parse,
-			"B original" to fit("B original", training, report)::interpret,
-			"C expanded" to fit("C expanded", expandedTraining, report)::interpret,
+			"B original" to original::interpret,
+			"C expanded" to expanded::interpret,
+			"D guarded" to guarded::interpret,
 		)
-		report.appendLine("${cases.size} written transcripts, ${syntheticCases.size} Vosk transcripts, ${generatedCases.size} generated transcripts, ${holdout.size} holdout transcripts")
+		report.appendLine("${cases.size} written transcripts, ${syntheticCases.size} Vosk transcripts, ${generatedCases.size} generated transcripts, ${holdout.size} holdout transcripts, ${challenge.size} challenge transcripts")
 		report.appendLine("Each row reports correct, missed, wrong plan, false acceptance.")
 		for ((category, categoryCases) in allCases.groupBy { it.category }) {
 			report.appendLine("$category (${categoryCases.size})")
@@ -120,6 +135,19 @@ class VoiceIntentComparisonTest {
 			}
 		}
 
+		var recovered = 0
+		for (case in allCases) {
+			val baseline = ItalianVoiceCommandParser.parse(case.transcript)?.actions
+			val candidate = guarded.interpret(case.transcript)
+			if (baseline != null && baseline == case.expected) {
+				assertEquals("Lost an existing command: ${case.transcript}", baseline, candidate?.actions)
+			}
+			assertTrue("Guarded candidate proposed an unintended action: ${case.transcript}",
+				candidate == null || candidate.actions == case.expected)
+			if (baseline == null && candidate != null) recovered++
+		}
+		assertTrue("Guarded candidate must recover at least one command", recovered > 0)
+		report.appendLine("Guarded candidate recovered $recovered commands rejected by the parser.")
 		val timingTranscripts = (cases + syntheticCases).map { it.transcript }
 		repeat(WARMUP_BATCHES) {
 			for ((_, interpret) in interpreters) checksum(timingTranscripts, interpret)

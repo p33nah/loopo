@@ -1,0 +1,24 @@
+Elsa|set:80,resume|velocità a ottanta percento e poi riprendi|velocità ottanta per cento e poi riprendi
+Cosimo|set:80,resume|velocità a ottanta percento e poi riprendi|velocità ottanta per cento e poi riprendi
+Elsa|set:75|velocità a settantacinque|velocità settantacinque
+Cosimo|set:75|velocità a settantacinque|velocità settantacinque
+Elsa|set:80,resume|velocità a ottanta e poi parti|velocità ottanta e poi parti
+Cosimo|set:80,resume|velocità a ottanta e poi parti|velocità ottanta e poi parti
+Elsa|delta:5|aumenta del cinque per cento la velocità|aumenta del cinque percento la velocità
+Cosimo|delta:5|aumenta del cinque per cento la velocità|aumento del cinque percento la velocità
+Elsa|resume|puoi far ripartire il brano per favore|puoi far ripartire il brano per favore
+Cosimo|resume|puoi far ripartire il brano per favore|vuoi far ripartire il brano per favore
+Elsa|pause|puoi mettere in pausa la traccia|puoi mettere in pausa la traccia
+Cosimo|pause|puoi mettere in pausa la traccia|puoi mettere in pausa la traccia
+Elsa|set:65|rallentare il brano al sessantacinque grazie|rallentare il brano al sessantacinque grazie
+Cosimo|set:65|rallentare il brano al sessantacinque grazie|rallentare il brano al sessantacinque grazie
+Elsa|set:77,resume|regola la velocità al settantasette poi avvia il brano|regola la velocità al settantasette poi avvia il brano
+Cosimo|set:77,resume|regola la velocità al settantasette poi avvia il brano|regolare la velocità del settantasette poi via il brano
+Elsa|reject|non mettere in pausa il brano|non mettere in pausa il brano
+Cosimo|reject|non mettere in pausa il brano|non mettere in pausa il brano
+Elsa|reject|metti il volume all'ottanta per cento|metti il volume all'ottanta percento
+Cosimo|reject|metti il volume all'ottanta per cento|metti il volume all'ottanta percento
+Elsa|reject|velocità a settanta oppure ottanta|velocità settanta oppure ottanta
+Cosimo|reject|velocità a settanta oppure ottanta|velocità settanta o ottanta
+Elsa|reject|fa partire la registrazione|fa partire la registrazione
+Cosimo|reject|fa partire la registrazione|fa partire la registrazione

@@ -114,3 +114,23 @@ The feature matrix identifies the required evidence for the release:
 Use a generated sine or short redistributable recording in mono and stereo at 44.1 and 48 kHz. Include a one-frame or very short WAV, invalid header, truncated payload, unsupported channel layout, and long file. Check playback rates at 25%, 100%, and 200%, plus a fractional value such as 73%. Check loops around the crossfade limit and the two-second cache boundary.
 
 Record each physical-device run with commit, APK SHA-256, Android version, ABI, page size, device model, output route, scenario, and result. Keep document URIs and private recordings out of public logs. A passed emulator run does not replace this matrix.
+
+## Compare Italian command interpreters
+
+The test APK compares the current parser with a supervised nearest-centroid classifier. The classifier learns one sparse weight vector per intent from `training.txt`. Its inputs are word and character trigram features. A separate extractor supplies the rate or delta, and both interpreters return the app's typed voice plans. The test compares the complete action list, including any resume step.
+
+`evaluation.txt` contains written commands and simulated transcription errors. `vosk-synthetic.txt` contains 12 prompts spoken by Microsoft Elsa Desktop and Microsoft Cosimo, with transcripts produced by the Windows Vosk 0.3.45 runtime. The replay used the same pinned Italian model as Loopo, with mono 16 kHz PCM in 100 ms chunks and an unconstrained recognizer. It flushes the recognizer at the end of each clip if no endpoint has returned text. The app uses the Android runtime and live microphone endpointing. The synthetic sample tests interpretation of Vosk output and cannot establish microphone or wake accuracy.
+
+Build and install the app and test APKs on one Android target. Run the paired replay and read its report.
+
+```powershell
+.\gradlew.bat assembleDebug assembleDebugAndroidTest --console=plain
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell am instrument -w -e class com.p33nah.loopo.ui.voice.VoiceIntentComparisonTest com.p33nah.loopo.test/androidx.test.runner.AndroidJUnitRunner
+adb logcat -d -s LoopoVoiceAB:I '*:S'
+```
+
+The report counts exact plans and correct rejections together. It reports missed commands, wrong plans, and accepted negative cases separately. Timing covers warmed interpretation and result hashing. It excludes model training, Vosk, and playback. Each side runs 15 batches in alternating order. The p95 describes batch averages, not individual command latency. The report also prints one cold classifier construction time and the number of fitted weights. The training text is 1,915 bytes before compression. The 726 fitted double coefficients account for 5,808 bytes of numeric values. This count excludes map entries, feature strings, and object overhead.
+
+For a phone trial, collect a fresh set of prompts with the intended action and the text displayed by Loopo. Include different speakers, background noise, and negative prompts. Keep only text and expected plans. Add the examples to the evaluation corpus and run both interpreters on the phone. Keep the training set fixed for the comparison. Review every false acceptance and wrong plan before considering production use.

@@ -114,3 +114,38 @@ The feature matrix identifies the required evidence for the release:
 Use a generated sine or short redistributable recording in mono and stereo at 44.1 and 48 kHz. Include a one-frame or very short WAV, invalid header, truncated payload, unsupported channel layout, and long file. Check playback rates at 25%, 100%, and 200%, plus a fractional value such as 73%. Check loops around the crossfade limit and the two-second cache boundary.
 
 Record each physical-device run with commit, APK SHA-256, Android version, ABI, page size, device model, output route, scenario, and result. Keep document URIs and private recordings out of public logs. A passed emulator run does not replace this matrix.
+
+## Compare Italian command interpreters
+
+The test APK compares the current parser with two fits of the same supervised nearest-centroid classifier and a guarded variant. B trains on the 57 examples in `training.txt`. C adds the 112 examples in `training-extra.txt`, including 32 phrases that resemble commands but refer to another action or object. Its inputs are word and character trigram features. A separate extractor supplies the rate or delta, and both interpreters return the app's typed voice plans. The test compares the complete action list, including any resume step.
+
+`evaluation.txt` contains written commands and simulated transcription errors. `vosk-synthetic.txt` contains 12 prompts spoken by Microsoft Elsa Desktop and Microsoft Cosimo, with transcripts produced by the Windows Vosk 0.3.45 runtime. The replay used the same pinned Italian model as Loopo, with mono 16 kHz PCM in 100 ms chunks and an unconstrained recognizer. It flushes the recognizer at the end of each clip if no endpoint has returned text. The app uses the Android runtime and live microphone endpointing. The synthetic sample tests interpretation of Vosk output and cannot establish microphone or wake accuracy.
+
+`generated-evaluation.txt` adds a deterministic stress corpus built from Italian phrase templates and labelled playback plans. Each row records the category, expected plan, source phrase, and input text. A label comes from the intended action before text mutations. The generator keeps the original number and negation intact in the one- and two-edit cases. A swapped pair of adjacent characters counts as one edit. Relative rate labels follow the existing Loopo convention of adding or subtracting percentage points. The generated cases also cover agreement errors, split number words, dropped prepositions, and commands that must be rejected.
+
+Regenerate the corpus after editing the templates. Use `--check` to confirm that the committed file matches the generator output.
+
+```powershell
+python scripts/generate_voice_evaluation.py
+python scripts/generate_voice_evaluation.py --check
+```
+
+`training-holdout.txt` contains 60 independently written evaluation cases for the training comparison. All interpreters receive the same evaluation inputs. The test checks for duplicate training examples and excludes matching evaluation prompts or transcripts after normalization.
+
+D keeps existing parser results and checks parser rejections for a supported command and a compatible amount. The checks cover the whole phrase, including each clause of a sequence. D permits a single-character edit to a known command word at the start of a clause when the correction resolves to one action. It keeps numbers exact, with support for split Italian number words. The classifier may veto a candidate plan. It cannot change the grounded action, amount, or direction. D reuses the weights from C.
+
+`guarded-holdout.txt` includes separately authored challenges and regression cases added during review. The replay asserts that D preserves successful parser commands, recovers commands the parser rejected, and proposes no wrong plans or false acceptances on these corpora. The candidate runs only in the test APK.
+
+Build and install the app and test APKs on one Android target. Run the paired replay and read its report.
+
+```powershell
+.\gradlew.bat assembleDebug assembleDebugAndroidTest --console=plain
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell am instrument -w -e class com.p33nah.loopo.ui.voice.VoiceIntentComparisonTest com.p33nah.loopo.test/androidx.test.runner.AndroidJUnitRunner
+adb logcat -d -s LoopoVoiceAB:I '*:S'
+```
+
+The report counts exact plans and correct rejections together. It reports missed commands, wrong plans, and accepted negative cases separately. Timing covers warmed interpretation and result hashing. It excludes model training, Vosk, and playback. Each interpreter runs 15 batches in rotating order over the original 92 cases. The generated corpus contributes to the accuracy comparison. The p95 describes batch averages, not individual command latency. The report prints one fit time and the number of fitted weights for each classifier. B fits 726 double coefficients and C fits 1,473. The coefficient count excludes map entries, feature strings, and object overhead.
+
+Keep the evaluation sets fixed when comparing training data. Read the generated categories separately because many rows share a template. The synthetic corpus measures interpretation of text. Microphone accuracy and device resource use require separate measurements.

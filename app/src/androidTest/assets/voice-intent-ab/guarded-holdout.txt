@@ -1,0 +1,80 @@
+clean|set:72|Porta il loop al settantadue per cento
+clean|set:95|Imposta la velocità del brano a novantacinque percento
+clean|set:110|Metti la riproduzione a 110 per cento
+clean|set:65|Fissa il ritmo al sessantacinque percento
+clean|set:120|Regola il loop sul 120%
+clean|set:88|Imposta la velocità su ottantotto
+clean|set:100|Riporta la velocità al cento per cento
+clean|delta:8|Aumenta di otto punti la velocità del loop
+clean|delta:-8|Riduci la velocità di otto punti percentuali
+clean|delta:3|Alza il ritmo del loop di tre per cento
+clean|delta:-10|Rallenta la riproduzione di dieci punti
+clean|pause|Metti in stop il loop per un momento
+clean|pause|Arresta la riproduzione qui
+clean|pause|Metti il brano in pausa adesso
+clean|resume|Riparti con il loop
+clean|resume|Riattiva la riproduzione
+clean|resume|Togli lo stop e continua
+clean|set:92,resume|Imposta il loop a novantadue e poi riparti
+clean|set:75,resume|Metti la velocità al 75 per cento e continua
+clean|set:105,resume|Porta il brano a 105 e fallo ripartire
+clean|delta:5,resume|Aumenta di cinque punti e riprendi l'ascolto
+negative|reject|Metti in pausa e imposta la velocità a ottanta
+paraphrase|set:84|Vorrei il loop all'ottantaquattro per cento
+paraphrase|set:115|Fai andare la traccia al 115 percento
+paraphrase|set:70|Scegli una velocità pari a settanta
+paraphrase|set:98|Imposta il passo su 98 per cento
+paraphrase|delta:6|Dai sei punti in più alla velocità di riproduzione
+paraphrase|delta:-6|Togli sei punti percentuali al ritmo
+paraphrase|delta:12|Falla andare più veloce di dodici punti
+paraphrase|delta:-4|Rallenta il loop di quattro percento
+paraphrase|pause|Lascia il loop in pausa
+negative|reject|Fermiamo la riproduzione per qualche secondo
+paraphrase|pause|Fai tacere il brano un attimo
+paraphrase|resume|Facciamo ripartire l'esercizio
+paraphrase|resume|Rimetti in esecuzione il brano
+paraphrase|resume|Continua pure ad ascoltare
+paraphrase|set:90,resume|Portalo al novanta per cento e rimetti in moto la traccia
+paraphrase|delta:-5,resume|Togli cinque punti alla velocità e poi continua
+noisy|set:83|Metti la velocita a ottantatre percento, per favore
+noisy|delta:7|Alza di sette puntii la velocità del loop
+noisy|delta:-9|Rallenta di nove per cento, graziee
+noisy|pause|Metti in pausaa il loop
+noisy|resume|Riprendi l'ascolto, ripartii
+noisy|set:80,resume|Imposta il loop a ottanta e riavvialo
+negative|reject|Non mettere in pausa il loop adesso
+negative|reject|Non riprendere ancora la riproduzione
+negative|reject|Non cambiare la velocità del brano
+negative|reject|Se vuoi, metti in pausa il loop
+negative|reject|Quando finisce, riprendi la riproduzione
+negative|reject|Se te lo chiedo dopo, rallenta di cinque punti
+negative|reject|Ho messo in pausa il loop poco fa
+negative|reject|La velocità del brano è impostata a ottanta
+negative|reject|Ieri ho ripreso la riproduzione
+negative|reject|Nel messaggio c'era scritto: «Metti in pausa il loop»
+negative|reject|La frase da trascrivere è “alza la velocità di cinque punti”
+negative|reject|Metti in pausa il metronomo, non il loop
+negative|reject|Alza il volume del loop di cinque punti
+negative|reject|Riprendi il video e lascia fermo il brano
+negative|reject|Imposta il metronomo a cento bpm
+negative|reject|Porta la velocità a 80 oppure a 90, scegli tu
+negative|reject|Metti il loop all'ottanta e poi al novanta per cento
+negative|reject|Rallenta di cinque e accelera di sette punti
+negative|reject|Aumenta di cinque punti, cioè abbassala di cinque
+negative|reject|Imposta a ottanta e poi
+negative|reject|Riprendi e metti in pausa subito
+negative|reject|Alza di cinque il tempo del loop in battiti al minuto
+negative|reject|Puoi dirmi come si mette in pausa il loop?negative|reject|Il brano all'ottanta per cento
+negative|reject|La musica al 72 percento
+negative|reject|Riprendi il brano all'ottantacinque percento
+negative|reject|La traccia parte da sola
+negative|reject|Il loop riparte adesso
+negative|reject|La luminosità a 95 per cento
+negative|reject|Regola la luminosità di riproduzione al 65 percento
+negative|reject|Regola il volume della riproduzione al 58 per cento
+negative|reject|Pausa poi riprendi
+negative|reject|Velocità al 90 poi continua poi ferma
+negative|reject|Velocità ottanta oppure settantacinque
+negative|reject|Riduci la velocità di 3 e aumenta di 4
+negative|reject|'Velocità a 81'
+negative|reject|“Velocità al 93 percento”

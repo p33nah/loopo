@@ -1,0 +1,68 @@
+legacy|resume|parti
+legacy|resume|avvia
+legacy|resume|continua
+legacy|resume|riavvia la riproduzione
+legacy|pause|ferma
+legacy|pause|metti in pausa
+legacy|pause|interrompi
+legacy|set:75|velocità a settantacinque
+legacy|set:80,resume|velocità a ottanta percento e poi riprendi
+legacy|set:75,resume|velocità a 75 e poi fai play
+legacy|set:70|rallenta al settanta
+legacy|set:25|imposta al 25 la velocità
+legacy|set:200|regola la velocità a duecento
+legacy|delta:5|aumenta del cinque per cento la velocità
+legacy|delta:-7|riduci la velocità di 7 punti percentuali
+legacy|delta:-10,resume|diminuisci la velocità del dieci per cento e poi parti
+paraphrase|resume|puoi far ripartire il brano per favore
+paraphrase|resume|fai partire la musica gentilmente
+paraphrase|resume|rimetti il pezzo in riproduzione
+paraphrase|resume|vorrei riprendere la riproduzione
+paraphrase|pause|puoi mettere in pausa la traccia
+paraphrase|pause|ferma un attimo il brano grazie
+paraphrase|pause|potresti sospendere la riproduzione
+paraphrase|set:80|puoi portare la velocità all'ottanta per cento per favore
+paraphrase|set:65|rallentare il brano al sessantacinque grazie
+paraphrase|set:90|vorrei il ritmo sul novanta percento
+paraphrase|set:80,resume|porta la velocità all'ottanta e quindi fai ripartire il brano
+paraphrase|set:77,resume|regola la velocità al settantasette poi avvia il brano
+paraphrase|delta:-5|abbassa il ritmo di cinque punti percentuali
+paraphrase|delta:3|potresti incrementare la velocità di tre percento
+paraphrase|delta:-2,resume|abbassa la velocità di due percento dopodiché riprendi
+paraphrase|delta:4|sali di quattro punti percentuali con il ritmo
+asr-like|set:75|velocita al settanta cinque per cento
+asr-like|set:98|metti velocita a novanta otto
+asr-like|set:83,resume|imposta velocita all ottanta tre per cento poi riprendi
+asr-like|pause|metti pausa brano
+asr-like|resume|fai plei
+asr-like|resume|riprende la riproduzione
+asr-like|set:64|portare la veloccita al sessantaquattro
+asr-like|delta:-9|abbasa il ritmo del nove percento
+asr-like|delta:6|aumeta di sei per cento la velocita
+asr-like|set:80|velocità ottanta percento
+negative|reject|non riprendere
+negative|reject|velocità a 80 e poi non riprendere
+negative|reject|non mettere in pausa il brano
+negative|reject|forse velocità al settanta
+negative|reject|velocità a settanta oppure ottanta
+negative|reject|velocità a 75 85 percento
+negative|reject|velocità a 24
+negative|reject|velocità a 201
+negative|reject|riduci del 180 percento la velocità
+negative|reject|aumenta di 5 la velocità
+negative|reject|metti la velocità a 80,5
+negative|reject|metti la velocità a -80
+negative|reject|aumenta e riduci la velocità del 5 percento
+negative|reject|riprendi e poi imposta la velocità al 75
+negative|reject|velocità a 75 e poi pausa
+negative|reject|velocità a 75 e poi riprendi e poi pausa
+negative|reject|riprendi dopo tre secondi
+negative|reject|se finisce il brano riprendi
+negative|reject|metti il volume all'ottanta per cento
+negative|reject|fa partire la registrazione
+negative|reject|pausa la registrazione
+negative|reject|quanto manca alla fine della canzone
+negative|reject|il brano continua da solo
+negative|reject|come si mette in pausa
+negative|reject|riprendi il download
+negative|reject|dammi la percentuale della batteria

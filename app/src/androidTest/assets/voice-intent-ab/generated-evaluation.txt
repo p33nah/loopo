@@ -1,0 +1,1816 @@
+clean|set:25|porta la velocità a 25 per cento|porta la velocità a 25 per cento
+typo-1|set:25|porta la velocità a 25 per cento|pporta la velocità a 25 per cento
+typo-2|set:25|porta la velocità a 25 per cento|poa la velocità a 25 per cento
+clean|set:25|porta la velocità a venticinque per cento|porta la velocità a venticinque per cento
+typo-1|set:25|porta la velocità a venticinque per cento|pporta la velocità a venticinque per cento
+typo-2|set:25|porta la velocità a venticinque per cento|poa la velocità a venticinque per cento
+clean|set:28|porta la velocità a 28 per cento|porta la velocità a 28 per cento
+typo-1|set:28|porta la velocità a 28 per cento|pporta la velocità a 28 per cento
+typo-2|set:28|porta la velocità a 28 per cento|poa la velocità a 28 per cento
+clean|set:28|porta la velocità a ventotto per cento|porta la velocità a ventotto per cento
+typo-1|set:28|porta la velocità a ventotto per cento|pporta la velocità a ventotto per cento
+typo-2|set:28|porta la velocità a ventotto per cento|poa la velocità a ventotto per cento
+clean|set:31|porta la velocità a 31 per cento|porta la velocità a 31 per cento
+typo-1|set:31|porta la velocità a 31 per cento|pporta la velocità a 31 per cento
+typo-2|set:31|porta la velocità a 31 per cento|poa la velocità a 31 per cento
+clean|set:31|porta la velocità a trentuno per cento|porta la velocità a trentuno per cento
+typo-1|set:31|porta la velocità a trentuno per cento|pporta la velocità a trentuno per cento
+typo-2|set:31|porta la velocità a trentuno per cento|poa la velocità a trentuno per cento
+clean|set:42|porta la velocità a 42 per cento|porta la velocità a 42 per cento
+typo-1|set:42|porta la velocità a 42 per cento|pporta la velocità a 42 per cento
+typo-2|set:42|porta la velocità a 42 per cento|poa la velocità a 42 per cento
+clean|set:42|porta la velocità a quarantadue per cento|porta la velocità a quarantadue per cento
+typo-1|set:42|porta la velocità a quarantadue per cento|pporta la velocità a quarantadue per cento
+typo-2|set:42|porta la velocità a quarantadue per cento|poa la velocità a quarantadue per cento
+clean|set:48|porta la velocità a 48 per cento|porta la velocità a 48 per cento
+typo-1|set:48|porta la velocità a 48 per cento|pporta la velocità a 48 per cento
+typo-2|set:48|porta la velocità a 48 per cento|poa la velocità a 48 per cento
+clean|set:48|porta la velocità a quarantotto per cento|porta la velocità a quarantotto per cento
+typo-1|set:48|porta la velocità a quarantotto per cento|pporta la velocità a quarantotto per cento
+typo-2|set:48|porta la velocità a quarantotto per cento|poa la velocità a quarantotto per cento
+clean|set:53|porta la velocità a 53 per cento|porta la velocità a 53 per cento
+typo-1|set:53|porta la velocità a 53 per cento|pporta la velocità a 53 per cento
+typo-2|set:53|porta la velocità a 53 per cento|poa la velocità a 53 per cento
+clean|set:53|porta la velocità a cinquantatré per cento|porta la velocità a cinquantatré per cento
+typo-1|set:53|porta la velocità a cinquantatré per cento|pporta la velocità a cinquantatré per cento
+typo-2|set:53|porta la velocità a cinquantatré per cento|poa la velocità a cinquantatré per cento
+clean|set:60|porta la velocità a 60 per cento|porta la velocità a 60 per cento
+typo-1|set:60|porta la velocità a 60 per cento|pporta la velocità a 60 per cento
+typo-2|set:60|porta la velocità a 60 per cento|poa la velocità a 60 per cento
+clean|set:60|porta la velocità a sessanta per cento|porta la velocità a sessanta per cento
+typo-1|set:60|porta la velocità a sessanta per cento|pporta la velocità a sessanta per cento
+typo-2|set:60|porta la velocità a sessanta per cento|poa la velocità a sessanta per cento
+clean|set:67|porta la velocità a 67 per cento|porta la velocità a 67 per cento
+typo-1|set:67|porta la velocità a 67 per cento|pporta la velocità a 67 per cento
+typo-2|set:67|porta la velocità a 67 per cento|poa la velocità a 67 per cento
+clean|set:67|porta la velocità a sessantasette per cento|porta la velocità a sessantasette per cento
+typo-1|set:67|porta la velocità a sessantasette per cento|pporta la velocità a sessantasette per cento
+typo-2|set:67|porta la velocità a sessantasette per cento|poa la velocità a sessantasette per cento
+clean|set:72|porta la velocità a 72 per cento|porta la velocità a 72 per cento
+typo-1|set:72|porta la velocità a 72 per cento|pporta la velocità a 72 per cento
+typo-2|set:72|porta la velocità a 72 per cento|poa la velocità a 72 per cento
+clean|set:72|porta la velocità a settantadue per cento|porta la velocità a settantadue per cento
+typo-1|set:72|porta la velocità a settantadue per cento|pporta la velocità a settantadue per cento
+typo-2|set:72|porta la velocità a settantadue per cento|poa la velocità a settantadue per cento
+clean|set:75|porta la velocità a 75 per cento|porta la velocità a 75 per cento
+typo-1|set:75|porta la velocità a 75 per cento|pporta la velocità a 75 per cento
+typo-2|set:75|porta la velocità a 75 per cento|poa la velocità a 75 per cento
+clean|set:75|porta la velocità a settantacinque per cento|porta la velocità a settantacinque per cento
+typo-1|set:75|porta la velocità a settantacinque per cento|pporta la velocità a settantacinque per cento
+typo-2|set:75|porta la velocità a settantacinque per cento|poa la velocità a settantacinque per cento
+clean|set:80|porta la velocità a 80 per cento|porta la velocità a 80 per cento
+typo-1|set:80|porta la velocità a 80 per cento|pporta la velocità a 80 per cento
+typo-2|set:80|porta la velocità a 80 per cento|poa la velocità a 80 per cento
+clean|set:80|porta la velocità a ottanta per cento|porta la velocità a ottanta per cento
+typo-1|set:80|porta la velocità a ottanta per cento|pporta la velocità a ottanta per cento
+typo-2|set:80|porta la velocità a ottanta per cento|poa la velocità a ottanta per cento
+clean|set:86|porta la velocità a 86 per cento|porta la velocità a 86 per cento
+typo-1|set:86|porta la velocità a 86 per cento|pporta la velocità a 86 per cento
+typo-2|set:86|porta la velocità a 86 per cento|poa la velocità a 86 per cento
+clean|set:86|porta la velocità a ottantasei per cento|porta la velocità a ottantasei per cento
+typo-1|set:86|porta la velocità a ottantasei per cento|pporta la velocità a ottantasei per cento
+typo-2|set:86|porta la velocità a ottantasei per cento|poa la velocità a ottantasei per cento
+clean|set:93|porta la velocità a 93 per cento|porta la velocità a 93 per cento
+typo-1|set:93|porta la velocità a 93 per cento|pporta la velocità a 93 per cento
+typo-2|set:93|porta la velocità a 93 per cento|poa la velocità a 93 per cento
+clean|set:93|porta la velocità a novantatré per cento|porta la velocità a novantatré per cento
+typo-1|set:93|porta la velocità a novantatré per cento|pporta la velocità a novantatré per cento
+typo-2|set:93|porta la velocità a novantatré per cento|poa la velocità a novantatré per cento
+clean|set:99|porta la velocità a 99 per cento|porta la velocità a 99 per cento
+typo-1|set:99|porta la velocità a 99 per cento|pporta la velocità a 99 per cento
+typo-2|set:99|porta la velocità a 99 per cento|poa la velocità a 99 per cento
+clean|set:99|porta la velocità a novantanove per cento|porta la velocità a novantanove per cento
+typo-1|set:99|porta la velocità a novantanove per cento|pporta la velocità a novantanove per cento
+typo-2|set:99|porta la velocità a novantanove per cento|poa la velocità a novantanove per cento
+clean|set:100|porta la velocità a 100 per cento|porta la velocità a 100 per cento
+typo-1|set:100|porta la velocità a 100 per cento|pporta la velocità a 100 per cento
+typo-2|set:100|porta la velocità a 100 per cento|poa la velocità a 100 per cento
+clean|set:100|porta la velocità a cento per cento|porta la velocità a cento per cento
+typo-1|set:100|porta la velocità a cento per cento|pporta la velocità a cento per cento
+typo-2|set:100|porta la velocità a cento per cento|poa la velocità a cento per cento
+clean|set:103|porta la velocità a 103 per cento|porta la velocità a 103 per cento
+typo-1|set:103|porta la velocità a 103 per cento|pporta la velocità a 103 per cento
+typo-2|set:103|porta la velocità a 103 per cento|poa la velocità a 103 per cento
+clean|set:103|porta la velocità a centotré per cento|porta la velocità a centotré per cento
+typo-1|set:103|porta la velocità a centotré per cento|pporta la velocità a centotré per cento
+typo-2|set:103|porta la velocità a centotré per cento|poa la velocità a centotré per cento
+clean|set:110|porta la velocità a 110 per cento|porta la velocità a 110 per cento
+typo-1|set:110|porta la velocità a 110 per cento|pporta la velocità a 110 per cento
+typo-2|set:110|porta la velocità a 110 per cento|poa la velocità a 110 per cento
+clean|set:110|porta la velocità a centodieci per cento|porta la velocità a centodieci per cento
+typo-1|set:110|porta la velocità a centodieci per cento|pporta la velocità a centodieci per cento
+typo-2|set:110|porta la velocità a centodieci per cento|poa la velocità a centodieci per cento
+clean|set:125|porta la velocità a 125 per cento|porta la velocità a 125 per cento
+typo-1|set:125|porta la velocità a 125 per cento|pporta la velocità a 125 per cento
+typo-2|set:125|porta la velocità a 125 per cento|poa la velocità a 125 per cento
+clean|set:125|porta la velocità a centoventicinque per cento|porta la velocità a centoventicinque per cento
+typo-1|set:125|porta la velocità a centoventicinque per cento|pporta la velocità a centoventicinque per cento
+typo-2|set:125|porta la velocità a centoventicinque per cento|poa la velocità a centoventicinque per cento
+clean|set:150|porta la velocità a 150 per cento|porta la velocità a 150 per cento
+typo-1|set:150|porta la velocità a 150 per cento|pporta la velocità a 150 per cento
+typo-2|set:150|porta la velocità a 150 per cento|poa la velocità a 150 per cento
+clean|set:150|porta la velocità a centocinquanta per cento|porta la velocità a centocinquanta per cento
+typo-1|set:150|porta la velocità a centocinquanta per cento|pporta la velocità a centocinquanta per cento
+typo-2|set:150|porta la velocità a centocinquanta per cento|poa la velocità a centocinquanta per cento
+clean|set:180|porta la velocità a 180 per cento|porta la velocità a 180 per cento
+typo-1|set:180|porta la velocità a 180 per cento|pporta la velocità a 180 per cento
+typo-2|set:180|porta la velocità a 180 per cento|poa la velocità a 180 per cento
+clean|set:180|porta la velocità a centottanta per cento|porta la velocità a centottanta per cento
+typo-1|set:180|porta la velocità a centottanta per cento|pporta la velocità a centottanta per cento
+typo-2|set:180|porta la velocità a centottanta per cento|poa la velocità a centottanta per cento
+clean|set:199|porta la velocità a 199 per cento|porta la velocità a 199 per cento
+typo-1|set:199|porta la velocità a 199 per cento|pporta la velocità a 199 per cento
+typo-2|set:199|porta la velocità a 199 per cento|poa la velocità a 199 per cento
+clean|set:199|porta la velocità a centonovantanove per cento|porta la velocità a centonovantanove per cento
+typo-1|set:199|porta la velocità a centonovantanove per cento|pporta la velocità a centonovantanove per cento
+typo-2|set:199|porta la velocità a centonovantanove per cento|poa la velocità a centonovantanove per cento
+clean|set:200|porta la velocità a 200 per cento|porta la velocità a 200 per cento
+typo-1|set:200|porta la velocità a 200 per cento|pporta la velocità a 200 per cento
+typo-2|set:200|porta la velocità a 200 per cento|poa la velocità a 200 per cento
+clean|set:200|porta la velocità a duecento per cento|porta la velocità a duecento per cento
+typo-1|set:200|porta la velocità a duecento per cento|pporta la velocità a duecento per cento
+typo-2|set:200|porta la velocità a duecento per cento|poa la velocità a duecento per cento
+clean|set:25|imposta il ritmo al 25 percento|imposta il ritmo al 25 percento
+typo-1|set:25|imposta il ritmo al 25 percento|impsota il ritmo al 25 percento
+typo-2|set:25|imposta il ritmo al 25 percento|impsa il ritmo al 25 percento
+clean|set:25|imposta il ritmo al venticinque percento|imposta il ritmo al venticinque percento
+typo-1|set:25|imposta il ritmo al venticinque percento|impsota il ritmo al venticinque percento
+typo-2|set:25|imposta il ritmo al venticinque percento|impsa il ritmo al venticinque percento
+clean|set:28|imposta il ritmo al 28 percento|imposta il ritmo al 28 percento
+typo-1|set:28|imposta il ritmo al 28 percento|impsota il ritmo al 28 percento
+typo-2|set:28|imposta il ritmo al 28 percento|impsa il ritmo al 28 percento
+clean|set:28|imposta il ritmo al ventotto percento|imposta il ritmo al ventotto percento
+typo-1|set:28|imposta il ritmo al ventotto percento|impsota il ritmo al ventotto percento
+typo-2|set:28|imposta il ritmo al ventotto percento|impsa il ritmo al ventotto percento
+clean|set:31|imposta il ritmo al 31 percento|imposta il ritmo al 31 percento
+typo-1|set:31|imposta il ritmo al 31 percento|impsota il ritmo al 31 percento
+typo-2|set:31|imposta il ritmo al 31 percento|impsa il ritmo al 31 percento
+clean|set:31|imposta il ritmo al trentuno percento|imposta il ritmo al trentuno percento
+typo-1|set:31|imposta il ritmo al trentuno percento|impsota il ritmo al trentuno percento
+typo-2|set:31|imposta il ritmo al trentuno percento|impsa il ritmo al trentuno percento
+clean|set:42|imposta il ritmo al 42 percento|imposta il ritmo al 42 percento
+typo-1|set:42|imposta il ritmo al 42 percento|impsota il ritmo al 42 percento
+typo-2|set:42|imposta il ritmo al 42 percento|impsa il ritmo al 42 percento
+clean|set:42|imposta il ritmo al quarantadue percento|imposta il ritmo al quarantadue percento
+typo-1|set:42|imposta il ritmo al quarantadue percento|impsota il ritmo al quarantadue percento
+typo-2|set:42|imposta il ritmo al quarantadue percento|impsa il ritmo al quarantadue percento
+clean|set:48|imposta il ritmo al 48 percento|imposta il ritmo al 48 percento
+typo-1|set:48|imposta il ritmo al 48 percento|impsota il ritmo al 48 percento
+typo-2|set:48|imposta il ritmo al 48 percento|impsa il ritmo al 48 percento
+clean|set:48|imposta il ritmo al quarantotto percento|imposta il ritmo al quarantotto percento
+typo-1|set:48|imposta il ritmo al quarantotto percento|impsota il ritmo al quarantotto percento
+typo-2|set:48|imposta il ritmo al quarantotto percento|impsa il ritmo al quarantotto percento
+clean|set:53|imposta il ritmo al 53 percento|imposta il ritmo al 53 percento
+typo-1|set:53|imposta il ritmo al 53 percento|impsota il ritmo al 53 percento
+typo-2|set:53|imposta il ritmo al 53 percento|impsa il ritmo al 53 percento
+clean|set:53|imposta il ritmo al cinquantatré percento|imposta il ritmo al cinquantatré percento
+typo-1|set:53|imposta il ritmo al cinquantatré percento|impsota il ritmo al cinquantatré percento
+typo-2|set:53|imposta il ritmo al cinquantatré percento|impsa il ritmo al cinquantatré percento
+clean|set:60|imposta il ritmo al 60 percento|imposta il ritmo al 60 percento
+typo-1|set:60|imposta il ritmo al 60 percento|impsota il ritmo al 60 percento
+typo-2|set:60|imposta il ritmo al 60 percento|impsa il ritmo al 60 percento
+clean|set:60|imposta il ritmo al sessanta percento|imposta il ritmo al sessanta percento
+typo-1|set:60|imposta il ritmo al sessanta percento|impsota il ritmo al sessanta percento
+typo-2|set:60|imposta il ritmo al sessanta percento|impsa il ritmo al sessanta percento
+clean|set:67|imposta il ritmo al 67 percento|imposta il ritmo al 67 percento
+typo-1|set:67|imposta il ritmo al 67 percento|impsota il ritmo al 67 percento
+typo-2|set:67|imposta il ritmo al 67 percento|impsa il ritmo al 67 percento
+clean|set:67|imposta il ritmo al sessantasette percento|imposta il ritmo al sessantasette percento
+typo-1|set:67|imposta il ritmo al sessantasette percento|impsota il ritmo al sessantasette percento
+typo-2|set:67|imposta il ritmo al sessantasette percento|impsa il ritmo al sessantasette percento
+clean|set:72|imposta il ritmo al 72 percento|imposta il ritmo al 72 percento
+typo-1|set:72|imposta il ritmo al 72 percento|impsota il ritmo al 72 percento
+typo-2|set:72|imposta il ritmo al 72 percento|impsa il ritmo al 72 percento
+clean|set:72|imposta il ritmo al settantadue percento|imposta il ritmo al settantadue percento
+typo-1|set:72|imposta il ritmo al settantadue percento|impsota il ritmo al settantadue percento
+typo-2|set:72|imposta il ritmo al settantadue percento|impsa il ritmo al settantadue percento
+clean|set:75|imposta il ritmo al 75 percento|imposta il ritmo al 75 percento
+typo-1|set:75|imposta il ritmo al 75 percento|impsota il ritmo al 75 percento
+typo-2|set:75|imposta il ritmo al 75 percento|impsa il ritmo al 75 percento
+clean|set:75|imposta il ritmo al settantacinque percento|imposta il ritmo al settantacinque percento
+typo-1|set:75|imposta il ritmo al settantacinque percento|impsota il ritmo al settantacinque percento
+typo-2|set:75|imposta il ritmo al settantacinque percento|impsa il ritmo al settantacinque percento
+clean|set:80|imposta il ritmo al 80 percento|imposta il ritmo al 80 percento
+typo-1|set:80|imposta il ritmo al 80 percento|impsota il ritmo al 80 percento
+typo-2|set:80|imposta il ritmo al 80 percento|impsa il ritmo al 80 percento
+clean|set:80|imposta il ritmo al ottanta percento|imposta il ritmo al ottanta percento
+typo-1|set:80|imposta il ritmo al ottanta percento|impsota il ritmo al ottanta percento
+typo-2|set:80|imposta il ritmo al ottanta percento|impsa il ritmo al ottanta percento
+clean|set:86|imposta il ritmo al 86 percento|imposta il ritmo al 86 percento
+typo-1|set:86|imposta il ritmo al 86 percento|impsota il ritmo al 86 percento
+typo-2|set:86|imposta il ritmo al 86 percento|impsa il ritmo al 86 percento
+clean|set:86|imposta il ritmo al ottantasei percento|imposta il ritmo al ottantasei percento
+typo-1|set:86|imposta il ritmo al ottantasei percento|impsota il ritmo al ottantasei percento
+typo-2|set:86|imposta il ritmo al ottantasei percento|impsa il ritmo al ottantasei percento
+clean|set:93|imposta il ritmo al 93 percento|imposta il ritmo al 93 percento
+typo-1|set:93|imposta il ritmo al 93 percento|impsota il ritmo al 93 percento
+typo-2|set:93|imposta il ritmo al 93 percento|impsa il ritmo al 93 percento
+clean|set:93|imposta il ritmo al novantatré percento|imposta il ritmo al novantatré percento
+typo-1|set:93|imposta il ritmo al novantatré percento|impsota il ritmo al novantatré percento
+typo-2|set:93|imposta il ritmo al novantatré percento|impsa il ritmo al novantatré percento
+clean|set:99|imposta il ritmo al 99 percento|imposta il ritmo al 99 percento
+typo-1|set:99|imposta il ritmo al 99 percento|impsota il ritmo al 99 percento
+typo-2|set:99|imposta il ritmo al 99 percento|impsa il ritmo al 99 percento
+clean|set:99|imposta il ritmo al novantanove percento|imposta il ritmo al novantanove percento
+typo-1|set:99|imposta il ritmo al novantanove percento|impsota il ritmo al novantanove percento
+typo-2|set:99|imposta il ritmo al novantanove percento|impsa il ritmo al novantanove percento
+clean|set:100|imposta il ritmo al 100 percento|imposta il ritmo al 100 percento
+typo-1|set:100|imposta il ritmo al 100 percento|impsota il ritmo al 100 percento
+typo-2|set:100|imposta il ritmo al 100 percento|impsa il ritmo al 100 percento
+clean|set:100|imposta il ritmo al cento percento|imposta il ritmo al cento percento
+typo-1|set:100|imposta il ritmo al cento percento|impsota il ritmo al cento percento
+typo-2|set:100|imposta il ritmo al cento percento|impsa il ritmo al cento percento
+clean|set:103|imposta il ritmo al 103 percento|imposta il ritmo al 103 percento
+typo-1|set:103|imposta il ritmo al 103 percento|impsota il ritmo al 103 percento
+typo-2|set:103|imposta il ritmo al 103 percento|impsa il ritmo al 103 percento
+clean|set:103|imposta il ritmo al centotré percento|imposta il ritmo al centotré percento
+typo-1|set:103|imposta il ritmo al centotré percento|impsota il ritmo al centotré percento
+typo-2|set:103|imposta il ritmo al centotré percento|impsa il ritmo al centotré percento
+clean|set:110|imposta il ritmo al 110 percento|imposta il ritmo al 110 percento
+typo-1|set:110|imposta il ritmo al 110 percento|impsota il ritmo al 110 percento
+typo-2|set:110|imposta il ritmo al 110 percento|impsa il ritmo al 110 percento
+clean|set:110|imposta il ritmo al centodieci percento|imposta il ritmo al centodieci percento
+typo-1|set:110|imposta il ritmo al centodieci percento|impsota il ritmo al centodieci percento
+typo-2|set:110|imposta il ritmo al centodieci percento|impsa il ritmo al centodieci percento
+clean|set:125|imposta il ritmo al 125 percento|imposta il ritmo al 125 percento
+typo-1|set:125|imposta il ritmo al 125 percento|impsota il ritmo al 125 percento
+typo-2|set:125|imposta il ritmo al 125 percento|impsa il ritmo al 125 percento
+clean|set:125|imposta il ritmo al centoventicinque percento|imposta il ritmo al centoventicinque percento
+typo-1|set:125|imposta il ritmo al centoventicinque percento|impsota il ritmo al centoventicinque percento
+typo-2|set:125|imposta il ritmo al centoventicinque percento|impsa il ritmo al centoventicinque percento
+clean|set:150|imposta il ritmo al 150 percento|imposta il ritmo al 150 percento
+typo-1|set:150|imposta il ritmo al 150 percento|impsota il ritmo al 150 percento
+typo-2|set:150|imposta il ritmo al 150 percento|impsa il ritmo al 150 percento
+clean|set:150|imposta il ritmo al centocinquanta percento|imposta il ritmo al centocinquanta percento
+typo-1|set:150|imposta il ritmo al centocinquanta percento|impsota il ritmo al centocinquanta percento
+typo-2|set:150|imposta il ritmo al centocinquanta percento|impsa il ritmo al centocinquanta percento
+clean|set:180|imposta il ritmo al 180 percento|imposta il ritmo al 180 percento
+typo-1|set:180|imposta il ritmo al 180 percento|impsota il ritmo al 180 percento
+typo-2|set:180|imposta il ritmo al 180 percento|impsa il ritmo al 180 percento
+clean|set:180|imposta il ritmo al centottanta percento|imposta il ritmo al centottanta percento
+typo-1|set:180|imposta il ritmo al centottanta percento|impsota il ritmo al centottanta percento
+typo-2|set:180|imposta il ritmo al centottanta percento|impsa il ritmo al centottanta percento
+clean|set:199|imposta il ritmo al 199 percento|imposta il ritmo al 199 percento
+typo-1|set:199|imposta il ritmo al 199 percento|impsota il ritmo al 199 percento
+typo-2|set:199|imposta il ritmo al 199 percento|impsa il ritmo al 199 percento
+clean|set:199|imposta il ritmo al centonovantanove percento|imposta il ritmo al centonovantanove percento
+typo-1|set:199|imposta il ritmo al centonovantanove percento|impsota il ritmo al centonovantanove percento
+typo-2|set:199|imposta il ritmo al centonovantanove percento|impsa il ritmo al centonovantanove percento
+clean|set:200|imposta il ritmo al 200 percento|imposta il ritmo al 200 percento
+typo-1|set:200|imposta il ritmo al 200 percento|impsota il ritmo al 200 percento
+typo-2|set:200|imposta il ritmo al 200 percento|impsa il ritmo al 200 percento
+clean|set:200|imposta il ritmo al duecento percento|imposta il ritmo al duecento percento
+typo-1|set:200|imposta il ritmo al duecento percento|impsota il ritmo al duecento percento
+typo-2|set:200|imposta il ritmo al duecento percento|impsa il ritmo al duecento percento
+clean|set:25|regola al 25 la velocità|regola al 25 la velocità
+typo-1|set:25|regola al 25 la velocità|reola al 25 la velocità
+typo-2|set:25|regola al 25 la velocità|rola al 25 la velocità
+clean|set:25|regola al venticinque la velocità|regola al venticinque la velocità
+typo-1|set:25|regola al venticinque la velocità|reola al venticinque la velocità
+typo-2|set:25|regola al venticinque la velocità|rola al venticinque la velocità
+clean|set:28|regola al 28 la velocità|regola al 28 la velocità
+typo-1|set:28|regola al 28 la velocità|reola al 28 la velocità
+typo-2|set:28|regola al 28 la velocità|rola al 28 la velocità
+clean|set:28|regola al ventotto la velocità|regola al ventotto la velocità
+typo-1|set:28|regola al ventotto la velocità|reola al ventotto la velocità
+typo-2|set:28|regola al ventotto la velocità|rola al ventotto la velocità
+clean|set:31|regola al 31 la velocità|regola al 31 la velocità
+typo-1|set:31|regola al 31 la velocità|reola al 31 la velocità
+typo-2|set:31|regola al 31 la velocità|rola al 31 la velocità
+clean|set:31|regola al trentuno la velocità|regola al trentuno la velocità
+typo-1|set:31|regola al trentuno la velocità|reola al trentuno la velocità
+typo-2|set:31|regola al trentuno la velocità|rola al trentuno la velocità
+clean|set:42|regola al 42 la velocità|regola al 42 la velocità
+typo-1|set:42|regola al 42 la velocità|reola al 42 la velocità
+typo-2|set:42|regola al 42 la velocità|rola al 42 la velocità
+clean|set:42|regola al quarantadue la velocità|regola al quarantadue la velocità
+typo-1|set:42|regola al quarantadue la velocità|reola al quarantadue la velocità
+typo-2|set:42|regola al quarantadue la velocità|rola al quarantadue la velocità
+clean|set:48|regola al 48 la velocità|regola al 48 la velocità
+typo-1|set:48|regola al 48 la velocità|reola al 48 la velocità
+typo-2|set:48|regola al 48 la velocità|rola al 48 la velocità
+clean|set:48|regola al quarantotto la velocità|regola al quarantotto la velocità
+typo-1|set:48|regola al quarantotto la velocità|reola al quarantotto la velocità
+typo-2|set:48|regola al quarantotto la velocità|rola al quarantotto la velocità
+clean|set:53|regola al 53 la velocità|regola al 53 la velocità
+typo-1|set:53|regola al 53 la velocità|reola al 53 la velocità
+typo-2|set:53|regola al 53 la velocità|rola al 53 la velocità
+clean|set:53|regola al cinquantatré la velocità|regola al cinquantatré la velocità
+typo-1|set:53|regola al cinquantatré la velocità|reola al cinquantatré la velocità
+typo-2|set:53|regola al cinquantatré la velocità|rola al cinquantatré la velocità
+clean|set:60|regola al 60 la velocità|regola al 60 la velocità
+typo-1|set:60|regola al 60 la velocità|reola al 60 la velocità
+typo-2|set:60|regola al 60 la velocità|rola al 60 la velocità
+clean|set:60|regola al sessanta la velocità|regola al sessanta la velocità
+typo-1|set:60|regola al sessanta la velocità|reola al sessanta la velocità
+typo-2|set:60|regola al sessanta la velocità|rola al sessanta la velocità
+clean|set:67|regola al 67 la velocità|regola al 67 la velocità
+typo-1|set:67|regola al 67 la velocità|reola al 67 la velocità
+typo-2|set:67|regola al 67 la velocità|rola al 67 la velocità
+clean|set:67|regola al sessantasette la velocità|regola al sessantasette la velocità
+typo-1|set:67|regola al sessantasette la velocità|reola al sessantasette la velocità
+typo-2|set:67|regola al sessantasette la velocità|rola al sessantasette la velocità
+clean|set:72|regola al 72 la velocità|regola al 72 la velocità
+typo-1|set:72|regola al 72 la velocità|reola al 72 la velocità
+typo-2|set:72|regola al 72 la velocità|rola al 72 la velocità
+clean|set:72|regola al settantadue la velocità|regola al settantadue la velocità
+typo-1|set:72|regola al settantadue la velocità|reola al settantadue la velocità
+typo-2|set:72|regola al settantadue la velocità|rola al settantadue la velocità
+clean|set:75|regola al 75 la velocità|regola al 75 la velocità
+typo-1|set:75|regola al 75 la velocità|reola al 75 la velocità
+typo-2|set:75|regola al 75 la velocità|rola al 75 la velocità
+clean|set:75|regola al settantacinque la velocità|regola al settantacinque la velocità
+typo-1|set:75|regola al settantacinque la velocità|reola al settantacinque la velocità
+typo-2|set:75|regola al settantacinque la velocità|rola al settantacinque la velocità
+clean|set:80|regola al 80 la velocità|regola al 80 la velocità
+typo-1|set:80|regola al 80 la velocità|reola al 80 la velocità
+typo-2|set:80|regola al 80 la velocità|rola al 80 la velocità
+clean|set:80|regola al ottanta la velocità|regola al ottanta la velocità
+typo-1|set:80|regola al ottanta la velocità|reola al ottanta la velocità
+typo-2|set:80|regola al ottanta la velocità|rola al ottanta la velocità
+clean|set:86|regola al 86 la velocità|regola al 86 la velocità
+typo-1|set:86|regola al 86 la velocità|reola al 86 la velocità
+typo-2|set:86|regola al 86 la velocità|rola al 86 la velocità
+clean|set:86|regola al ottantasei la velocità|regola al ottantasei la velocità
+typo-1|set:86|regola al ottantasei la velocità|reola al ottantasei la velocità
+typo-2|set:86|regola al ottantasei la velocità|rola al ottantasei la velocità
+clean|set:93|regola al 93 la velocità|regola al 93 la velocità
+typo-1|set:93|regola al 93 la velocità|reola al 93 la velocità
+typo-2|set:93|regola al 93 la velocità|rola al 93 la velocità
+clean|set:93|regola al novantatré la velocità|regola al novantatré la velocità
+typo-1|set:93|regola al novantatré la velocità|reola al novantatré la velocità
+typo-2|set:93|regola al novantatré la velocità|rola al novantatré la velocità
+clean|set:99|regola al 99 la velocità|regola al 99 la velocità
+typo-1|set:99|regola al 99 la velocità|reola al 99 la velocità
+typo-2|set:99|regola al 99 la velocità|rola al 99 la velocità
+clean|set:99|regola al novantanove la velocità|regola al novantanove la velocità
+typo-1|set:99|regola al novantanove la velocità|reola al novantanove la velocità
+typo-2|set:99|regola al novantanove la velocità|rola al novantanove la velocità
+clean|set:100|regola al 100 la velocità|regola al 100 la velocità
+typo-1|set:100|regola al 100 la velocità|reola al 100 la velocità
+typo-2|set:100|regola al 100 la velocità|rola al 100 la velocità
+clean|set:100|regola al cento la velocità|regola al cento la velocità
+typo-1|set:100|regola al cento la velocità|reola al cento la velocità
+typo-2|set:100|regola al cento la velocità|rola al cento la velocità
+clean|set:103|regola al 103 la velocità|regola al 103 la velocità
+typo-1|set:103|regola al 103 la velocità|reola al 103 la velocità
+typo-2|set:103|regola al 103 la velocità|rola al 103 la velocità
+clean|set:103|regola al centotré la velocità|regola al centotré la velocità
+typo-1|set:103|regola al centotré la velocità|reola al centotré la velocità
+typo-2|set:103|regola al centotré la velocità|rola al centotré la velocità
+clean|set:110|regola al 110 la velocità|regola al 110 la velocità
+typo-1|set:110|regola al 110 la velocità|reola al 110 la velocità
+typo-2|set:110|regola al 110 la velocità|rola al 110 la velocità
+clean|set:110|regola al centodieci la velocità|regola al centodieci la velocità
+typo-1|set:110|regola al centodieci la velocità|reola al centodieci la velocità
+typo-2|set:110|regola al centodieci la velocità|rola al centodieci la velocità
+clean|set:125|regola al 125 la velocità|regola al 125 la velocità
+typo-1|set:125|regola al 125 la velocità|reola al 125 la velocità
+typo-2|set:125|regola al 125 la velocità|rola al 125 la velocità
+clean|set:125|regola al centoventicinque la velocità|regola al centoventicinque la velocità
+typo-1|set:125|regola al centoventicinque la velocità|reola al centoventicinque la velocità
+typo-2|set:125|regola al centoventicinque la velocità|rola al centoventicinque la velocità
+clean|set:150|regola al 150 la velocità|regola al 150 la velocità
+typo-1|set:150|regola al 150 la velocità|reola al 150 la velocità
+typo-2|set:150|regola al 150 la velocità|rola al 150 la velocità
+clean|set:150|regola al centocinquanta la velocità|regola al centocinquanta la velocità
+typo-1|set:150|regola al centocinquanta la velocità|reola al centocinquanta la velocità
+typo-2|set:150|regola al centocinquanta la velocità|rola al centocinquanta la velocità
+clean|set:180|regola al 180 la velocità|regola al 180 la velocità
+typo-1|set:180|regola al 180 la velocità|reola al 180 la velocità
+typo-2|set:180|regola al 180 la velocità|rola al 180 la velocità
+clean|set:180|regola al centottanta la velocità|regola al centottanta la velocità
+typo-1|set:180|regola al centottanta la velocità|reola al centottanta la velocità
+typo-2|set:180|regola al centottanta la velocità|rola al centottanta la velocità
+clean|set:199|regola al 199 la velocità|regola al 199 la velocità
+typo-1|set:199|regola al 199 la velocità|reola al 199 la velocità
+typo-2|set:199|regola al 199 la velocità|rola al 199 la velocità
+clean|set:199|regola al centonovantanove la velocità|regola al centonovantanove la velocità
+typo-1|set:199|regola al centonovantanove la velocità|reola al centonovantanove la velocità
+typo-2|set:199|regola al centonovantanove la velocità|rola al centonovantanove la velocità
+clean|set:200|regola al 200 la velocità|regola al 200 la velocità
+typo-1|set:200|regola al 200 la velocità|reola al 200 la velocità
+typo-2|set:200|regola al 200 la velocità|rola al 200 la velocità
+clean|set:200|regola al duecento la velocità|regola al duecento la velocità
+typo-1|set:200|regola al duecento la velocità|reola al duecento la velocità
+typo-2|set:200|regola al duecento la velocità|rola al duecento la velocità
+paraphrase|set:25|vorrei ascoltare il brano al 25 percento|vorrei ascoltare il brano al 25 percento
+paraphrase|set:25|vorrei ascoltare il brano al venticinque percento|vorrei ascoltare il brano al venticinque percento
+paraphrase|set:28|vorrei ascoltare il brano al 28 percento|vorrei ascoltare il brano al 28 percento
+paraphrase|set:28|vorrei ascoltare il brano al ventotto percento|vorrei ascoltare il brano al ventotto percento
+paraphrase|set:31|vorrei ascoltare il brano al 31 percento|vorrei ascoltare il brano al 31 percento
+paraphrase|set:31|vorrei ascoltare il brano al trentuno percento|vorrei ascoltare il brano al trentuno percento
+paraphrase|set:42|vorrei ascoltare il brano al 42 percento|vorrei ascoltare il brano al 42 percento
+paraphrase|set:42|vorrei ascoltare il brano al quarantadue percento|vorrei ascoltare il brano al quarantadue percento
+paraphrase|set:48|vorrei ascoltare il brano al 48 percento|vorrei ascoltare il brano al 48 percento
+paraphrase|set:48|vorrei ascoltare il brano al quarantotto percento|vorrei ascoltare il brano al quarantotto percento
+paraphrase|set:53|vorrei ascoltare il brano al 53 percento|vorrei ascoltare il brano al 53 percento
+paraphrase|set:53|vorrei ascoltare il brano al cinquantatré percento|vorrei ascoltare il brano al cinquantatré percento
+paraphrase|set:60|vorrei ascoltare il brano al 60 percento|vorrei ascoltare il brano al 60 percento
+paraphrase|set:60|vorrei ascoltare il brano al sessanta percento|vorrei ascoltare il brano al sessanta percento
+paraphrase|set:67|vorrei ascoltare il brano al 67 percento|vorrei ascoltare il brano al 67 percento
+paraphrase|set:67|vorrei ascoltare il brano al sessantasette percento|vorrei ascoltare il brano al sessantasette percento
+paraphrase|set:72|vorrei ascoltare il brano al 72 percento|vorrei ascoltare il brano al 72 percento
+paraphrase|set:72|vorrei ascoltare il brano al settantadue percento|vorrei ascoltare il brano al settantadue percento
+paraphrase|set:75|vorrei ascoltare il brano al 75 percento|vorrei ascoltare il brano al 75 percento
+paraphrase|set:75|vorrei ascoltare il brano al settantacinque percento|vorrei ascoltare il brano al settantacinque percento
+paraphrase|set:80|vorrei ascoltare il brano al 80 percento|vorrei ascoltare il brano al 80 percento
+paraphrase|set:80|vorrei ascoltare il brano al ottanta percento|vorrei ascoltare il brano al ottanta percento
+paraphrase|set:86|vorrei ascoltare il brano al 86 percento|vorrei ascoltare il brano al 86 percento
+paraphrase|set:86|vorrei ascoltare il brano al ottantasei percento|vorrei ascoltare il brano al ottantasei percento
+paraphrase|set:93|vorrei ascoltare il brano al 93 percento|vorrei ascoltare il brano al 93 percento
+paraphrase|set:93|vorrei ascoltare il brano al novantatré percento|vorrei ascoltare il brano al novantatré percento
+paraphrase|set:99|vorrei ascoltare il brano al 99 percento|vorrei ascoltare il brano al 99 percento
+paraphrase|set:99|vorrei ascoltare il brano al novantanove percento|vorrei ascoltare il brano al novantanove percento
+paraphrase|set:100|vorrei ascoltare il brano al 100 percento|vorrei ascoltare il brano al 100 percento
+paraphrase|set:100|vorrei ascoltare il brano al cento percento|vorrei ascoltare il brano al cento percento
+paraphrase|set:103|vorrei ascoltare il brano al 103 percento|vorrei ascoltare il brano al 103 percento
+paraphrase|set:103|vorrei ascoltare il brano al centotré percento|vorrei ascoltare il brano al centotré percento
+paraphrase|set:110|vorrei ascoltare il brano al 110 percento|vorrei ascoltare il brano al 110 percento
+paraphrase|set:110|vorrei ascoltare il brano al centodieci percento|vorrei ascoltare il brano al centodieci percento
+paraphrase|set:125|vorrei ascoltare il brano al 125 percento|vorrei ascoltare il brano al 125 percento
+paraphrase|set:125|vorrei ascoltare il brano al centoventicinque percento|vorrei ascoltare il brano al centoventicinque percento
+paraphrase|set:150|vorrei ascoltare il brano al 150 percento|vorrei ascoltare il brano al 150 percento
+paraphrase|set:150|vorrei ascoltare il brano al centocinquanta percento|vorrei ascoltare il brano al centocinquanta percento
+paraphrase|set:180|vorrei ascoltare il brano al 180 percento|vorrei ascoltare il brano al 180 percento
+paraphrase|set:180|vorrei ascoltare il brano al centottanta percento|vorrei ascoltare il brano al centottanta percento
+paraphrase|set:199|vorrei ascoltare il brano al 199 percento|vorrei ascoltare il brano al 199 percento
+paraphrase|set:199|vorrei ascoltare il brano al centonovantanove percento|vorrei ascoltare il brano al centonovantanove percento
+paraphrase|set:200|vorrei ascoltare il brano al 200 percento|vorrei ascoltare il brano al 200 percento
+paraphrase|set:200|vorrei ascoltare il brano al duecento percento|vorrei ascoltare il brano al duecento percento
+paraphrase|set:25|mi metti la velocità al 25 per cento per favore|mi metti la velocità al 25 per cento per favore
+paraphrase|set:25|mi metti la velocità al venticinque per cento per favore|mi metti la velocità al venticinque per cento per favore
+paraphrase|set:28|mi metti la velocità al 28 per cento per favore|mi metti la velocità al 28 per cento per favore
+paraphrase|set:28|mi metti la velocità al ventotto per cento per favore|mi metti la velocità al ventotto per cento per favore
+paraphrase|set:31|mi metti la velocità al 31 per cento per favore|mi metti la velocità al 31 per cento per favore
+paraphrase|set:31|mi metti la velocità al trentuno per cento per favore|mi metti la velocità al trentuno per cento per favore
+paraphrase|set:42|mi metti la velocità al 42 per cento per favore|mi metti la velocità al 42 per cento per favore
+paraphrase|set:42|mi metti la velocità al quarantadue per cento per favore|mi metti la velocità al quarantadue per cento per favore
+paraphrase|set:48|mi metti la velocità al 48 per cento per favore|mi metti la velocità al 48 per cento per favore
+paraphrase|set:48|mi metti la velocità al quarantotto per cento per favore|mi metti la velocità al quarantotto per cento per favore
+paraphrase|set:53|mi metti la velocità al 53 per cento per favore|mi metti la velocità al 53 per cento per favore
+paraphrase|set:53|mi metti la velocità al cinquantatré per cento per favore|mi metti la velocità al cinquantatré per cento per favore
+paraphrase|set:60|mi metti la velocità al 60 per cento per favore|mi metti la velocità al 60 per cento per favore
+paraphrase|set:60|mi metti la velocità al sessanta per cento per favore|mi metti la velocità al sessanta per cento per favore
+paraphrase|set:67|mi metti la velocità al 67 per cento per favore|mi metti la velocità al 67 per cento per favore
+paraphrase|set:67|mi metti la velocità al sessantasette per cento per favore|mi metti la velocità al sessantasette per cento per favore
+paraphrase|set:72|mi metti la velocità al 72 per cento per favore|mi metti la velocità al 72 per cento per favore
+paraphrase|set:72|mi metti la velocità al settantadue per cento per favore|mi metti la velocità al settantadue per cento per favore
+paraphrase|set:75|mi metti la velocità al 75 per cento per favore|mi metti la velocità al 75 per cento per favore
+paraphrase|set:75|mi metti la velocità al settantacinque per cento per favore|mi metti la velocità al settantacinque per cento per favore
+paraphrase|set:80|mi metti la velocità al 80 per cento per favore|mi metti la velocità al 80 per cento per favore
+paraphrase|set:80|mi metti la velocità al ottanta per cento per favore|mi metti la velocità al ottanta per cento per favore
+paraphrase|set:86|mi metti la velocità al 86 per cento per favore|mi metti la velocità al 86 per cento per favore
+paraphrase|set:86|mi metti la velocità al ottantasei per cento per favore|mi metti la velocità al ottantasei per cento per favore
+paraphrase|set:93|mi metti la velocità al 93 per cento per favore|mi metti la velocità al 93 per cento per favore
+paraphrase|set:93|mi metti la velocità al novantatré per cento per favore|mi metti la velocità al novantatré per cento per favore
+paraphrase|set:99|mi metti la velocità al 99 per cento per favore|mi metti la velocità al 99 per cento per favore
+paraphrase|set:99|mi metti la velocità al novantanove per cento per favore|mi metti la velocità al novantanove per cento per favore
+paraphrase|set:100|mi metti la velocità al 100 per cento per favore|mi metti la velocità al 100 per cento per favore
+paraphrase|set:100|mi metti la velocità al cento per cento per favore|mi metti la velocità al cento per cento per favore
+paraphrase|set:103|mi metti la velocità al 103 per cento per favore|mi metti la velocità al 103 per cento per favore
+paraphrase|set:103|mi metti la velocità al centotré per cento per favore|mi metti la velocità al centotré per cento per favore
+paraphrase|set:110|mi metti la velocità al 110 per cento per favore|mi metti la velocità al 110 per cento per favore
+paraphrase|set:110|mi metti la velocità al centodieci per cento per favore|mi metti la velocità al centodieci per cento per favore
+paraphrase|set:125|mi metti la velocità al 125 per cento per favore|mi metti la velocità al 125 per cento per favore
+paraphrase|set:125|mi metti la velocità al centoventicinque per cento per favore|mi metti la velocità al centoventicinque per cento per favore
+paraphrase|set:150|mi metti la velocità al 150 per cento per favore|mi metti la velocità al 150 per cento per favore
+paraphrase|set:150|mi metti la velocità al centocinquanta per cento per favore|mi metti la velocità al centocinquanta per cento per favore
+paraphrase|set:180|mi metti la velocità al 180 per cento per favore|mi metti la velocità al 180 per cento per favore
+paraphrase|set:180|mi metti la velocità al centottanta per cento per favore|mi metti la velocità al centottanta per cento per favore
+paraphrase|set:199|mi metti la velocità al 199 per cento per favore|mi metti la velocità al 199 per cento per favore
+paraphrase|set:199|mi metti la velocità al centonovantanove per cento per favore|mi metti la velocità al centonovantanove per cento per favore
+paraphrase|set:200|mi metti la velocità al 200 per cento per favore|mi metti la velocità al 200 per cento per favore
+paraphrase|set:200|mi metti la velocità al duecento per cento per favore|mi metti la velocità al duecento per cento per favore
+paraphrase|set:25|potresti far andare il pezzo al 25 percento|potresti far andare il pezzo al 25 percento
+paraphrase|set:25|potresti far andare il pezzo al venticinque percento|potresti far andare il pezzo al venticinque percento
+paraphrase|set:28|potresti far andare il pezzo al 28 percento|potresti far andare il pezzo al 28 percento
+paraphrase|set:28|potresti far andare il pezzo al ventotto percento|potresti far andare il pezzo al ventotto percento
+paraphrase|set:31|potresti far andare il pezzo al 31 percento|potresti far andare il pezzo al 31 percento
+paraphrase|set:31|potresti far andare il pezzo al trentuno percento|potresti far andare il pezzo al trentuno percento
+paraphrase|set:42|potresti far andare il pezzo al 42 percento|potresti far andare il pezzo al 42 percento
+paraphrase|set:42|potresti far andare il pezzo al quarantadue percento|potresti far andare il pezzo al quarantadue percento
+paraphrase|set:48|potresti far andare il pezzo al 48 percento|potresti far andare il pezzo al 48 percento
+paraphrase|set:48|potresti far andare il pezzo al quarantotto percento|potresti far andare il pezzo al quarantotto percento
+paraphrase|set:53|potresti far andare il pezzo al 53 percento|potresti far andare il pezzo al 53 percento
+paraphrase|set:53|potresti far andare il pezzo al cinquantatré percento|potresti far andare il pezzo al cinquantatré percento
+paraphrase|set:60|potresti far andare il pezzo al 60 percento|potresti far andare il pezzo al 60 percento
+paraphrase|set:60|potresti far andare il pezzo al sessanta percento|potresti far andare il pezzo al sessanta percento
+paraphrase|set:67|potresti far andare il pezzo al 67 percento|potresti far andare il pezzo al 67 percento
+paraphrase|set:67|potresti far andare il pezzo al sessantasette percento|potresti far andare il pezzo al sessantasette percento
+paraphrase|set:72|potresti far andare il pezzo al 72 percento|potresti far andare il pezzo al 72 percento
+paraphrase|set:72|potresti far andare il pezzo al settantadue percento|potresti far andare il pezzo al settantadue percento
+paraphrase|set:75|potresti far andare il pezzo al 75 percento|potresti far andare il pezzo al 75 percento
+paraphrase|set:75|potresti far andare il pezzo al settantacinque percento|potresti far andare il pezzo al settantacinque percento
+paraphrase|set:80|potresti far andare il pezzo al 80 percento|potresti far andare il pezzo al 80 percento
+paraphrase|set:80|potresti far andare il pezzo al ottanta percento|potresti far andare il pezzo al ottanta percento
+paraphrase|set:86|potresti far andare il pezzo al 86 percento|potresti far andare il pezzo al 86 percento
+paraphrase|set:86|potresti far andare il pezzo al ottantasei percento|potresti far andare il pezzo al ottantasei percento
+paraphrase|set:93|potresti far andare il pezzo al 93 percento|potresti far andare il pezzo al 93 percento
+paraphrase|set:93|potresti far andare il pezzo al novantatré percento|potresti far andare il pezzo al novantatré percento
+paraphrase|set:99|potresti far andare il pezzo al 99 percento|potresti far andare il pezzo al 99 percento
+paraphrase|set:99|potresti far andare il pezzo al novantanove percento|potresti far andare il pezzo al novantanove percento
+paraphrase|set:100|potresti far andare il pezzo al 100 percento|potresti far andare il pezzo al 100 percento
+paraphrase|set:100|potresti far andare il pezzo al cento percento|potresti far andare il pezzo al cento percento
+paraphrase|set:103|potresti far andare il pezzo al 103 percento|potresti far andare il pezzo al 103 percento
+paraphrase|set:103|potresti far andare il pezzo al centotré percento|potresti far andare il pezzo al centotré percento
+paraphrase|set:110|potresti far andare il pezzo al 110 percento|potresti far andare il pezzo al 110 percento
+paraphrase|set:110|potresti far andare il pezzo al centodieci percento|potresti far andare il pezzo al centodieci percento
+paraphrase|set:125|potresti far andare il pezzo al 125 percento|potresti far andare il pezzo al 125 percento
+paraphrase|set:125|potresti far andare il pezzo al centoventicinque percento|potresti far andare il pezzo al centoventicinque percento
+paraphrase|set:150|potresti far andare il pezzo al 150 percento|potresti far andare il pezzo al 150 percento
+paraphrase|set:150|potresti far andare il pezzo al centocinquanta percento|potresti far andare il pezzo al centocinquanta percento
+paraphrase|set:180|potresti far andare il pezzo al 180 percento|potresti far andare il pezzo al 180 percento
+paraphrase|set:180|potresti far andare il pezzo al centottanta percento|potresti far andare il pezzo al centottanta percento
+paraphrase|set:199|potresti far andare il pezzo al 199 percento|potresti far andare il pezzo al 199 percento
+paraphrase|set:199|potresti far andare il pezzo al centonovantanove percento|potresti far andare il pezzo al centonovantanove percento
+paraphrase|set:200|potresti far andare il pezzo al 200 percento|potresti far andare il pezzo al 200 percento
+paraphrase|set:200|potresti far andare il pezzo al duecento percento|potresti far andare il pezzo al duecento percento
+paraphrase|set:25|per questa prova mi serve la velocità al 25 percento|per questa prova mi serve la velocità al 25 percento
+paraphrase|set:25|per questa prova mi serve la velocità al venticinque percento|per questa prova mi serve la velocità al venticinque percento
+paraphrase|set:28|per questa prova mi serve la velocità al 28 percento|per questa prova mi serve la velocità al 28 percento
+paraphrase|set:28|per questa prova mi serve la velocità al ventotto percento|per questa prova mi serve la velocità al ventotto percento
+paraphrase|set:31|per questa prova mi serve la velocità al 31 percento|per questa prova mi serve la velocità al 31 percento
+paraphrase|set:31|per questa prova mi serve la velocità al trentuno percento|per questa prova mi serve la velocità al trentuno percento
+paraphrase|set:42|per questa prova mi serve la velocità al 42 percento|per questa prova mi serve la velocità al 42 percento
+paraphrase|set:42|per questa prova mi serve la velocità al quarantadue percento|per questa prova mi serve la velocità al quarantadue percento
+paraphrase|set:48|per questa prova mi serve la velocità al 48 percento|per questa prova mi serve la velocità al 48 percento
+paraphrase|set:48|per questa prova mi serve la velocità al quarantotto percento|per questa prova mi serve la velocità al quarantotto percento
+paraphrase|set:53|per questa prova mi serve la velocità al 53 percento|per questa prova mi serve la velocità al 53 percento
+paraphrase|set:53|per questa prova mi serve la velocità al cinquantatré percento|per questa prova mi serve la velocità al cinquantatré percento
+paraphrase|set:60|per questa prova mi serve la velocità al 60 percento|per questa prova mi serve la velocità al 60 percento
+paraphrase|set:60|per questa prova mi serve la velocità al sessanta percento|per questa prova mi serve la velocità al sessanta percento
+paraphrase|set:67|per questa prova mi serve la velocità al 67 percento|per questa prova mi serve la velocità al 67 percento
+paraphrase|set:67|per questa prova mi serve la velocità al sessantasette percento|per questa prova mi serve la velocità al sessantasette percento
+paraphrase|set:72|per questa prova mi serve la velocità al 72 percento|per questa prova mi serve la velocità al 72 percento
+paraphrase|set:72|per questa prova mi serve la velocità al settantadue percento|per questa prova mi serve la velocità al settantadue percento
+paraphrase|set:75|per questa prova mi serve la velocità al 75 percento|per questa prova mi serve la velocità al 75 percento
+paraphrase|set:75|per questa prova mi serve la velocità al settantacinque percento|per questa prova mi serve la velocità al settantacinque percento
+paraphrase|set:80|per questa prova mi serve la velocità al 80 percento|per questa prova mi serve la velocità al 80 percento
+paraphrase|set:80|per questa prova mi serve la velocità al ottanta percento|per questa prova mi serve la velocità al ottanta percento
+paraphrase|set:86|per questa prova mi serve la velocità al 86 percento|per questa prova mi serve la velocità al 86 percento
+paraphrase|set:86|per questa prova mi serve la velocità al ottantasei percento|per questa prova mi serve la velocità al ottantasei percento
+paraphrase|set:93|per questa prova mi serve la velocità al 93 percento|per questa prova mi serve la velocità al 93 percento
+paraphrase|set:93|per questa prova mi serve la velocità al novantatré percento|per questa prova mi serve la velocità al novantatré percento
+paraphrase|set:99|per questa prova mi serve la velocità al 99 percento|per questa prova mi serve la velocità al 99 percento
+paraphrase|set:99|per questa prova mi serve la velocità al novantanove percento|per questa prova mi serve la velocità al novantanove percento
+paraphrase|set:100|per questa prova mi serve la velocità al 100 percento|per questa prova mi serve la velocità al 100 percento
+paraphrase|set:100|per questa prova mi serve la velocità al cento percento|per questa prova mi serve la velocità al cento percento
+paraphrase|set:103|per questa prova mi serve la velocità al 103 percento|per questa prova mi serve la velocità al 103 percento
+paraphrase|set:103|per questa prova mi serve la velocità al centotré percento|per questa prova mi serve la velocità al centotré percento
+paraphrase|set:110|per questa prova mi serve la velocità al 110 percento|per questa prova mi serve la velocità al 110 percento
+paraphrase|set:110|per questa prova mi serve la velocità al centodieci percento|per questa prova mi serve la velocità al centodieci percento
+paraphrase|set:125|per questa prova mi serve la velocità al 125 percento|per questa prova mi serve la velocità al 125 percento
+paraphrase|set:125|per questa prova mi serve la velocità al centoventicinque percento|per questa prova mi serve la velocità al centoventicinque percento
+paraphrase|set:150|per questa prova mi serve la velocità al 150 percento|per questa prova mi serve la velocità al 150 percento
+paraphrase|set:150|per questa prova mi serve la velocità al centocinquanta percento|per questa prova mi serve la velocità al centocinquanta percento
+paraphrase|set:180|per questa prova mi serve la velocità al 180 percento|per questa prova mi serve la velocità al 180 percento
+paraphrase|set:180|per questa prova mi serve la velocità al centottanta percento|per questa prova mi serve la velocità al centottanta percento
+paraphrase|set:199|per questa prova mi serve la velocità al 199 percento|per questa prova mi serve la velocità al 199 percento
+paraphrase|set:199|per questa prova mi serve la velocità al centonovantanove percento|per questa prova mi serve la velocità al centonovantanove percento
+paraphrase|set:200|per questa prova mi serve la velocità al 200 percento|per questa prova mi serve la velocità al 200 percento
+paraphrase|set:200|per questa prova mi serve la velocità al duecento percento|per questa prova mi serve la velocità al duecento percento
+grammar|set:25|imposta velocità 25 percento|imposta velocità 25 percento
+grammar|set:25|imposta velocità venticinque percento|imposta velocità venticinque percento
+grammar|set:28|imposta velocità 28 percento|imposta velocità 28 percento
+grammar|set:28|imposta velocità ventotto percento|imposta velocità ventotto percento
+grammar|set:31|imposta velocità 31 percento|imposta velocità 31 percento
+grammar|set:31|imposta velocità trentuno percento|imposta velocità trentuno percento
+grammar|set:42|imposta velocità 42 percento|imposta velocità 42 percento
+grammar|set:42|imposta velocità quarantadue percento|imposta velocità quarantadue percento
+grammar|set:48|imposta velocità 48 percento|imposta velocità 48 percento
+grammar|set:48|imposta velocità quarantotto percento|imposta velocità quarantotto percento
+grammar|set:53|imposta velocità 53 percento|imposta velocità 53 percento
+grammar|set:53|imposta velocità cinquantatré percento|imposta velocità cinquantatré percento
+grammar|set:60|imposta velocità 60 percento|imposta velocità 60 percento
+grammar|set:60|imposta velocità sessanta percento|imposta velocità sessanta percento
+grammar|set:67|imposta velocità 67 percento|imposta velocità 67 percento
+grammar|set:67|imposta velocità sessantasette percento|imposta velocità sessantasette percento
+grammar|set:72|imposta velocità 72 percento|imposta velocità 72 percento
+grammar|set:72|imposta velocità settantadue percento|imposta velocità settantadue percento
+grammar|set:75|imposta velocità 75 percento|imposta velocità 75 percento
+grammar|set:75|imposta velocità settantacinque percento|imposta velocità settantacinque percento
+grammar|set:80|imposta velocità 80 percento|imposta velocità 80 percento
+grammar|set:80|imposta velocità ottanta percento|imposta velocità ottanta percento
+grammar|set:86|imposta velocità 86 percento|imposta velocità 86 percento
+grammar|set:86|imposta velocità ottantasei percento|imposta velocità ottantasei percento
+grammar|set:93|imposta velocità 93 percento|imposta velocità 93 percento
+grammar|set:93|imposta velocità novantatré percento|imposta velocità novantatré percento
+grammar|set:99|imposta velocità 99 percento|imposta velocità 99 percento
+grammar|set:99|imposta velocità novantanove percento|imposta velocità novantanove percento
+grammar|set:100|imposta velocità 100 percento|imposta velocità 100 percento
+grammar|set:100|imposta velocità cento percento|imposta velocità cento percento
+grammar|set:103|imposta velocità 103 percento|imposta velocità 103 percento
+grammar|set:103|imposta velocità centotré percento|imposta velocità centotré percento
+grammar|set:110|imposta velocità 110 percento|imposta velocità 110 percento
+grammar|set:110|imposta velocità centodieci percento|imposta velocità centodieci percento
+grammar|set:125|imposta velocità 125 percento|imposta velocità 125 percento
+grammar|set:125|imposta velocità centoventicinque percento|imposta velocità centoventicinque percento
+grammar|set:150|imposta velocità 150 percento|imposta velocità 150 percento
+grammar|set:150|imposta velocità centocinquanta percento|imposta velocità centocinquanta percento
+grammar|set:180|imposta velocità 180 percento|imposta velocità 180 percento
+grammar|set:180|imposta velocità centottanta percento|imposta velocità centottanta percento
+grammar|set:199|imposta velocità 199 percento|imposta velocità 199 percento
+grammar|set:199|imposta velocità centonovantanove percento|imposta velocità centonovantanove percento
+grammar|set:200|imposta velocità 200 percento|imposta velocità 200 percento
+grammar|set:200|imposta velocità duecento percento|imposta velocità duecento percento
+grammar|set:25|porta il velocità a 25 per cento|porta il velocità a 25 per cento
+grammar|set:25|porta il velocità a venticinque per cento|porta il velocità a venticinque per cento
+grammar|set:28|porta il velocità a 28 per cento|porta il velocità a 28 per cento
+grammar|set:28|porta il velocità a ventotto per cento|porta il velocità a ventotto per cento
+grammar|set:31|porta il velocità a 31 per cento|porta il velocità a 31 per cento
+grammar|set:31|porta il velocità a trentuno per cento|porta il velocità a trentuno per cento
+grammar|set:42|porta il velocità a 42 per cento|porta il velocità a 42 per cento
+grammar|set:42|porta il velocità a quarantadue per cento|porta il velocità a quarantadue per cento
+grammar|set:48|porta il velocità a 48 per cento|porta il velocità a 48 per cento
+grammar|set:48|porta il velocità a quarantotto per cento|porta il velocità a quarantotto per cento
+grammar|set:53|porta il velocità a 53 per cento|porta il velocità a 53 per cento
+grammar|set:53|porta il velocità a cinquantatré per cento|porta il velocità a cinquantatré per cento
+grammar|set:60|porta il velocità a 60 per cento|porta il velocità a 60 per cento
+grammar|set:60|porta il velocità a sessanta per cento|porta il velocità a sessanta per cento
+grammar|set:67|porta il velocità a 67 per cento|porta il velocità a 67 per cento
+grammar|set:67|porta il velocità a sessantasette per cento|porta il velocità a sessantasette per cento
+grammar|set:72|porta il velocità a 72 per cento|porta il velocità a 72 per cento
+grammar|set:72|porta il velocità a settantadue per cento|porta il velocità a settantadue per cento
+grammar|set:75|porta il velocità a 75 per cento|porta il velocità a 75 per cento
+grammar|set:75|porta il velocità a settantacinque per cento|porta il velocità a settantacinque per cento
+grammar|set:80|porta il velocità a 80 per cento|porta il velocità a 80 per cento
+grammar|set:80|porta il velocità a ottanta per cento|porta il velocità a ottanta per cento
+grammar|set:86|porta il velocità a 86 per cento|porta il velocità a 86 per cento
+grammar|set:86|porta il velocità a ottantasei per cento|porta il velocità a ottantasei per cento
+grammar|set:93|porta il velocità a 93 per cento|porta il velocità a 93 per cento
+grammar|set:93|porta il velocità a novantatré per cento|porta il velocità a novantatré per cento
+grammar|set:99|porta il velocità a 99 per cento|porta il velocità a 99 per cento
+grammar|set:99|porta il velocità a novantanove per cento|porta il velocità a novantanove per cento
+grammar|set:100|porta il velocità a 100 per cento|porta il velocità a 100 per cento
+grammar|set:100|porta il velocità a cento per cento|porta il velocità a cento per cento
+grammar|set:103|porta il velocità a 103 per cento|porta il velocità a 103 per cento
+grammar|set:103|porta il velocità a centotré per cento|porta il velocità a centotré per cento
+grammar|set:110|porta il velocità a 110 per cento|porta il velocità a 110 per cento
+grammar|set:110|porta il velocità a centodieci per cento|porta il velocità a centodieci per cento
+grammar|set:125|porta il velocità a 125 per cento|porta il velocità a 125 per cento
+grammar|set:125|porta il velocità a centoventicinque per cento|porta il velocità a centoventicinque per cento
+grammar|set:150|porta il velocità a 150 per cento|porta il velocità a 150 per cento
+grammar|set:150|porta il velocità a centocinquanta per cento|porta il velocità a centocinquanta per cento
+grammar|set:180|porta il velocità a 180 per cento|porta il velocità a 180 per cento
+grammar|set:180|porta il velocità a centottanta per cento|porta il velocità a centottanta per cento
+grammar|set:199|porta il velocità a 199 per cento|porta il velocità a 199 per cento
+grammar|set:199|porta il velocità a centonovantanove per cento|porta il velocità a centonovantanove per cento
+grammar|set:200|porta il velocità a 200 per cento|porta il velocità a 200 per cento
+grammar|set:200|porta il velocità a duecento per cento|porta il velocità a duecento per cento
+grammar|set:25|metti le velocità al 25 percento|metti le velocità al 25 percento
+grammar|set:25|metti le velocità al venticinque percento|metti le velocità al venticinque percento
+grammar|set:28|metti le velocità al 28 percento|metti le velocità al 28 percento
+grammar|set:28|metti le velocità al ventotto percento|metti le velocità al ventotto percento
+grammar|set:31|metti le velocità al 31 percento|metti le velocità al 31 percento
+grammar|set:31|metti le velocità al trentuno percento|metti le velocità al trentuno percento
+grammar|set:42|metti le velocità al 42 percento|metti le velocità al 42 percento
+grammar|set:42|metti le velocità al quarantadue percento|metti le velocità al quarantadue percento
+grammar|set:48|metti le velocità al 48 percento|metti le velocità al 48 percento
+grammar|set:48|metti le velocità al quarantotto percento|metti le velocità al quarantotto percento
+grammar|set:53|metti le velocità al 53 percento|metti le velocità al 53 percento
+grammar|set:53|metti le velocità al cinquantatré percento|metti le velocità al cinquantatré percento
+grammar|set:60|metti le velocità al 60 percento|metti le velocità al 60 percento
+grammar|set:60|metti le velocità al sessanta percento|metti le velocità al sessanta percento
+grammar|set:67|metti le velocità al 67 percento|metti le velocità al 67 percento
+grammar|set:67|metti le velocità al sessantasette percento|metti le velocità al sessantasette percento
+grammar|set:72|metti le velocità al 72 percento|metti le velocità al 72 percento
+grammar|set:72|metti le velocità al settantadue percento|metti le velocità al settantadue percento
+grammar|set:75|metti le velocità al 75 percento|metti le velocità al 75 percento
+grammar|set:75|metti le velocità al settantacinque percento|metti le velocità al settantacinque percento
+grammar|set:80|metti le velocità al 80 percento|metti le velocità al 80 percento
+grammar|set:80|metti le velocità al ottanta percento|metti le velocità al ottanta percento
+grammar|set:86|metti le velocità al 86 percento|metti le velocità al 86 percento
+grammar|set:86|metti le velocità al ottantasei percento|metti le velocità al ottantasei percento
+grammar|set:93|metti le velocità al 93 percento|metti le velocità al 93 percento
+grammar|set:93|metti le velocità al novantatré percento|metti le velocità al novantatré percento
+grammar|set:99|metti le velocità al 99 percento|metti le velocità al 99 percento
+grammar|set:99|metti le velocità al novantanove percento|metti le velocità al novantanove percento
+grammar|set:100|metti le velocità al 100 percento|metti le velocità al 100 percento
+grammar|set:100|metti le velocità al cento percento|metti le velocità al cento percento
+grammar|set:103|metti le velocità al 103 percento|metti le velocità al 103 percento
+grammar|set:103|metti le velocità al centotré percento|metti le velocità al centotré percento
+grammar|set:110|metti le velocità al 110 percento|metti le velocità al 110 percento
+grammar|set:110|metti le velocità al centodieci percento|metti le velocità al centodieci percento
+grammar|set:125|metti le velocità al 125 percento|metti le velocità al 125 percento
+grammar|set:125|metti le velocità al centoventicinque percento|metti le velocità al centoventicinque percento
+grammar|set:150|metti le velocità al 150 percento|metti le velocità al 150 percento
+grammar|set:150|metti le velocità al centocinquanta percento|metti le velocità al centocinquanta percento
+grammar|set:180|metti le velocità al 180 percento|metti le velocità al 180 percento
+grammar|set:180|metti le velocità al centottanta percento|metti le velocità al centottanta percento
+grammar|set:199|metti le velocità al 199 percento|metti le velocità al 199 percento
+grammar|set:199|metti le velocità al centonovantanove percento|metti le velocità al centonovantanove percento
+grammar|set:200|metti le velocità al 200 percento|metti le velocità al 200 percento
+grammar|set:200|metti le velocità al duecento percento|metti le velocità al duecento percento
+grammar|set:25|regola velocità 25 per cento|regola velocità 25 per cento
+grammar|set:25|regola velocità venticinque per cento|regola velocità venticinque per cento
+grammar|set:28|regola velocità 28 per cento|regola velocità 28 per cento
+grammar|set:28|regola velocità ventotto per cento|regola velocità ventotto per cento
+grammar|set:31|regola velocità 31 per cento|regola velocità 31 per cento
+grammar|set:31|regola velocità trentuno per cento|regola velocità trentuno per cento
+grammar|set:42|regola velocità 42 per cento|regola velocità 42 per cento
+grammar|set:42|regola velocità quarantadue per cento|regola velocità quarantadue per cento
+grammar|set:48|regola velocità 48 per cento|regola velocità 48 per cento
+grammar|set:48|regola velocità quarantotto per cento|regola velocità quarantotto per cento
+grammar|set:53|regola velocità 53 per cento|regola velocità 53 per cento
+grammar|set:53|regola velocità cinquantatré per cento|regola velocità cinquantatré per cento
+grammar|set:60|regola velocità 60 per cento|regola velocità 60 per cento
+grammar|set:60|regola velocità sessanta per cento|regola velocità sessanta per cento
+grammar|set:67|regola velocità 67 per cento|regola velocità 67 per cento
+grammar|set:67|regola velocità sessantasette per cento|regola velocità sessantasette per cento
+grammar|set:72|regola velocità 72 per cento|regola velocità 72 per cento
+grammar|set:72|regola velocità settantadue per cento|regola velocità settantadue per cento
+grammar|set:75|regola velocità 75 per cento|regola velocità 75 per cento
+grammar|set:75|regola velocità settantacinque per cento|regola velocità settantacinque per cento
+grammar|set:80|regola velocità 80 per cento|regola velocità 80 per cento
+grammar|set:80|regola velocità ottanta per cento|regola velocità ottanta per cento
+grammar|set:86|regola velocità 86 per cento|regola velocità 86 per cento
+grammar|set:86|regola velocità ottantasei per cento|regola velocità ottantasei per cento
+grammar|set:93|regola velocità 93 per cento|regola velocità 93 per cento
+grammar|set:93|regola velocità novantatré per cento|regola velocità novantatré per cento
+grammar|set:99|regola velocità 99 per cento|regola velocità 99 per cento
+grammar|set:99|regola velocità novantanove per cento|regola velocità novantanove per cento
+grammar|set:100|regola velocità 100 per cento|regola velocità 100 per cento
+grammar|set:100|regola velocità cento per cento|regola velocità cento per cento
+grammar|set:103|regola velocità 103 per cento|regola velocità 103 per cento
+grammar|set:103|regola velocità centotré per cento|regola velocità centotré per cento
+grammar|set:110|regola velocità 110 per cento|regola velocità 110 per cento
+grammar|set:110|regola velocità centodieci per cento|regola velocità centodieci per cento
+grammar|set:125|regola velocità 125 per cento|regola velocità 125 per cento
+grammar|set:125|regola velocità centoventicinque per cento|regola velocità centoventicinque per cento
+grammar|set:150|regola velocità 150 per cento|regola velocità 150 per cento
+grammar|set:150|regola velocità centocinquanta per cento|regola velocità centocinquanta per cento
+grammar|set:180|regola velocità 180 per cento|regola velocità 180 per cento
+grammar|set:180|regola velocità centottanta per cento|regola velocità centottanta per cento
+grammar|set:199|regola velocità 199 per cento|regola velocità 199 per cento
+grammar|set:199|regola velocità centonovantanove per cento|regola velocità centonovantanove per cento
+grammar|set:200|regola velocità 200 per cento|regola velocità 200 per cento
+grammar|set:200|regola velocità duecento per cento|regola velocità duecento per cento
+clean|delta:1|aumenta la velocità di 1 punti percentuali|aumenta la velocità di 1 punti percentuali
+typo-1|delta:1|aumenta la velocità di 1 punti percentuali|aumneta la velocità di 1 punti percentuali
+typo-2|delta:1|aumenta la velocità di 1 punti percentuali|aumta la velocità di 1 punti percentuali
+clean|delta:-1|riduci la velocità di 1 punti percentuali|riduci la velocità di 1 punti percentuali
+typo-1|delta:-1|riduci la velocità di 1 punti percentuali|ridui la velocità di 1 punti percentuali
+typo-2|delta:-1|riduci la velocità di 1 punti percentuali|riui la velocità di 1 punti percentuali
+clean|delta:1|aumenta la velocità di uno punti percentuali|aumenta la velocità di uno punti percentuali
+typo-1|delta:1|aumenta la velocità di uno punti percentuali|aumneta la velocità di uno punti percentuali
+typo-2|delta:1|aumenta la velocità di uno punti percentuali|aumta la velocità di uno punti percentuali
+clean|delta:-1|riduci la velocità di uno punti percentuali|riduci la velocità di uno punti percentuali
+typo-1|delta:-1|riduci la velocità di uno punti percentuali|ridui la velocità di uno punti percentuali
+typo-2|delta:-1|riduci la velocità di uno punti percentuali|riui la velocità di uno punti percentuali
+clean|delta:2|aumenta la velocità di 2 punti percentuali|aumenta la velocità di 2 punti percentuali
+typo-1|delta:2|aumenta la velocità di 2 punti percentuali|aumneta la velocità di 2 punti percentuali
+typo-2|delta:2|aumenta la velocità di 2 punti percentuali|aumta la velocità di 2 punti percentuali
+clean|delta:-2|riduci la velocità di 2 punti percentuali|riduci la velocità di 2 punti percentuali
+typo-1|delta:-2|riduci la velocità di 2 punti percentuali|ridui la velocità di 2 punti percentuali
+typo-2|delta:-2|riduci la velocità di 2 punti percentuali|riui la velocità di 2 punti percentuali
+clean|delta:2|aumenta la velocità di due punti percentuali|aumenta la velocità di due punti percentuali
+typo-1|delta:2|aumenta la velocità di due punti percentuali|aumneta la velocità di due punti percentuali
+typo-2|delta:2|aumenta la velocità di due punti percentuali|aumta la velocità di due punti percentuali
+clean|delta:-2|riduci la velocità di due punti percentuali|riduci la velocità di due punti percentuali
+typo-1|delta:-2|riduci la velocità di due punti percentuali|ridui la velocità di due punti percentuali
+typo-2|delta:-2|riduci la velocità di due punti percentuali|riui la velocità di due punti percentuali
+clean|delta:3|aumenta la velocità di 3 punti percentuali|aumenta la velocità di 3 punti percentuali
+typo-1|delta:3|aumenta la velocità di 3 punti percentuali|aumneta la velocità di 3 punti percentuali
+typo-2|delta:3|aumenta la velocità di 3 punti percentuali|aumta la velocità di 3 punti percentuali
+clean|delta:-3|riduci la velocità di 3 punti percentuali|riduci la velocità di 3 punti percentuali
+typo-1|delta:-3|riduci la velocità di 3 punti percentuali|ridui la velocità di 3 punti percentuali
+typo-2|delta:-3|riduci la velocità di 3 punti percentuali|riui la velocità di 3 punti percentuali
+clean|delta:3|aumenta la velocità di tre punti percentuali|aumenta la velocità di tre punti percentuali
+typo-1|delta:3|aumenta la velocità di tre punti percentuali|aumneta la velocità di tre punti percentuali
+typo-2|delta:3|aumenta la velocità di tre punti percentuali|aumta la velocità di tre punti percentuali
+clean|delta:-3|riduci la velocità di tre punti percentuali|riduci la velocità di tre punti percentuali
+typo-1|delta:-3|riduci la velocità di tre punti percentuali|ridui la velocità di tre punti percentuali
+typo-2|delta:-3|riduci la velocità di tre punti percentuali|riui la velocità di tre punti percentuali
+clean|delta:4|aumenta la velocità di 4 punti percentuali|aumenta la velocità di 4 punti percentuali
+typo-1|delta:4|aumenta la velocità di 4 punti percentuali|aumneta la velocità di 4 punti percentuali
+typo-2|delta:4|aumenta la velocità di 4 punti percentuali|aumta la velocità di 4 punti percentuali
+clean|delta:-4|riduci la velocità di 4 punti percentuali|riduci la velocità di 4 punti percentuali
+typo-1|delta:-4|riduci la velocità di 4 punti percentuali|ridui la velocità di 4 punti percentuali
+typo-2|delta:-4|riduci la velocità di 4 punti percentuali|riui la velocità di 4 punti percentuali
+clean|delta:4|aumenta la velocità di quattro punti percentuali|aumenta la velocità di quattro punti percentuali
+typo-1|delta:4|aumenta la velocità di quattro punti percentuali|aumneta la velocità di quattro punti percentuali
+typo-2|delta:4|aumenta la velocità di quattro punti percentuali|aumta la velocità di quattro punti percentuali
+clean|delta:-4|riduci la velocità di quattro punti percentuali|riduci la velocità di quattro punti percentuali
+typo-1|delta:-4|riduci la velocità di quattro punti percentuali|ridui la velocità di quattro punti percentuali
+typo-2|delta:-4|riduci la velocità di quattro punti percentuali|riui la velocità di quattro punti percentuali
+clean|delta:5|aumenta la velocità di 5 punti percentuali|aumenta la velocità di 5 punti percentuali
+typo-1|delta:5|aumenta la velocità di 5 punti percentuali|aumneta la velocità di 5 punti percentuali
+typo-2|delta:5|aumenta la velocità di 5 punti percentuali|aumta la velocità di 5 punti percentuali
+clean|delta:-5|riduci la velocità di 5 punti percentuali|riduci la velocità di 5 punti percentuali
+typo-1|delta:-5|riduci la velocità di 5 punti percentuali|ridui la velocità di 5 punti percentuali
+typo-2|delta:-5|riduci la velocità di 5 punti percentuali|riui la velocità di 5 punti percentuali
+clean|delta:5|aumenta la velocità di cinque punti percentuali|aumenta la velocità di cinque punti percentuali
+typo-1|delta:5|aumenta la velocità di cinque punti percentuali|aumneta la velocità di cinque punti percentuali
+typo-2|delta:5|aumenta la velocità di cinque punti percentuali|aumta la velocità di cinque punti percentuali
+clean|delta:-5|riduci la velocità di cinque punti percentuali|riduci la velocità di cinque punti percentuali
+typo-1|delta:-5|riduci la velocità di cinque punti percentuali|ridui la velocità di cinque punti percentuali
+typo-2|delta:-5|riduci la velocità di cinque punti percentuali|riui la velocità di cinque punti percentuali
+clean|delta:7|aumenta la velocità di 7 punti percentuali|aumenta la velocità di 7 punti percentuali
+typo-1|delta:7|aumenta la velocità di 7 punti percentuali|aumneta la velocità di 7 punti percentuali
+typo-2|delta:7|aumenta la velocità di 7 punti percentuali|aumta la velocità di 7 punti percentuali
+clean|delta:7|aumenta la velocità di sette punti percentuali|aumenta la velocità di sette punti percentuali
+typo-1|delta:7|aumenta la velocità di sette punti percentuali|aumneta la velocità di sette punti percentuali
+typo-2|delta:7|aumenta la velocità di sette punti percentuali|aumta la velocità di sette punti percentuali
+clean|delta:-7|riduci la velocità di sette punti percentuali|riduci la velocità di sette punti percentuali
+typo-1|delta:-7|riduci la velocità di sette punti percentuali|ridui la velocità di sette punti percentuali
+typo-2|delta:-7|riduci la velocità di sette punti percentuali|riui la velocità di sette punti percentuali
+clean|delta:9|aumenta la velocità di 9 punti percentuali|aumenta la velocità di 9 punti percentuali
+typo-1|delta:9|aumenta la velocità di 9 punti percentuali|aumneta la velocità di 9 punti percentuali
+typo-2|delta:9|aumenta la velocità di 9 punti percentuali|aumta la velocità di 9 punti percentuali
+clean|delta:-9|riduci la velocità di 9 punti percentuali|riduci la velocità di 9 punti percentuali
+typo-1|delta:-9|riduci la velocità di 9 punti percentuali|ridui la velocità di 9 punti percentuali
+typo-2|delta:-9|riduci la velocità di 9 punti percentuali|riui la velocità di 9 punti percentuali
+clean|delta:9|aumenta la velocità di nove punti percentuali|aumenta la velocità di nove punti percentuali
+typo-1|delta:9|aumenta la velocità di nove punti percentuali|aumneta la velocità di nove punti percentuali
+typo-2|delta:9|aumenta la velocità di nove punti percentuali|aumta la velocità di nove punti percentuali
+clean|delta:-9|riduci la velocità di nove punti percentuali|riduci la velocità di nove punti percentuali
+typo-1|delta:-9|riduci la velocità di nove punti percentuali|ridui la velocità di nove punti percentuali
+typo-2|delta:-9|riduci la velocità di nove punti percentuali|riui la velocità di nove punti percentuali
+clean|delta:10|aumenta la velocità di 10 punti percentuali|aumenta la velocità di 10 punti percentuali
+typo-1|delta:10|aumenta la velocità di 10 punti percentuali|aumneta la velocità di 10 punti percentuali
+typo-2|delta:10|aumenta la velocità di 10 punti percentuali|aumta la velocità di 10 punti percentuali
+clean|delta:-10|riduci la velocità di 10 punti percentuali|riduci la velocità di 10 punti percentuali
+typo-1|delta:-10|riduci la velocità di 10 punti percentuali|ridui la velocità di 10 punti percentuali
+typo-2|delta:-10|riduci la velocità di 10 punti percentuali|riui la velocità di 10 punti percentuali
+clean|delta:10|aumenta la velocità di dieci punti percentuali|aumenta la velocità di dieci punti percentuali
+typo-1|delta:10|aumenta la velocità di dieci punti percentuali|aumneta la velocità di dieci punti percentuali
+typo-2|delta:10|aumenta la velocità di dieci punti percentuali|aumta la velocità di dieci punti percentuali
+clean|delta:-10|riduci la velocità di dieci punti percentuali|riduci la velocità di dieci punti percentuali
+typo-1|delta:-10|riduci la velocità di dieci punti percentuali|ridui la velocità di dieci punti percentuali
+typo-2|delta:-10|riduci la velocità di dieci punti percentuali|riui la velocità di dieci punti percentuali
+clean|delta:16|aumenta la velocità di 16 punti percentuali|aumenta la velocità di 16 punti percentuali
+typo-1|delta:16|aumenta la velocità di 16 punti percentuali|aumneta la velocità di 16 punti percentuali
+typo-2|delta:16|aumenta la velocità di 16 punti percentuali|aumta la velocità di 16 punti percentuali
+clean|delta:-16|riduci la velocità di 16 punti percentuali|riduci la velocità di 16 punti percentuali
+typo-1|delta:-16|riduci la velocità di 16 punti percentuali|ridui la velocità di 16 punti percentuali
+typo-2|delta:-16|riduci la velocità di 16 punti percentuali|riui la velocità di 16 punti percentuali
+clean|delta:16|aumenta la velocità di sedici punti percentuali|aumenta la velocità di sedici punti percentuali
+typo-1|delta:16|aumenta la velocità di sedici punti percentuali|aumneta la velocità di sedici punti percentuali
+typo-2|delta:16|aumenta la velocità di sedici punti percentuali|aumta la velocità di sedici punti percentuali
+clean|delta:-16|riduci la velocità di sedici punti percentuali|riduci la velocità di sedici punti percentuali
+typo-1|delta:-16|riduci la velocità di sedici punti percentuali|ridui la velocità di sedici punti percentuali
+typo-2|delta:-16|riduci la velocità di sedici punti percentuali|riui la velocità di sedici punti percentuali
+clean|delta:25|aumenta la velocità di 25 punti percentuali|aumenta la velocità di 25 punti percentuali
+typo-1|delta:25|aumenta la velocità di 25 punti percentuali|aumneta la velocità di 25 punti percentuali
+typo-2|delta:25|aumenta la velocità di 25 punti percentuali|aumta la velocità di 25 punti percentuali
+clean|delta:-25|riduci la velocità di 25 punti percentuali|riduci la velocità di 25 punti percentuali
+typo-1|delta:-25|riduci la velocità di 25 punti percentuali|ridui la velocità di 25 punti percentuali
+typo-2|delta:-25|riduci la velocità di 25 punti percentuali|riui la velocità di 25 punti percentuali
+clean|delta:25|aumenta la velocità di venticinque punti percentuali|aumenta la velocità di venticinque punti percentuali
+typo-1|delta:25|aumenta la velocità di venticinque punti percentuali|aumneta la velocità di venticinque punti percentuali
+typo-2|delta:25|aumenta la velocità di venticinque punti percentuali|aumta la velocità di venticinque punti percentuali
+clean|delta:-25|riduci la velocità di venticinque punti percentuali|riduci la velocità di venticinque punti percentuali
+typo-1|delta:-25|riduci la velocità di venticinque punti percentuali|ridui la velocità di venticinque punti percentuali
+typo-2|delta:-25|riduci la velocità di venticinque punti percentuali|riui la velocità di venticinque punti percentuali
+clean|delta:40|aumenta la velocità di 40 punti percentuali|aumenta la velocità di 40 punti percentuali
+typo-1|delta:40|aumenta la velocità di 40 punti percentuali|aumneta la velocità di 40 punti percentuali
+typo-2|delta:40|aumenta la velocità di 40 punti percentuali|aumta la velocità di 40 punti percentuali
+clean|delta:-40|riduci la velocità di 40 punti percentuali|riduci la velocità di 40 punti percentuali
+typo-1|delta:-40|riduci la velocità di 40 punti percentuali|ridui la velocità di 40 punti percentuali
+typo-2|delta:-40|riduci la velocità di 40 punti percentuali|riui la velocità di 40 punti percentuali
+clean|delta:40|aumenta la velocità di quaranta punti percentuali|aumenta la velocità di quaranta punti percentuali
+typo-1|delta:40|aumenta la velocità di quaranta punti percentuali|aumneta la velocità di quaranta punti percentuali
+typo-2|delta:40|aumenta la velocità di quaranta punti percentuali|aumta la velocità di quaranta punti percentuali
+clean|delta:-40|riduci la velocità di quaranta punti percentuali|riduci la velocità di quaranta punti percentuali
+typo-1|delta:-40|riduci la velocità di quaranta punti percentuali|ridui la velocità di quaranta punti percentuali
+typo-2|delta:-40|riduci la velocità di quaranta punti percentuali|riui la velocità di quaranta punti percentuali
+clean|delta:75|aumenta la velocità di 75 punti percentuali|aumenta la velocità di 75 punti percentuali
+typo-1|delta:75|aumenta la velocità di 75 punti percentuali|aumneta la velocità di 75 punti percentuali
+typo-2|delta:75|aumenta la velocità di 75 punti percentuali|aumta la velocità di 75 punti percentuali
+clean|delta:-75|riduci la velocità di 75 punti percentuali|riduci la velocità di 75 punti percentuali
+typo-1|delta:-75|riduci la velocità di 75 punti percentuali|ridui la velocità di 75 punti percentuali
+typo-2|delta:-75|riduci la velocità di 75 punti percentuali|riui la velocità di 75 punti percentuali
+clean|delta:75|aumenta la velocità di settantacinque punti percentuali|aumenta la velocità di settantacinque punti percentuali
+typo-1|delta:75|aumenta la velocità di settantacinque punti percentuali|aumneta la velocità di settantacinque punti percentuali
+typo-2|delta:75|aumenta la velocità di settantacinque punti percentuali|aumta la velocità di settantacinque punti percentuali
+clean|delta:-75|riduci la velocità di settantacinque punti percentuali|riduci la velocità di settantacinque punti percentuali
+typo-1|delta:-75|riduci la velocità di settantacinque punti percentuali|ridui la velocità di settantacinque punti percentuali
+typo-2|delta:-75|riduci la velocità di settantacinque punti percentuali|riui la velocità di settantacinque punti percentuali
+clean|delta:125|aumenta la velocità di 125 punti percentuali|aumenta la velocità di 125 punti percentuali
+typo-1|delta:125|aumenta la velocità di 125 punti percentuali|aumneta la velocità di 125 punti percentuali
+typo-2|delta:125|aumenta la velocità di 125 punti percentuali|aumta la velocità di 125 punti percentuali
+clean|delta:-125|riduci la velocità di 125 punti percentuali|riduci la velocità di 125 punti percentuali
+typo-1|delta:-125|riduci la velocità di 125 punti percentuali|ridui la velocità di 125 punti percentuali
+typo-2|delta:-125|riduci la velocità di 125 punti percentuali|riui la velocità di 125 punti percentuali
+clean|delta:125|aumenta la velocità di centoventicinque punti percentuali|aumenta la velocità di centoventicinque punti percentuali
+typo-1|delta:125|aumenta la velocità di centoventicinque punti percentuali|aumneta la velocità di centoventicinque punti percentuali
+typo-2|delta:125|aumenta la velocità di centoventicinque punti percentuali|aumta la velocità di centoventicinque punti percentuali
+clean|delta:-125|riduci la velocità di centoventicinque punti percentuali|riduci la velocità di centoventicinque punti percentuali
+typo-1|delta:-125|riduci la velocità di centoventicinque punti percentuali|ridui la velocità di centoventicinque punti percentuali
+typo-2|delta:-125|riduci la velocità di centoventicinque punti percentuali|riui la velocità di centoventicinque punti percentuali
+clean|delta:175|aumenta la velocità di 175 punti percentuali|aumenta la velocità di 175 punti percentuali
+typo-1|delta:175|aumenta la velocità di 175 punti percentuali|aumneta la velocità di 175 punti percentuali
+typo-2|delta:175|aumenta la velocità di 175 punti percentuali|aumta la velocità di 175 punti percentuali
+clean|delta:-175|riduci la velocità di 175 punti percentuali|riduci la velocità di 175 punti percentuali
+typo-1|delta:-175|riduci la velocità di 175 punti percentuali|ridui la velocità di 175 punti percentuali
+typo-2|delta:-175|riduci la velocità di 175 punti percentuali|riui la velocità di 175 punti percentuali
+clean|delta:175|aumenta la velocità di centosettantacinque punti percentuali|aumenta la velocità di centosettantacinque punti percentuali
+typo-1|delta:175|aumenta la velocità di centosettantacinque punti percentuali|aumneta la velocità di centosettantacinque punti percentuali
+typo-2|delta:175|aumenta la velocità di centosettantacinque punti percentuali|aumta la velocità di centosettantacinque punti percentuali
+clean|delta:-175|riduci la velocità di centosettantacinque punti percentuali|riduci la velocità di centosettantacinque punti percentuali
+typo-1|delta:-175|riduci la velocità di centosettantacinque punti percentuali|ridui la velocità di centosettantacinque punti percentuali
+typo-2|delta:-175|riduci la velocità di centosettantacinque punti percentuali|riui la velocità di centosettantacinque punti percentuali
+clean|delta:1|incrementa del 1 percento il ritmo|incrementa del 1 percento il ritmo
+typo-1|delta:1|incrementa del 1 percento il ritmo|incremeta del 1 percento il ritmo
+typo-2|delta:1|incrementa del 1 percento il ritmo|incemeta del 1 percento il ritmo
+clean|delta:-1|diminuisci del 1 percento il ritmo|diminuisci del 1 percento il ritmo
+typo-1|delta:-1|diminuisci del 1 percento il ritmo|diminusci del 1 percento il ritmo
+typo-2|delta:-1|diminuisci del 1 percento il ritmo|diminuci del 1 percento il ritmo
+clean|delta:1|incrementa del uno percento il ritmo|incrementa del uno percento il ritmo
+typo-1|delta:1|incrementa del uno percento il ritmo|incremeta del uno percento il ritmo
+typo-2|delta:1|incrementa del uno percento il ritmo|incemeta del uno percento il ritmo
+clean|delta:-1|diminuisci del uno percento il ritmo|diminuisci del uno percento il ritmo
+typo-1|delta:-1|diminuisci del uno percento il ritmo|diminusci del uno percento il ritmo
+typo-2|delta:-1|diminuisci del uno percento il ritmo|diminuci del uno percento il ritmo
+clean|delta:2|incrementa del 2 percento il ritmo|incrementa del 2 percento il ritmo
+typo-1|delta:2|incrementa del 2 percento il ritmo|incremeta del 2 percento il ritmo
+typo-2|delta:2|incrementa del 2 percento il ritmo|incemeta del 2 percento il ritmo
+clean|delta:-2|diminuisci del 2 percento il ritmo|diminuisci del 2 percento il ritmo
+typo-1|delta:-2|diminuisci del 2 percento il ritmo|diminusci del 2 percento il ritmo
+typo-2|delta:-2|diminuisci del 2 percento il ritmo|diminuci del 2 percento il ritmo
+clean|delta:2|incrementa del due percento il ritmo|incrementa del due percento il ritmo
+typo-1|delta:2|incrementa del due percento il ritmo|incremeta del due percento il ritmo
+typo-2|delta:2|incrementa del due percento il ritmo|incemeta del due percento il ritmo
+clean|delta:-2|diminuisci del due percento il ritmo|diminuisci del due percento il ritmo
+typo-1|delta:-2|diminuisci del due percento il ritmo|diminusci del due percento il ritmo
+typo-2|delta:-2|diminuisci del due percento il ritmo|diminuci del due percento il ritmo
+clean|delta:3|incrementa del 3 percento il ritmo|incrementa del 3 percento il ritmo
+typo-1|delta:3|incrementa del 3 percento il ritmo|incremeta del 3 percento il ritmo
+typo-2|delta:3|incrementa del 3 percento il ritmo|incemeta del 3 percento il ritmo
+clean|delta:-3|diminuisci del 3 percento il ritmo|diminuisci del 3 percento il ritmo
+typo-1|delta:-3|diminuisci del 3 percento il ritmo|diminusci del 3 percento il ritmo
+typo-2|delta:-3|diminuisci del 3 percento il ritmo|diminuci del 3 percento il ritmo
+clean|delta:3|incrementa del tre percento il ritmo|incrementa del tre percento il ritmo
+typo-1|delta:3|incrementa del tre percento il ritmo|incremeta del tre percento il ritmo
+typo-2|delta:3|incrementa del tre percento il ritmo|incemeta del tre percento il ritmo
+clean|delta:-3|diminuisci del tre percento il ritmo|diminuisci del tre percento il ritmo
+typo-1|delta:-3|diminuisci del tre percento il ritmo|diminusci del tre percento il ritmo
+typo-2|delta:-3|diminuisci del tre percento il ritmo|diminuci del tre percento il ritmo
+clean|delta:4|incrementa del 4 percento il ritmo|incrementa del 4 percento il ritmo
+typo-1|delta:4|incrementa del 4 percento il ritmo|incremeta del 4 percento il ritmo
+typo-2|delta:4|incrementa del 4 percento il ritmo|incemeta del 4 percento il ritmo
+clean|delta:-4|diminuisci del 4 percento il ritmo|diminuisci del 4 percento il ritmo
+typo-1|delta:-4|diminuisci del 4 percento il ritmo|diminusci del 4 percento il ritmo
+typo-2|delta:-4|diminuisci del 4 percento il ritmo|diminuci del 4 percento il ritmo
+clean|delta:4|incrementa del quattro percento il ritmo|incrementa del quattro percento il ritmo
+typo-1|delta:4|incrementa del quattro percento il ritmo|incremeta del quattro percento il ritmo
+typo-2|delta:4|incrementa del quattro percento il ritmo|incemeta del quattro percento il ritmo
+clean|delta:-4|diminuisci del quattro percento il ritmo|diminuisci del quattro percento il ritmo
+typo-1|delta:-4|diminuisci del quattro percento il ritmo|diminusci del quattro percento il ritmo
+typo-2|delta:-4|diminuisci del quattro percento il ritmo|diminuci del quattro percento il ritmo
+clean|delta:5|incrementa del 5 percento il ritmo|incrementa del 5 percento il ritmo
+typo-1|delta:5|incrementa del 5 percento il ritmo|incremeta del 5 percento il ritmo
+typo-2|delta:5|incrementa del 5 percento il ritmo|incemeta del 5 percento il ritmo
+clean|delta:-5|diminuisci del 5 percento il ritmo|diminuisci del 5 percento il ritmo
+typo-1|delta:-5|diminuisci del 5 percento il ritmo|diminusci del 5 percento il ritmo
+typo-2|delta:-5|diminuisci del 5 percento il ritmo|diminuci del 5 percento il ritmo
+clean|delta:5|incrementa del cinque percento il ritmo|incrementa del cinque percento il ritmo
+typo-1|delta:5|incrementa del cinque percento il ritmo|incremeta del cinque percento il ritmo
+typo-2|delta:5|incrementa del cinque percento il ritmo|incemeta del cinque percento il ritmo
+clean|delta:-5|diminuisci del cinque percento il ritmo|diminuisci del cinque percento il ritmo
+typo-1|delta:-5|diminuisci del cinque percento il ritmo|diminusci del cinque percento il ritmo
+typo-2|delta:-5|diminuisci del cinque percento il ritmo|diminuci del cinque percento il ritmo
+clean|delta:7|incrementa del 7 percento il ritmo|incrementa del 7 percento il ritmo
+typo-1|delta:7|incrementa del 7 percento il ritmo|incremeta del 7 percento il ritmo
+typo-2|delta:7|incrementa del 7 percento il ritmo|incemeta del 7 percento il ritmo
+clean|delta:-7|diminuisci del 7 percento il ritmo|diminuisci del 7 percento il ritmo
+typo-1|delta:-7|diminuisci del 7 percento il ritmo|diminusci del 7 percento il ritmo
+typo-2|delta:-7|diminuisci del 7 percento il ritmo|diminuci del 7 percento il ritmo
+clean|delta:7|incrementa del sette percento il ritmo|incrementa del sette percento il ritmo
+typo-1|delta:7|incrementa del sette percento il ritmo|incremeta del sette percento il ritmo
+typo-2|delta:7|incrementa del sette percento il ritmo|incemeta del sette percento il ritmo
+clean|delta:-7|diminuisci del sette percento il ritmo|diminuisci del sette percento il ritmo
+typo-1|delta:-7|diminuisci del sette percento il ritmo|diminusci del sette percento il ritmo
+typo-2|delta:-7|diminuisci del sette percento il ritmo|diminuci del sette percento il ritmo
+clean|delta:9|incrementa del 9 percento il ritmo|incrementa del 9 percento il ritmo
+typo-1|delta:9|incrementa del 9 percento il ritmo|incremeta del 9 percento il ritmo
+typo-2|delta:9|incrementa del 9 percento il ritmo|incemeta del 9 percento il ritmo
+clean|delta:-9|diminuisci del 9 percento il ritmo|diminuisci del 9 percento il ritmo
+typo-1|delta:-9|diminuisci del 9 percento il ritmo|diminusci del 9 percento il ritmo
+typo-2|delta:-9|diminuisci del 9 percento il ritmo|diminuci del 9 percento il ritmo
+clean|delta:9|incrementa del nove percento il ritmo|incrementa del nove percento il ritmo
+typo-1|delta:9|incrementa del nove percento il ritmo|incremeta del nove percento il ritmo
+typo-2|delta:9|incrementa del nove percento il ritmo|incemeta del nove percento il ritmo
+clean|delta:-9|diminuisci del nove percento il ritmo|diminuisci del nove percento il ritmo
+typo-1|delta:-9|diminuisci del nove percento il ritmo|diminusci del nove percento il ritmo
+typo-2|delta:-9|diminuisci del nove percento il ritmo|diminuci del nove percento il ritmo
+clean|delta:10|incrementa del 10 percento il ritmo|incrementa del 10 percento il ritmo
+typo-1|delta:10|incrementa del 10 percento il ritmo|incremeta del 10 percento il ritmo
+typo-2|delta:10|incrementa del 10 percento il ritmo|incemeta del 10 percento il ritmo
+clean|delta:-10|diminuisci del 10 percento il ritmo|diminuisci del 10 percento il ritmo
+typo-1|delta:-10|diminuisci del 10 percento il ritmo|diminusci del 10 percento il ritmo
+typo-2|delta:-10|diminuisci del 10 percento il ritmo|diminuci del 10 percento il ritmo
+clean|delta:10|incrementa del dieci percento il ritmo|incrementa del dieci percento il ritmo
+typo-1|delta:10|incrementa del dieci percento il ritmo|incremeta del dieci percento il ritmo
+typo-2|delta:10|incrementa del dieci percento il ritmo|incemeta del dieci percento il ritmo
+clean|delta:-10|diminuisci del dieci percento il ritmo|diminuisci del dieci percento il ritmo
+typo-1|delta:-10|diminuisci del dieci percento il ritmo|diminusci del dieci percento il ritmo
+typo-2|delta:-10|diminuisci del dieci percento il ritmo|diminuci del dieci percento il ritmo
+clean|delta:16|incrementa del 16 percento il ritmo|incrementa del 16 percento il ritmo
+typo-1|delta:16|incrementa del 16 percento il ritmo|incremeta del 16 percento il ritmo
+typo-2|delta:16|incrementa del 16 percento il ritmo|incemeta del 16 percento il ritmo
+clean|delta:-16|diminuisci del 16 percento il ritmo|diminuisci del 16 percento il ritmo
+typo-1|delta:-16|diminuisci del 16 percento il ritmo|diminusci del 16 percento il ritmo
+typo-2|delta:-16|diminuisci del 16 percento il ritmo|diminuci del 16 percento il ritmo
+clean|delta:16|incrementa del sedici percento il ritmo|incrementa del sedici percento il ritmo
+typo-1|delta:16|incrementa del sedici percento il ritmo|incremeta del sedici percento il ritmo
+typo-2|delta:16|incrementa del sedici percento il ritmo|incemeta del sedici percento il ritmo
+clean|delta:-16|diminuisci del sedici percento il ritmo|diminuisci del sedici percento il ritmo
+typo-1|delta:-16|diminuisci del sedici percento il ritmo|diminusci del sedici percento il ritmo
+typo-2|delta:-16|diminuisci del sedici percento il ritmo|diminuci del sedici percento il ritmo
+clean|delta:25|incrementa del 25 percento il ritmo|incrementa del 25 percento il ritmo
+typo-1|delta:25|incrementa del 25 percento il ritmo|incremeta del 25 percento il ritmo
+typo-2|delta:25|incrementa del 25 percento il ritmo|incemeta del 25 percento il ritmo
+clean|delta:-25|diminuisci del 25 percento il ritmo|diminuisci del 25 percento il ritmo
+typo-1|delta:-25|diminuisci del 25 percento il ritmo|diminusci del 25 percento il ritmo
+typo-2|delta:-25|diminuisci del 25 percento il ritmo|diminuci del 25 percento il ritmo
+clean|delta:25|incrementa del venticinque percento il ritmo|incrementa del venticinque percento il ritmo
+typo-1|delta:25|incrementa del venticinque percento il ritmo|incremeta del venticinque percento il ritmo
+typo-2|delta:25|incrementa del venticinque percento il ritmo|incemeta del venticinque percento il ritmo
+clean|delta:-25|diminuisci del venticinque percento il ritmo|diminuisci del venticinque percento il ritmo
+typo-1|delta:-25|diminuisci del venticinque percento il ritmo|diminusci del venticinque percento il ritmo
+typo-2|delta:-25|diminuisci del venticinque percento il ritmo|diminuci del venticinque percento il ritmo
+clean|delta:40|incrementa del 40 percento il ritmo|incrementa del 40 percento il ritmo
+typo-1|delta:40|incrementa del 40 percento il ritmo|incremeta del 40 percento il ritmo
+typo-2|delta:40|incrementa del 40 percento il ritmo|incemeta del 40 percento il ritmo
+clean|delta:-40|diminuisci del 40 percento il ritmo|diminuisci del 40 percento il ritmo
+typo-1|delta:-40|diminuisci del 40 percento il ritmo|diminusci del 40 percento il ritmo
+typo-2|delta:-40|diminuisci del 40 percento il ritmo|diminuci del 40 percento il ritmo
+clean|delta:40|incrementa del quaranta percento il ritmo|incrementa del quaranta percento il ritmo
+typo-1|delta:40|incrementa del quaranta percento il ritmo|incremeta del quaranta percento il ritmo
+typo-2|delta:40|incrementa del quaranta percento il ritmo|incemeta del quaranta percento il ritmo
+clean|delta:-40|diminuisci del quaranta percento il ritmo|diminuisci del quaranta percento il ritmo
+typo-1|delta:-40|diminuisci del quaranta percento il ritmo|diminusci del quaranta percento il ritmo
+typo-2|delta:-40|diminuisci del quaranta percento il ritmo|diminuci del quaranta percento il ritmo
+clean|delta:75|incrementa del 75 percento il ritmo|incrementa del 75 percento il ritmo
+typo-1|delta:75|incrementa del 75 percento il ritmo|incremeta del 75 percento il ritmo
+typo-2|delta:75|incrementa del 75 percento il ritmo|incemeta del 75 percento il ritmo
+clean|delta:-75|diminuisci del 75 percento il ritmo|diminuisci del 75 percento il ritmo
+typo-1|delta:-75|diminuisci del 75 percento il ritmo|diminusci del 75 percento il ritmo
+typo-2|delta:-75|diminuisci del 75 percento il ritmo|diminuci del 75 percento il ritmo
+clean|delta:75|incrementa del settantacinque percento il ritmo|incrementa del settantacinque percento il ritmo
+typo-1|delta:75|incrementa del settantacinque percento il ritmo|incremeta del settantacinque percento il ritmo
+typo-2|delta:75|incrementa del settantacinque percento il ritmo|incemeta del settantacinque percento il ritmo
+clean|delta:-75|diminuisci del settantacinque percento il ritmo|diminuisci del settantacinque percento il ritmo
+typo-1|delta:-75|diminuisci del settantacinque percento il ritmo|diminusci del settantacinque percento il ritmo
+typo-2|delta:-75|diminuisci del settantacinque percento il ritmo|diminuci del settantacinque percento il ritmo
+clean|delta:125|incrementa del 125 percento il ritmo|incrementa del 125 percento il ritmo
+typo-1|delta:125|incrementa del 125 percento il ritmo|incremeta del 125 percento il ritmo
+typo-2|delta:125|incrementa del 125 percento il ritmo|incemeta del 125 percento il ritmo
+clean|delta:-125|diminuisci del 125 percento il ritmo|diminuisci del 125 percento il ritmo
+typo-1|delta:-125|diminuisci del 125 percento il ritmo|diminusci del 125 percento il ritmo
+typo-2|delta:-125|diminuisci del 125 percento il ritmo|diminuci del 125 percento il ritmo
+clean|delta:125|incrementa del centoventicinque percento il ritmo|incrementa del centoventicinque percento il ritmo
+typo-1|delta:125|incrementa del centoventicinque percento il ritmo|incremeta del centoventicinque percento il ritmo
+typo-2|delta:125|incrementa del centoventicinque percento il ritmo|incemeta del centoventicinque percento il ritmo
+clean|delta:-125|diminuisci del centoventicinque percento il ritmo|diminuisci del centoventicinque percento il ritmo
+typo-1|delta:-125|diminuisci del centoventicinque percento il ritmo|diminusci del centoventicinque percento il ritmo
+typo-2|delta:-125|diminuisci del centoventicinque percento il ritmo|diminuci del centoventicinque percento il ritmo
+clean|delta:175|incrementa del 175 percento il ritmo|incrementa del 175 percento il ritmo
+typo-1|delta:175|incrementa del 175 percento il ritmo|incremeta del 175 percento il ritmo
+typo-2|delta:175|incrementa del 175 percento il ritmo|incemeta del 175 percento il ritmo
+clean|delta:-175|diminuisci del 175 percento il ritmo|diminuisci del 175 percento il ritmo
+typo-1|delta:-175|diminuisci del 175 percento il ritmo|diminusci del 175 percento il ritmo
+typo-2|delta:-175|diminuisci del 175 percento il ritmo|diminuci del 175 percento il ritmo
+clean|delta:175|incrementa del centosettantacinque percento il ritmo|incrementa del centosettantacinque percento il ritmo
+typo-1|delta:175|incrementa del centosettantacinque percento il ritmo|incremeta del centosettantacinque percento il ritmo
+typo-2|delta:175|incrementa del centosettantacinque percento il ritmo|incemeta del centosettantacinque percento il ritmo
+clean|delta:-175|diminuisci del centosettantacinque percento il ritmo|diminuisci del centosettantacinque percento il ritmo
+typo-1|delta:-175|diminuisci del centosettantacinque percento il ritmo|diminusci del centosettantacinque percento il ritmo
+typo-2|delta:-175|diminuisci del centosettantacinque percento il ritmo|diminuci del centosettantacinque percento il ritmo
+paraphrase|delta:1|mi alzi la velocità di 1 punti percentuali|mi alzi la velocità di 1 punti percentuali
+paraphrase|delta:-1|mi abbassi la velocità di 1 punti percentuali|mi abbassi la velocità di 1 punti percentuali
+paraphrase|delta:1|mi alzi la velocità di uno punti percentuali|mi alzi la velocità di uno punti percentuali
+paraphrase|delta:-1|mi abbassi la velocità di uno punti percentuali|mi abbassi la velocità di uno punti percentuali
+paraphrase|delta:2|mi alzi la velocità di 2 punti percentuali|mi alzi la velocità di 2 punti percentuali
+paraphrase|delta:-2|mi abbassi la velocità di 2 punti percentuali|mi abbassi la velocità di 2 punti percentuali
+paraphrase|delta:2|mi alzi la velocità di due punti percentuali|mi alzi la velocità di due punti percentuali
+paraphrase|delta:-2|mi abbassi la velocità di due punti percentuali|mi abbassi la velocità di due punti percentuali
+paraphrase|delta:3|mi alzi la velocità di 3 punti percentuali|mi alzi la velocità di 3 punti percentuali
+paraphrase|delta:-3|mi abbassi la velocità di 3 punti percentuali|mi abbassi la velocità di 3 punti percentuali
+paraphrase|delta:3|mi alzi la velocità di tre punti percentuali|mi alzi la velocità di tre punti percentuali
+paraphrase|delta:-3|mi abbassi la velocità di tre punti percentuali|mi abbassi la velocità di tre punti percentuali
+paraphrase|delta:4|mi alzi la velocità di 4 punti percentuali|mi alzi la velocità di 4 punti percentuali
+paraphrase|delta:-4|mi abbassi la velocità di 4 punti percentuali|mi abbassi la velocità di 4 punti percentuali
+paraphrase|delta:4|mi alzi la velocità di quattro punti percentuali|mi alzi la velocità di quattro punti percentuali
+paraphrase|delta:-4|mi abbassi la velocità di quattro punti percentuali|mi abbassi la velocità di quattro punti percentuali
+paraphrase|delta:5|mi alzi la velocità di 5 punti percentuali|mi alzi la velocità di 5 punti percentuali
+paraphrase|delta:-5|mi abbassi la velocità di 5 punti percentuali|mi abbassi la velocità di 5 punti percentuali
+paraphrase|delta:5|mi alzi la velocità di cinque punti percentuali|mi alzi la velocità di cinque punti percentuali
+paraphrase|delta:-5|mi abbassi la velocità di cinque punti percentuali|mi abbassi la velocità di cinque punti percentuali
+paraphrase|delta:7|mi alzi la velocità di 7 punti percentuali|mi alzi la velocità di 7 punti percentuali
+paraphrase|delta:-7|mi abbassi la velocità di 7 punti percentuali|mi abbassi la velocità di 7 punti percentuali
+paraphrase|delta:7|mi alzi la velocità di sette punti percentuali|mi alzi la velocità di sette punti percentuali
+paraphrase|delta:-7|mi abbassi la velocità di sette punti percentuali|mi abbassi la velocità di sette punti percentuali
+paraphrase|delta:9|mi alzi la velocità di 9 punti percentuali|mi alzi la velocità di 9 punti percentuali
+paraphrase|delta:-9|mi abbassi la velocità di 9 punti percentuali|mi abbassi la velocità di 9 punti percentuali
+paraphrase|delta:9|mi alzi la velocità di nove punti percentuali|mi alzi la velocità di nove punti percentuali
+paraphrase|delta:-9|mi abbassi la velocità di nove punti percentuali|mi abbassi la velocità di nove punti percentuali
+paraphrase|delta:10|mi alzi la velocità di 10 punti percentuali|mi alzi la velocità di 10 punti percentuali
+paraphrase|delta:-10|mi abbassi la velocità di 10 punti percentuali|mi abbassi la velocità di 10 punti percentuali
+paraphrase|delta:10|mi alzi la velocità di dieci punti percentuali|mi alzi la velocità di dieci punti percentuali
+paraphrase|delta:-10|mi abbassi la velocità di dieci punti percentuali|mi abbassi la velocità di dieci punti percentuali
+paraphrase|delta:16|mi alzi la velocità di 16 punti percentuali|mi alzi la velocità di 16 punti percentuali
+paraphrase|delta:-16|mi abbassi la velocità di 16 punti percentuali|mi abbassi la velocità di 16 punti percentuali
+paraphrase|delta:16|mi alzi la velocità di sedici punti percentuali|mi alzi la velocità di sedici punti percentuali
+paraphrase|delta:-16|mi abbassi la velocità di sedici punti percentuali|mi abbassi la velocità di sedici punti percentuali
+paraphrase|delta:25|mi alzi la velocità di 25 punti percentuali|mi alzi la velocità di 25 punti percentuali
+paraphrase|delta:-25|mi abbassi la velocità di 25 punti percentuali|mi abbassi la velocità di 25 punti percentuali
+paraphrase|delta:25|mi alzi la velocità di venticinque punti percentuali|mi alzi la velocità di venticinque punti percentuali
+paraphrase|delta:-25|mi abbassi la velocità di venticinque punti percentuali|mi abbassi la velocità di venticinque punti percentuali
+paraphrase|delta:40|mi alzi la velocità di 40 punti percentuali|mi alzi la velocità di 40 punti percentuali
+paraphrase|delta:-40|mi abbassi la velocità di 40 punti percentuali|mi abbassi la velocità di 40 punti percentuali
+paraphrase|delta:40|mi alzi la velocità di quaranta punti percentuali|mi alzi la velocità di quaranta punti percentuali
+paraphrase|delta:-40|mi abbassi la velocità di quaranta punti percentuali|mi abbassi la velocità di quaranta punti percentuali
+paraphrase|delta:75|mi alzi la velocità di 75 punti percentuali|mi alzi la velocità di 75 punti percentuali
+paraphrase|delta:-75|mi abbassi la velocità di 75 punti percentuali|mi abbassi la velocità di 75 punti percentuali
+paraphrase|delta:75|mi alzi la velocità di settantacinque punti percentuali|mi alzi la velocità di settantacinque punti percentuali
+paraphrase|delta:-75|mi abbassi la velocità di settantacinque punti percentuali|mi abbassi la velocità di settantacinque punti percentuali
+paraphrase|delta:125|mi alzi la velocità di 125 punti percentuali|mi alzi la velocità di 125 punti percentuali
+paraphrase|delta:-125|mi abbassi la velocità di 125 punti percentuali|mi abbassi la velocità di 125 punti percentuali
+paraphrase|delta:125|mi alzi la velocità di centoventicinque punti percentuali|mi alzi la velocità di centoventicinque punti percentuali
+paraphrase|delta:-125|mi abbassi la velocità di centoventicinque punti percentuali|mi abbassi la velocità di centoventicinque punti percentuali
+paraphrase|delta:175|mi alzi la velocità di 175 punti percentuali|mi alzi la velocità di 175 punti percentuali
+paraphrase|delta:-175|mi abbassi la velocità di 175 punti percentuali|mi abbassi la velocità di 175 punti percentuali
+paraphrase|delta:175|mi alzi la velocità di centosettantacinque punti percentuali|mi alzi la velocità di centosettantacinque punti percentuali
+paraphrase|delta:-175|mi abbassi la velocità di centosettantacinque punti percentuali|mi abbassi la velocità di centosettantacinque punti percentuali
+paraphrase|delta:1|puoi aumentare il ritmo di 1 punti percentuali per favore|puoi aumentare il ritmo di 1 punti percentuali per favore
+paraphrase|delta:-1|puoi ridurre il ritmo di 1 punti percentuali per favore|puoi ridurre il ritmo di 1 punti percentuali per favore
+paraphrase|delta:1|puoi aumentare il ritmo di uno punti percentuali per favore|puoi aumentare il ritmo di uno punti percentuali per favore
+paraphrase|delta:-1|puoi ridurre il ritmo di uno punti percentuali per favore|puoi ridurre il ritmo di uno punti percentuali per favore
+paraphrase|delta:2|puoi aumentare il ritmo di 2 punti percentuali per favore|puoi aumentare il ritmo di 2 punti percentuali per favore
+paraphrase|delta:-2|puoi ridurre il ritmo di 2 punti percentuali per favore|puoi ridurre il ritmo di 2 punti percentuali per favore
+paraphrase|delta:2|puoi aumentare il ritmo di due punti percentuali per favore|puoi aumentare il ritmo di due punti percentuali per favore
+paraphrase|delta:-2|puoi ridurre il ritmo di due punti percentuali per favore|puoi ridurre il ritmo di due punti percentuali per favore
+paraphrase|delta:3|puoi aumentare il ritmo di 3 punti percentuali per favore|puoi aumentare il ritmo di 3 punti percentuali per favore
+paraphrase|delta:-3|puoi ridurre il ritmo di 3 punti percentuali per favore|puoi ridurre il ritmo di 3 punti percentuali per favore
+paraphrase|delta:3|puoi aumentare il ritmo di tre punti percentuali per favore|puoi aumentare il ritmo di tre punti percentuali per favore
+paraphrase|delta:-3|puoi ridurre il ritmo di tre punti percentuali per favore|puoi ridurre il ritmo di tre punti percentuali per favore
+paraphrase|delta:4|puoi aumentare il ritmo di 4 punti percentuali per favore|puoi aumentare il ritmo di 4 punti percentuali per favore
+paraphrase|delta:-4|puoi ridurre il ritmo di 4 punti percentuali per favore|puoi ridurre il ritmo di 4 punti percentuali per favore
+paraphrase|delta:4|puoi aumentare il ritmo di quattro punti percentuali per favore|puoi aumentare il ritmo di quattro punti percentuali per favore
+paraphrase|delta:-4|puoi ridurre il ritmo di quattro punti percentuali per favore|puoi ridurre il ritmo di quattro punti percentuali per favore
+paraphrase|delta:5|puoi aumentare il ritmo di 5 punti percentuali per favore|puoi aumentare il ritmo di 5 punti percentuali per favore
+paraphrase|delta:-5|puoi ridurre il ritmo di 5 punti percentuali per favore|puoi ridurre il ritmo di 5 punti percentuali per favore
+paraphrase|delta:5|puoi aumentare il ritmo di cinque punti percentuali per favore|puoi aumentare il ritmo di cinque punti percentuali per favore
+paraphrase|delta:-5|puoi ridurre il ritmo di cinque punti percentuali per favore|puoi ridurre il ritmo di cinque punti percentuali per favore
+paraphrase|delta:7|puoi aumentare il ritmo di 7 punti percentuali per favore|puoi aumentare il ritmo di 7 punti percentuali per favore
+paraphrase|delta:-7|puoi ridurre il ritmo di 7 punti percentuali per favore|puoi ridurre il ritmo di 7 punti percentuali per favore
+paraphrase|delta:7|puoi aumentare il ritmo di sette punti percentuali per favore|puoi aumentare il ritmo di sette punti percentuali per favore
+paraphrase|delta:-7|puoi ridurre il ritmo di sette punti percentuali per favore|puoi ridurre il ritmo di sette punti percentuali per favore
+paraphrase|delta:9|puoi aumentare il ritmo di 9 punti percentuali per favore|puoi aumentare il ritmo di 9 punti percentuali per favore
+paraphrase|delta:-9|puoi ridurre il ritmo di 9 punti percentuali per favore|puoi ridurre il ritmo di 9 punti percentuali per favore
+paraphrase|delta:9|puoi aumentare il ritmo di nove punti percentuali per favore|puoi aumentare il ritmo di nove punti percentuali per favore
+paraphrase|delta:-9|puoi ridurre il ritmo di nove punti percentuali per favore|puoi ridurre il ritmo di nove punti percentuali per favore
+paraphrase|delta:10|puoi aumentare il ritmo di 10 punti percentuali per favore|puoi aumentare il ritmo di 10 punti percentuali per favore
+paraphrase|delta:-10|puoi ridurre il ritmo di 10 punti percentuali per favore|puoi ridurre il ritmo di 10 punti percentuali per favore
+paraphrase|delta:10|puoi aumentare il ritmo di dieci punti percentuali per favore|puoi aumentare il ritmo di dieci punti percentuali per favore
+paraphrase|delta:-10|puoi ridurre il ritmo di dieci punti percentuali per favore|puoi ridurre il ritmo di dieci punti percentuali per favore
+paraphrase|delta:16|puoi aumentare il ritmo di 16 punti percentuali per favore|puoi aumentare il ritmo di 16 punti percentuali per favore
+paraphrase|delta:-16|puoi ridurre il ritmo di 16 punti percentuali per favore|puoi ridurre il ritmo di 16 punti percentuali per favore
+paraphrase|delta:16|puoi aumentare il ritmo di sedici punti percentuali per favore|puoi aumentare il ritmo di sedici punti percentuali per favore
+paraphrase|delta:-16|puoi ridurre il ritmo di sedici punti percentuali per favore|puoi ridurre il ritmo di sedici punti percentuali per favore
+paraphrase|delta:25|puoi aumentare il ritmo di 25 punti percentuali per favore|puoi aumentare il ritmo di 25 punti percentuali per favore
+paraphrase|delta:-25|puoi ridurre il ritmo di 25 punti percentuali per favore|puoi ridurre il ritmo di 25 punti percentuali per favore
+paraphrase|delta:25|puoi aumentare il ritmo di venticinque punti percentuali per favore|puoi aumentare il ritmo di venticinque punti percentuali per favore
+paraphrase|delta:-25|puoi ridurre il ritmo di venticinque punti percentuali per favore|puoi ridurre il ritmo di venticinque punti percentuali per favore
+paraphrase|delta:40|puoi aumentare il ritmo di 40 punti percentuali per favore|puoi aumentare il ritmo di 40 punti percentuali per favore
+paraphrase|delta:-40|puoi ridurre il ritmo di 40 punti percentuali per favore|puoi ridurre il ritmo di 40 punti percentuali per favore
+paraphrase|delta:40|puoi aumentare il ritmo di quaranta punti percentuali per favore|puoi aumentare il ritmo di quaranta punti percentuali per favore
+paraphrase|delta:-40|puoi ridurre il ritmo di quaranta punti percentuali per favore|puoi ridurre il ritmo di quaranta punti percentuali per favore
+paraphrase|delta:75|puoi aumentare il ritmo di 75 punti percentuali per favore|puoi aumentare il ritmo di 75 punti percentuali per favore
+paraphrase|delta:-75|puoi ridurre il ritmo di 75 punti percentuali per favore|puoi ridurre il ritmo di 75 punti percentuali per favore
+paraphrase|delta:75|puoi aumentare il ritmo di settantacinque punti percentuali per favore|puoi aumentare il ritmo di settantacinque punti percentuali per favore
+paraphrase|delta:-75|puoi ridurre il ritmo di settantacinque punti percentuali per favore|puoi ridurre il ritmo di settantacinque punti percentuali per favore
+paraphrase|delta:125|puoi aumentare il ritmo di 125 punti percentuali per favore|puoi aumentare il ritmo di 125 punti percentuali per favore
+paraphrase|delta:-125|puoi ridurre il ritmo di 125 punti percentuali per favore|puoi ridurre il ritmo di 125 punti percentuali per favore
+paraphrase|delta:125|puoi aumentare il ritmo di centoventicinque punti percentuali per favore|puoi aumentare il ritmo di centoventicinque punti percentuali per favore
+paraphrase|delta:-125|puoi ridurre il ritmo di centoventicinque punti percentuali per favore|puoi ridurre il ritmo di centoventicinque punti percentuali per favore
+paraphrase|delta:175|puoi aumentare il ritmo di 175 punti percentuali per favore|puoi aumentare il ritmo di 175 punti percentuali per favore
+paraphrase|delta:-175|puoi ridurre il ritmo di 175 punti percentuali per favore|puoi ridurre il ritmo di 175 punti percentuali per favore
+paraphrase|delta:175|puoi aumentare il ritmo di centosettantacinque punti percentuali per favore|puoi aumentare il ritmo di centosettantacinque punti percentuali per favore
+paraphrase|delta:-175|puoi ridurre il ritmo di centosettantacinque punti percentuali per favore|puoi ridurre il ritmo di centosettantacinque punti percentuali per favore
+grammar|delta:1|aumenta velocità di 1 percento|aumenta velocità di 1 percento
+grammar|delta:-1|riduci velocità di 1 percento|riduci velocità di 1 percento
+grammar|delta:1|aumenta velocità di uno percento|aumenta velocità di uno percento
+grammar|delta:-1|riduci velocità di uno percento|riduci velocità di uno percento
+grammar|delta:2|aumenta velocità di 2 percento|aumenta velocità di 2 percento
+grammar|delta:-2|riduci velocità di 2 percento|riduci velocità di 2 percento
+grammar|delta:2|aumenta velocità di due percento|aumenta velocità di due percento
+grammar|delta:-2|riduci velocità di due percento|riduci velocità di due percento
+grammar|delta:3|aumenta velocità di 3 percento|aumenta velocità di 3 percento
+grammar|delta:-3|riduci velocità di 3 percento|riduci velocità di 3 percento
+grammar|delta:3|aumenta velocità di tre percento|aumenta velocità di tre percento
+grammar|delta:-3|riduci velocità di tre percento|riduci velocità di tre percento
+grammar|delta:4|aumenta velocità di 4 percento|aumenta velocità di 4 percento
+grammar|delta:-4|riduci velocità di 4 percento|riduci velocità di 4 percento
+grammar|delta:4|aumenta velocità di quattro percento|aumenta velocità di quattro percento
+grammar|delta:-4|riduci velocità di quattro percento|riduci velocità di quattro percento
+grammar|delta:5|aumenta velocità di 5 percento|aumenta velocità di 5 percento
+grammar|delta:-5|riduci velocità di 5 percento|riduci velocità di 5 percento
+grammar|delta:5|aumenta velocità di cinque percento|aumenta velocità di cinque percento
+grammar|delta:-5|riduci velocità di cinque percento|riduci velocità di cinque percento
+grammar|delta:7|aumenta velocità di 7 percento|aumenta velocità di 7 percento
+grammar|delta:-7|riduci velocità di 7 percento|riduci velocità di 7 percento
+grammar|delta:7|aumenta velocità di sette percento|aumenta velocità di sette percento
+grammar|delta:-7|riduci velocità di sette percento|riduci velocità di sette percento
+grammar|delta:9|aumenta velocità di 9 percento|aumenta velocità di 9 percento
+grammar|delta:-9|riduci velocità di 9 percento|riduci velocità di 9 percento
+grammar|delta:9|aumenta velocità di nove percento|aumenta velocità di nove percento
+grammar|delta:-9|riduci velocità di nove percento|riduci velocità di nove percento
+grammar|delta:10|aumenta velocità di 10 percento|aumenta velocità di 10 percento
+grammar|delta:-10|riduci velocità di 10 percento|riduci velocità di 10 percento
+grammar|delta:10|aumenta velocità di dieci percento|aumenta velocità di dieci percento
+grammar|delta:-10|riduci velocità di dieci percento|riduci velocità di dieci percento
+grammar|delta:16|aumenta velocità di 16 percento|aumenta velocità di 16 percento
+grammar|delta:-16|riduci velocità di 16 percento|riduci velocità di 16 percento
+grammar|delta:16|aumenta velocità di sedici percento|aumenta velocità di sedici percento
+grammar|delta:-16|riduci velocità di sedici percento|riduci velocità di sedici percento
+grammar|delta:25|aumenta velocità di 25 percento|aumenta velocità di 25 percento
+grammar|delta:-25|riduci velocità di 25 percento|riduci velocità di 25 percento
+grammar|delta:25|aumenta velocità di venticinque percento|aumenta velocità di venticinque percento
+grammar|delta:-25|riduci velocità di venticinque percento|riduci velocità di venticinque percento
+grammar|delta:40|aumenta velocità di 40 percento|aumenta velocità di 40 percento
+grammar|delta:-40|riduci velocità di 40 percento|riduci velocità di 40 percento
+grammar|delta:40|aumenta velocità di quaranta percento|aumenta velocità di quaranta percento
+grammar|delta:-40|riduci velocità di quaranta percento|riduci velocità di quaranta percento
+grammar|delta:75|aumenta velocità di 75 percento|aumenta velocità di 75 percento
+grammar|delta:-75|riduci velocità di 75 percento|riduci velocità di 75 percento
+grammar|delta:75|aumenta velocità di settantacinque percento|aumenta velocità di settantacinque percento
+grammar|delta:-75|riduci velocità di settantacinque percento|riduci velocità di settantacinque percento
+grammar|delta:125|aumenta velocità di 125 percento|aumenta velocità di 125 percento
+grammar|delta:-125|riduci velocità di 125 percento|riduci velocità di 125 percento
+grammar|delta:125|aumenta velocità di centoventicinque percento|aumenta velocità di centoventicinque percento
+grammar|delta:-125|riduci velocità di centoventicinque percento|riduci velocità di centoventicinque percento
+grammar|delta:175|aumenta velocità di 175 percento|aumenta velocità di 175 percento
+grammar|delta:-175|riduci velocità di 175 percento|riduci velocità di 175 percento
+grammar|delta:175|aumenta velocità di centosettantacinque percento|aumenta velocità di centosettantacinque percento
+grammar|delta:-175|riduci velocità di centosettantacinque percento|riduci velocità di centosettantacinque percento
+grammar|delta:1|aumenta il velocità del 1 percento|aumenta il velocità del 1 percento
+grammar|delta:-1|riduci il velocità del 1 percento|riduci il velocità del 1 percento
+grammar|delta:1|aumenta il velocità del uno percento|aumenta il velocità del uno percento
+grammar|delta:-1|riduci il velocità del uno percento|riduci il velocità del uno percento
+grammar|delta:2|aumenta il velocità del 2 percento|aumenta il velocità del 2 percento
+grammar|delta:-2|riduci il velocità del 2 percento|riduci il velocità del 2 percento
+grammar|delta:2|aumenta il velocità del due percento|aumenta il velocità del due percento
+grammar|delta:-2|riduci il velocità del due percento|riduci il velocità del due percento
+grammar|delta:3|aumenta il velocità del 3 percento|aumenta il velocità del 3 percento
+grammar|delta:-3|riduci il velocità del 3 percento|riduci il velocità del 3 percento
+grammar|delta:3|aumenta il velocità del tre percento|aumenta il velocità del tre percento
+grammar|delta:-3|riduci il velocità del tre percento|riduci il velocità del tre percento
+grammar|delta:4|aumenta il velocità del 4 percento|aumenta il velocità del 4 percento
+grammar|delta:-4|riduci il velocità del 4 percento|riduci il velocità del 4 percento
+grammar|delta:4|aumenta il velocità del quattro percento|aumenta il velocità del quattro percento
+grammar|delta:-4|riduci il velocità del quattro percento|riduci il velocità del quattro percento
+grammar|delta:5|aumenta il velocità del 5 percento|aumenta il velocità del 5 percento
+grammar|delta:-5|riduci il velocità del 5 percento|riduci il velocità del 5 percento
+grammar|delta:5|aumenta il velocità del cinque percento|aumenta il velocità del cinque percento
+grammar|delta:-5|riduci il velocità del cinque percento|riduci il velocità del cinque percento
+grammar|delta:7|aumenta il velocità del 7 percento|aumenta il velocità del 7 percento
+grammar|delta:-7|riduci il velocità del 7 percento|riduci il velocità del 7 percento
+grammar|delta:7|aumenta il velocità del sette percento|aumenta il velocità del sette percento
+grammar|delta:-7|riduci il velocità del sette percento|riduci il velocità del sette percento
+grammar|delta:9|aumenta il velocità del 9 percento|aumenta il velocità del 9 percento
+grammar|delta:-9|riduci il velocità del 9 percento|riduci il velocità del 9 percento
+grammar|delta:9|aumenta il velocità del nove percento|aumenta il velocità del nove percento
+grammar|delta:-9|riduci il velocità del nove percento|riduci il velocità del nove percento
+grammar|delta:10|aumenta il velocità del 10 percento|aumenta il velocità del 10 percento
+grammar|delta:-10|riduci il velocità del 10 percento|riduci il velocità del 10 percento
+grammar|delta:10|aumenta il velocità del dieci percento|aumenta il velocità del dieci percento
+grammar|delta:-10|riduci il velocità del dieci percento|riduci il velocità del dieci percento
+grammar|delta:16|aumenta il velocità del 16 percento|aumenta il velocità del 16 percento
+grammar|delta:-16|riduci il velocità del 16 percento|riduci il velocità del 16 percento
+grammar|delta:16|aumenta il velocità del sedici percento|aumenta il velocità del sedici percento
+grammar|delta:-16|riduci il velocità del sedici percento|riduci il velocità del sedici percento
+grammar|delta:25|aumenta il velocità del 25 percento|aumenta il velocità del 25 percento
+grammar|delta:-25|riduci il velocità del 25 percento|riduci il velocità del 25 percento
+grammar|delta:25|aumenta il velocità del venticinque percento|aumenta il velocità del venticinque percento
+grammar|delta:-25|riduci il velocità del venticinque percento|riduci il velocità del venticinque percento
+grammar|delta:40|aumenta il velocità del 40 percento|aumenta il velocità del 40 percento
+grammar|delta:-40|riduci il velocità del 40 percento|riduci il velocità del 40 percento
+grammar|delta:40|aumenta il velocità del quaranta percento|aumenta il velocità del quaranta percento
+grammar|delta:-40|riduci il velocità del quaranta percento|riduci il velocità del quaranta percento
+grammar|delta:75|aumenta il velocità del 75 percento|aumenta il velocità del 75 percento
+grammar|delta:-75|riduci il velocità del 75 percento|riduci il velocità del 75 percento
+grammar|delta:75|aumenta il velocità del settantacinque percento|aumenta il velocità del settantacinque percento
+grammar|delta:-75|riduci il velocità del settantacinque percento|riduci il velocità del settantacinque percento
+grammar|delta:125|aumenta il velocità del 125 percento|aumenta il velocità del 125 percento
+grammar|delta:-125|riduci il velocità del 125 percento|riduci il velocità del 125 percento
+grammar|delta:125|aumenta il velocità del centoventicinque percento|aumenta il velocità del centoventicinque percento
+grammar|delta:-125|riduci il velocità del centoventicinque percento|riduci il velocità del centoventicinque percento
+grammar|delta:175|aumenta il velocità del 175 percento|aumenta il velocità del 175 percento
+grammar|delta:-175|riduci il velocità del 175 percento|riduci il velocità del 175 percento
+grammar|delta:175|aumenta il velocità del centosettantacinque percento|aumenta il velocità del centosettantacinque percento
+grammar|delta:-175|riduci il velocità del centosettantacinque percento|riduci il velocità del centosettantacinque percento
+grammar|delta:1|incrementa velocità 1 punti percentuali|incrementa velocità 1 punti percentuali
+grammar|delta:-1|diminuisci velocità 1 punti percentuali|diminuisci velocità 1 punti percentuali
+grammar|delta:1|incrementa velocità uno punti percentuali|incrementa velocità uno punti percentuali
+grammar|delta:-1|diminuisci velocità uno punti percentuali|diminuisci velocità uno punti percentuali
+grammar|delta:2|incrementa velocità 2 punti percentuali|incrementa velocità 2 punti percentuali
+grammar|delta:-2|diminuisci velocità 2 punti percentuali|diminuisci velocità 2 punti percentuali
+grammar|delta:2|incrementa velocità due punti percentuali|incrementa velocità due punti percentuali
+grammar|delta:-2|diminuisci velocità due punti percentuali|diminuisci velocità due punti percentuali
+grammar|delta:3|incrementa velocità 3 punti percentuali|incrementa velocità 3 punti percentuali
+grammar|delta:-3|diminuisci velocità 3 punti percentuali|diminuisci velocità 3 punti percentuali
+grammar|delta:3|incrementa velocità tre punti percentuali|incrementa velocità tre punti percentuali
+grammar|delta:-3|diminuisci velocità tre punti percentuali|diminuisci velocità tre punti percentuali
+grammar|delta:4|incrementa velocità 4 punti percentuali|incrementa velocità 4 punti percentuali
+grammar|delta:-4|diminuisci velocità 4 punti percentuali|diminuisci velocità 4 punti percentuali
+grammar|delta:4|incrementa velocità quattro punti percentuali|incrementa velocità quattro punti percentuali
+grammar|delta:-4|diminuisci velocità quattro punti percentuali|diminuisci velocità quattro punti percentuali
+grammar|delta:5|incrementa velocità 5 punti percentuali|incrementa velocità 5 punti percentuali
+grammar|delta:-5|diminuisci velocità 5 punti percentuali|diminuisci velocità 5 punti percentuali
+grammar|delta:5|incrementa velocità cinque punti percentuali|incrementa velocità cinque punti percentuali
+grammar|delta:-5|diminuisci velocità cinque punti percentuali|diminuisci velocità cinque punti percentuali
+grammar|delta:7|incrementa velocità 7 punti percentuali|incrementa velocità 7 punti percentuali
+grammar|delta:-7|diminuisci velocità 7 punti percentuali|diminuisci velocità 7 punti percentuali
+grammar|delta:7|incrementa velocità sette punti percentuali|incrementa velocità sette punti percentuali
+grammar|delta:-7|diminuisci velocità sette punti percentuali|diminuisci velocità sette punti percentuali
+grammar|delta:9|incrementa velocità 9 punti percentuali|incrementa velocità 9 punti percentuali
+grammar|delta:-9|diminuisci velocità 9 punti percentuali|diminuisci velocità 9 punti percentuali
+grammar|delta:9|incrementa velocità nove punti percentuali|incrementa velocità nove punti percentuali
+grammar|delta:-9|diminuisci velocità nove punti percentuali|diminuisci velocità nove punti percentuali
+grammar|delta:10|incrementa velocità 10 punti percentuali|incrementa velocità 10 punti percentuali
+grammar|delta:-10|diminuisci velocità 10 punti percentuali|diminuisci velocità 10 punti percentuali
+grammar|delta:10|incrementa velocità dieci punti percentuali|incrementa velocità dieci punti percentuali
+grammar|delta:-10|diminuisci velocità dieci punti percentuali|diminuisci velocità dieci punti percentuali
+grammar|delta:16|incrementa velocità 16 punti percentuali|incrementa velocità 16 punti percentuali
+grammar|delta:-16|diminuisci velocità 16 punti percentuali|diminuisci velocità 16 punti percentuali
+grammar|delta:16|incrementa velocità sedici punti percentuali|incrementa velocità sedici punti percentuali
+grammar|delta:-16|diminuisci velocità sedici punti percentuali|diminuisci velocità sedici punti percentuali
+grammar|delta:25|incrementa velocità 25 punti percentuali|incrementa velocità 25 punti percentuali
+grammar|delta:-25|diminuisci velocità 25 punti percentuali|diminuisci velocità 25 punti percentuali
+grammar|delta:25|incrementa velocità venticinque punti percentuali|incrementa velocità venticinque punti percentuali
+grammar|delta:-25|diminuisci velocità venticinque punti percentuali|diminuisci velocità venticinque punti percentuali
+grammar|delta:40|incrementa velocità 40 punti percentuali|incrementa velocità 40 punti percentuali
+grammar|delta:-40|diminuisci velocità 40 punti percentuali|diminuisci velocità 40 punti percentuali
+grammar|delta:40|incrementa velocità quaranta punti percentuali|incrementa velocità quaranta punti percentuali
+grammar|delta:-40|diminuisci velocità quaranta punti percentuali|diminuisci velocità quaranta punti percentuali
+grammar|delta:75|incrementa velocità 75 punti percentuali|incrementa velocità 75 punti percentuali
+grammar|delta:-75|diminuisci velocità 75 punti percentuali|diminuisci velocità 75 punti percentuali
+grammar|delta:75|incrementa velocità settantacinque punti percentuali|incrementa velocità settantacinque punti percentuali
+grammar|delta:-75|diminuisci velocità settantacinque punti percentuali|diminuisci velocità settantacinque punti percentuali
+grammar|delta:125|incrementa velocità 125 punti percentuali|incrementa velocità 125 punti percentuali
+grammar|delta:-125|diminuisci velocità 125 punti percentuali|diminuisci velocità 125 punti percentuali
+grammar|delta:125|incrementa velocità centoventicinque punti percentuali|incrementa velocità centoventicinque punti percentuali
+grammar|delta:-125|diminuisci velocità centoventicinque punti percentuali|diminuisci velocità centoventicinque punti percentuali
+grammar|delta:175|incrementa velocità 175 punti percentuali|incrementa velocità 175 punti percentuali
+grammar|delta:-175|diminuisci velocità 175 punti percentuali|diminuisci velocità 175 punti percentuali
+grammar|delta:175|incrementa velocità centosettantacinque punti percentuali|incrementa velocità centosettantacinque punti percentuali
+grammar|delta:-175|diminuisci velocità centosettantacinque punti percentuali|diminuisci velocità centosettantacinque punti percentuali
+clean|resume|riparti|riparti
+typo-1|resume|riparti|riprati
+typo-2|resume|riparti|ripti
+clean|pause|ferma la riproduzione|ferma la riproduzione
+typo-1|pause|ferma la riproduzione|fermma la riproduzione
+typo-2|pause|ferma la riproduzione|fma la riproduzione
+paraphrase|resume|puoi rimettere il brano in riproduzione|puoi rimettere il brano in riproduzione
+paraphrase|resume|vorrei tornare ad ascoltare il pezzo|vorrei tornare ad ascoltare il pezzo
+paraphrase|resume|fai continuare a suonare la traccia|fai continuare a suonare la traccia
+paraphrase|pause|mi fermi il brano un attimo per favore|mi fermi il brano un attimo per favore
+paraphrase|pause|sospendi la traccia per piacere|sospendi la traccia per piacere
+paraphrase|pause|puoi mettere il pezzo in pausa adesso|puoi mettere il pezzo in pausa adesso
+grammar|resume|riprendi brano subito|riprendi brano subito
+grammar|resume|fai ripartire il musica|fai ripartire il musica
+grammar|pause|ferma la brano|ferma la brano
+grammar|pause|metti in pausa traccia|metti in pausa traccia
+clean|set:25,resume|porta la velocità a venticinque percento e poi riprendi|porta la velocità a venticinque percento e poi riprendi
+typo-1|set:25,resume|porta la velocità a venticinque percento e poi riprendi|pporta la velocità a venticinque percento e poi riprendi
+typo-2|set:25,resume|porta la velocità a venticinque percento e poi riprendi|poa la velocità a venticinque percento e poi riprendi
+clean|set:28,resume|porta la velocità a ventotto percento e poi riprendi|porta la velocità a ventotto percento e poi riprendi
+typo-1|set:28,resume|porta la velocità a ventotto percento e poi riprendi|pporta la velocità a ventotto percento e poi riprendi
+typo-2|set:28,resume|porta la velocità a ventotto percento e poi riprendi|poa la velocità a ventotto percento e poi riprendi
+clean|set:31,resume|porta la velocità a trentuno percento e poi riprendi|porta la velocità a trentuno percento e poi riprendi
+typo-1|set:31,resume|porta la velocità a trentuno percento e poi riprendi|pporta la velocità a trentuno percento e poi riprendi
+typo-2|set:31,resume|porta la velocità a trentuno percento e poi riprendi|poa la velocità a trentuno percento e poi riprendi
+clean|set:42,resume|porta la velocità a quarantadue percento e poi riprendi|porta la velocità a quarantadue percento e poi riprendi
+typo-1|set:42,resume|porta la velocità a quarantadue percento e poi riprendi|pporta la velocità a quarantadue percento e poi riprendi
+typo-2|set:42,resume|porta la velocità a quarantadue percento e poi riprendi|poa la velocità a quarantadue percento e poi riprendi
+clean|set:48,resume|porta la velocità a quarantotto percento e poi riprendi|porta la velocità a quarantotto percento e poi riprendi
+typo-1|set:48,resume|porta la velocità a quarantotto percento e poi riprendi|pporta la velocità a quarantotto percento e poi riprendi
+typo-2|set:48,resume|porta la velocità a quarantotto percento e poi riprendi|poa la velocità a quarantotto percento e poi riprendi
+clean|set:53,resume|porta la velocità a cinquantatré percento e poi riprendi|porta la velocità a cinquantatré percento e poi riprendi
+typo-1|set:53,resume|porta la velocità a cinquantatré percento e poi riprendi|pporta la velocità a cinquantatré percento e poi riprendi
+typo-2|set:53,resume|porta la velocità a cinquantatré percento e poi riprendi|poa la velocità a cinquantatré percento e poi riprendi
+clean|set:60,resume|porta la velocità a sessanta percento e poi riprendi|porta la velocità a sessanta percento e poi riprendi
+typo-1|set:60,resume|porta la velocità a sessanta percento e poi riprendi|pporta la velocità a sessanta percento e poi riprendi
+typo-2|set:60,resume|porta la velocità a sessanta percento e poi riprendi|poa la velocità a sessanta percento e poi riprendi
+clean|set:67,resume|porta la velocità a sessantasette percento e poi riprendi|porta la velocità a sessantasette percento e poi riprendi
+typo-1|set:67,resume|porta la velocità a sessantasette percento e poi riprendi|pporta la velocità a sessantasette percento e poi riprendi
+typo-2|set:67,resume|porta la velocità a sessantasette percento e poi riprendi|poa la velocità a sessantasette percento e poi riprendi
+clean|set:72,resume|porta la velocità a settantadue percento e poi riprendi|porta la velocità a settantadue percento e poi riprendi
+typo-1|set:72,resume|porta la velocità a settantadue percento e poi riprendi|pporta la velocità a settantadue percento e poi riprendi
+typo-2|set:72,resume|porta la velocità a settantadue percento e poi riprendi|poa la velocità a settantadue percento e poi riprendi
+clean|set:75,resume|porta la velocità a settantacinque percento e poi riprendi|porta la velocità a settantacinque percento e poi riprendi
+typo-1|set:75,resume|porta la velocità a settantacinque percento e poi riprendi|pporta la velocità a settantacinque percento e poi riprendi
+typo-2|set:75,resume|porta la velocità a settantacinque percento e poi riprendi|poa la velocità a settantacinque percento e poi riprendi
+clean|set:80,resume|porta la velocità a ottanta percento e poi riprendi|porta la velocità a ottanta percento e poi riprendi
+typo-1|set:80,resume|porta la velocità a ottanta percento e poi riprendi|pporta la velocità a ottanta percento e poi riprendi
+typo-2|set:80,resume|porta la velocità a ottanta percento e poi riprendi|poa la velocità a ottanta percento e poi riprendi
+clean|set:86,resume|porta la velocità a ottantasei percento e poi riprendi|porta la velocità a ottantasei percento e poi riprendi
+typo-1|set:86,resume|porta la velocità a ottantasei percento e poi riprendi|pporta la velocità a ottantasei percento e poi riprendi
+typo-2|set:86,resume|porta la velocità a ottantasei percento e poi riprendi|poa la velocità a ottantasei percento e poi riprendi
+clean|set:93,resume|porta la velocità a novantatré percento e poi riprendi|porta la velocità a novantatré percento e poi riprendi
+typo-1|set:93,resume|porta la velocità a novantatré percento e poi riprendi|pporta la velocità a novantatré percento e poi riprendi
+typo-2|set:93,resume|porta la velocità a novantatré percento e poi riprendi|poa la velocità a novantatré percento e poi riprendi
+clean|set:99,resume|porta la velocità a novantanove percento e poi riprendi|porta la velocità a novantanove percento e poi riprendi
+typo-1|set:99,resume|porta la velocità a novantanove percento e poi riprendi|pporta la velocità a novantanove percento e poi riprendi
+typo-2|set:99,resume|porta la velocità a novantanove percento e poi riprendi|poa la velocità a novantanove percento e poi riprendi
+clean|set:100,resume|porta la velocità a cento percento e poi riprendi|porta la velocità a cento percento e poi riprendi
+typo-1|set:100,resume|porta la velocità a cento percento e poi riprendi|pporta la velocità a cento percento e poi riprendi
+typo-2|set:100,resume|porta la velocità a cento percento e poi riprendi|poa la velocità a cento percento e poi riprendi
+clean|set:103,resume|porta la velocità a centotré percento e poi riprendi|porta la velocità a centotré percento e poi riprendi
+typo-1|set:103,resume|porta la velocità a centotré percento e poi riprendi|pporta la velocità a centotré percento e poi riprendi
+typo-2|set:103,resume|porta la velocità a centotré percento e poi riprendi|poa la velocità a centotré percento e poi riprendi
+clean|set:110,resume|porta la velocità a centodieci percento e poi riprendi|porta la velocità a centodieci percento e poi riprendi
+typo-1|set:110,resume|porta la velocità a centodieci percento e poi riprendi|pporta la velocità a centodieci percento e poi riprendi
+typo-2|set:110,resume|porta la velocità a centodieci percento e poi riprendi|poa la velocità a centodieci percento e poi riprendi
+clean|set:125,resume|porta la velocità a centoventicinque percento e poi riprendi|porta la velocità a centoventicinque percento e poi riprendi
+typo-1|set:125,resume|porta la velocità a centoventicinque percento e poi riprendi|pporta la velocità a centoventicinque percento e poi riprendi
+typo-2|set:125,resume|porta la velocità a centoventicinque percento e poi riprendi|poa la velocità a centoventicinque percento e poi riprendi
+clean|set:150,resume|porta la velocità a centocinquanta percento e poi riprendi|porta la velocità a centocinquanta percento e poi riprendi
+typo-1|set:150,resume|porta la velocità a centocinquanta percento e poi riprendi|pporta la velocità a centocinquanta percento e poi riprendi
+typo-2|set:150,resume|porta la velocità a centocinquanta percento e poi riprendi|poa la velocità a centocinquanta percento e poi riprendi
+clean|set:180,resume|porta la velocità a centottanta percento e poi riprendi|porta la velocità a centottanta percento e poi riprendi
+typo-1|set:180,resume|porta la velocità a centottanta percento e poi riprendi|pporta la velocità a centottanta percento e poi riprendi
+typo-2|set:180,resume|porta la velocità a centottanta percento e poi riprendi|poa la velocità a centottanta percento e poi riprendi
+clean|set:199,resume|porta la velocità a centonovantanove percento e poi riprendi|porta la velocità a centonovantanove percento e poi riprendi
+typo-1|set:199,resume|porta la velocità a centonovantanove percento e poi riprendi|pporta la velocità a centonovantanove percento e poi riprendi
+typo-2|set:199,resume|porta la velocità a centonovantanove percento e poi riprendi|poa la velocità a centonovantanove percento e poi riprendi
+clean|set:200,resume|porta la velocità a duecento percento e poi riprendi|porta la velocità a duecento percento e poi riprendi
+typo-1|set:200,resume|porta la velocità a duecento percento e poi riprendi|pporta la velocità a duecento percento e poi riprendi
+typo-2|set:200,resume|porta la velocità a duecento percento e poi riprendi|poa la velocità a duecento percento e poi riprendi
+clean|delta:-1,resume|riduci il ritmo di uno punti percentuali e poi riprendi|riduci il ritmo di uno punti percentuali e poi riprendi
+typo-1|delta:-1,resume|riduci il ritmo di uno punti percentuali e poi riprendi|ridui il ritmo di uno punti percentuali e poi riprendi
+typo-2|delta:-1,resume|riduci il ritmo di uno punti percentuali e poi riprendi|riui il ritmo di uno punti percentuali e poi riprendi
+clean|delta:-2,resume|riduci il ritmo di due punti percentuali e poi riprendi|riduci il ritmo di due punti percentuali e poi riprendi
+typo-1|delta:-2,resume|riduci il ritmo di due punti percentuali e poi riprendi|ridui il ritmo di due punti percentuali e poi riprendi
+typo-2|delta:-2,resume|riduci il ritmo di due punti percentuali e poi riprendi|riui il ritmo di due punti percentuali e poi riprendi
+clean|delta:-3,resume|riduci il ritmo di tre punti percentuali e poi riprendi|riduci il ritmo di tre punti percentuali e poi riprendi
+typo-1|delta:-3,resume|riduci il ritmo di tre punti percentuali e poi riprendi|ridui il ritmo di tre punti percentuali e poi riprendi
+typo-2|delta:-3,resume|riduci il ritmo di tre punti percentuali e poi riprendi|riui il ritmo di tre punti percentuali e poi riprendi
+clean|delta:-4,resume|riduci il ritmo di quattro punti percentuali e poi riprendi|riduci il ritmo di quattro punti percentuali e poi riprendi
+typo-1|delta:-4,resume|riduci il ritmo di quattro punti percentuali e poi riprendi|ridui il ritmo di quattro punti percentuali e poi riprendi
+typo-2|delta:-4,resume|riduci il ritmo di quattro punti percentuali e poi riprendi|riui il ritmo di quattro punti percentuali e poi riprendi
+clean|delta:-5,resume|riduci il ritmo di cinque punti percentuali e poi riprendi|riduci il ritmo di cinque punti percentuali e poi riprendi
+typo-1|delta:-5,resume|riduci il ritmo di cinque punti percentuali e poi riprendi|ridui il ritmo di cinque punti percentuali e poi riprendi
+typo-2|delta:-5,resume|riduci il ritmo di cinque punti percentuali e poi riprendi|riui il ritmo di cinque punti percentuali e poi riprendi
+clean|delta:-7,resume|riduci il ritmo di sette punti percentuali e poi riprendi|riduci il ritmo di sette punti percentuali e poi riprendi
+typo-1|delta:-7,resume|riduci il ritmo di sette punti percentuali e poi riprendi|ridui il ritmo di sette punti percentuali e poi riprendi
+typo-2|delta:-7,resume|riduci il ritmo di sette punti percentuali e poi riprendi|riui il ritmo di sette punti percentuali e poi riprendi
+clean|delta:-9,resume|riduci il ritmo di nove punti percentuali e poi riprendi|riduci il ritmo di nove punti percentuali e poi riprendi
+typo-1|delta:-9,resume|riduci il ritmo di nove punti percentuali e poi riprendi|ridui il ritmo di nove punti percentuali e poi riprendi
+typo-2|delta:-9,resume|riduci il ritmo di nove punti percentuali e poi riprendi|riui il ritmo di nove punti percentuali e poi riprendi
+clean|delta:-10,resume|riduci il ritmo di dieci punti percentuali e poi riprendi|riduci il ritmo di dieci punti percentuali e poi riprendi
+typo-1|delta:-10,resume|riduci il ritmo di dieci punti percentuali e poi riprendi|ridui il ritmo di dieci punti percentuali e poi riprendi
+typo-2|delta:-10,resume|riduci il ritmo di dieci punti percentuali e poi riprendi|riui il ritmo di dieci punti percentuali e poi riprendi
+clean|delta:-16,resume|riduci il ritmo di sedici punti percentuali e poi riprendi|riduci il ritmo di sedici punti percentuali e poi riprendi
+typo-1|delta:-16,resume|riduci il ritmo di sedici punti percentuali e poi riprendi|ridui il ritmo di sedici punti percentuali e poi riprendi
+typo-2|delta:-16,resume|riduci il ritmo di sedici punti percentuali e poi riprendi|riui il ritmo di sedici punti percentuali e poi riprendi
+clean|delta:-25,resume|riduci il ritmo di venticinque punti percentuali e poi riprendi|riduci il ritmo di venticinque punti percentuali e poi riprendi
+typo-1|delta:-25,resume|riduci il ritmo di venticinque punti percentuali e poi riprendi|ridui il ritmo di venticinque punti percentuali e poi riprendi
+typo-2|delta:-25,resume|riduci il ritmo di venticinque punti percentuali e poi riprendi|riui il ritmo di venticinque punti percentuali e poi riprendi
+clean|delta:-40,resume|riduci il ritmo di quaranta punti percentuali e poi riprendi|riduci il ritmo di quaranta punti percentuali e poi riprendi
+typo-1|delta:-40,resume|riduci il ritmo di quaranta punti percentuali e poi riprendi|ridui il ritmo di quaranta punti percentuali e poi riprendi
+typo-2|delta:-40,resume|riduci il ritmo di quaranta punti percentuali e poi riprendi|riui il ritmo di quaranta punti percentuali e poi riprendi
+clean|delta:-75,resume|riduci il ritmo di settantacinque punti percentuali e poi riprendi|riduci il ritmo di settantacinque punti percentuali e poi riprendi
+typo-1|delta:-75,resume|riduci il ritmo di settantacinque punti percentuali e poi riprendi|ridui il ritmo di settantacinque punti percentuali e poi riprendi
+typo-2|delta:-75,resume|riduci il ritmo di settantacinque punti percentuali e poi riprendi|riui il ritmo di settantacinque punti percentuali e poi riprendi
+clean|delta:-125,resume|riduci il ritmo di centoventicinque punti percentuali e poi riprendi|riduci il ritmo di centoventicinque punti percentuali e poi riprendi
+typo-1|delta:-125,resume|riduci il ritmo di centoventicinque punti percentuali e poi riprendi|ridui il ritmo di centoventicinque punti percentuali e poi riprendi
+typo-2|delta:-125,resume|riduci il ritmo di centoventicinque punti percentuali e poi riprendi|riui il ritmo di centoventicinque punti percentuali e poi riprendi
+clean|delta:-175,resume|riduci il ritmo di centosettantacinque punti percentuali e poi riprendi|riduci il ritmo di centosettantacinque punti percentuali e poi riprendi
+typo-1|delta:-175,resume|riduci il ritmo di centosettantacinque punti percentuali e poi riprendi|ridui il ritmo di centosettantacinque punti percentuali e poi riprendi
+typo-2|delta:-175,resume|riduci il ritmo di centosettantacinque punti percentuali e poi riprendi|riui il ritmo di centosettantacinque punti percentuali e poi riprendi
+paraphrase|set:25,resume|porta la velocità a venticinque percento quindi fai ripartire il pezzo|porta la velocità a venticinque percento quindi fai ripartire il pezzo
+paraphrase|set:28,resume|porta la velocità a ventotto percento quindi fai ripartire il pezzo|porta la velocità a ventotto percento quindi fai ripartire il pezzo
+paraphrase|set:31,resume|porta la velocità a trentuno percento quindi fai ripartire il pezzo|porta la velocità a trentuno percento quindi fai ripartire il pezzo
+paraphrase|set:42,resume|porta la velocità a quarantadue percento quindi fai ripartire il pezzo|porta la velocità a quarantadue percento quindi fai ripartire il pezzo
+paraphrase|set:48,resume|porta la velocità a quarantotto percento quindi fai ripartire il pezzo|porta la velocità a quarantotto percento quindi fai ripartire il pezzo
+paraphrase|set:53,resume|porta la velocità a cinquantatré percento quindi fai ripartire il pezzo|porta la velocità a cinquantatré percento quindi fai ripartire il pezzo
+paraphrase|set:60,resume|porta la velocità a sessanta percento quindi fai ripartire il pezzo|porta la velocità a sessanta percento quindi fai ripartire il pezzo
+paraphrase|set:67,resume|porta la velocità a sessantasette percento quindi fai ripartire il pezzo|porta la velocità a sessantasette percento quindi fai ripartire il pezzo
+paraphrase|set:72,resume|porta la velocità a settantadue percento quindi fai ripartire il pezzo|porta la velocità a settantadue percento quindi fai ripartire il pezzo
+paraphrase|set:75,resume|porta la velocità a settantacinque percento quindi fai ripartire il pezzo|porta la velocità a settantacinque percento quindi fai ripartire il pezzo
+paraphrase|set:80,resume|porta la velocità a ottanta percento quindi fai ripartire il pezzo|porta la velocità a ottanta percento quindi fai ripartire il pezzo
+paraphrase|set:86,resume|porta la velocità a ottantasei percento quindi fai ripartire il pezzo|porta la velocità a ottantasei percento quindi fai ripartire il pezzo
+paraphrase|set:93,resume|porta la velocità a novantatré percento quindi fai ripartire il pezzo|porta la velocità a novantatré percento quindi fai ripartire il pezzo
+paraphrase|set:99,resume|porta la velocità a novantanove percento quindi fai ripartire il pezzo|porta la velocità a novantanove percento quindi fai ripartire il pezzo
+paraphrase|set:100,resume|porta la velocità a cento percento quindi fai ripartire il pezzo|porta la velocità a cento percento quindi fai ripartire il pezzo
+paraphrase|set:103,resume|porta la velocità a centotré percento quindi fai ripartire il pezzo|porta la velocità a centotré percento quindi fai ripartire il pezzo
+paraphrase|set:110,resume|porta la velocità a centodieci percento quindi fai ripartire il pezzo|porta la velocità a centodieci percento quindi fai ripartire il pezzo
+paraphrase|set:125,resume|porta la velocità a centoventicinque percento quindi fai ripartire il pezzo|porta la velocità a centoventicinque percento quindi fai ripartire il pezzo
+paraphrase|set:150,resume|porta la velocità a centocinquanta percento quindi fai ripartire il pezzo|porta la velocità a centocinquanta percento quindi fai ripartire il pezzo
+paraphrase|set:180,resume|porta la velocità a centottanta percento quindi fai ripartire il pezzo|porta la velocità a centottanta percento quindi fai ripartire il pezzo
+paraphrase|set:199,resume|porta la velocità a centonovantanove percento quindi fai ripartire il pezzo|porta la velocità a centonovantanove percento quindi fai ripartire il pezzo
+paraphrase|set:200,resume|porta la velocità a duecento percento quindi fai ripartire il pezzo|porta la velocità a duecento percento quindi fai ripartire il pezzo
+paraphrase|delta:-1,resume|riduci il ritmo di uno punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di uno punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-2,resume|riduci il ritmo di due punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di due punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-3,resume|riduci il ritmo di tre punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di tre punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-4,resume|riduci il ritmo di quattro punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di quattro punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-5,resume|riduci il ritmo di cinque punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di cinque punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-7,resume|riduci il ritmo di sette punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di sette punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-9,resume|riduci il ritmo di nove punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di nove punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-10,resume|riduci il ritmo di dieci punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di dieci punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-16,resume|riduci il ritmo di sedici punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di sedici punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-25,resume|riduci il ritmo di venticinque punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di venticinque punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-40,resume|riduci il ritmo di quaranta punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di quaranta punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-75,resume|riduci il ritmo di settantacinque punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di settantacinque punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-125,resume|riduci il ritmo di centoventicinque punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di centoventicinque punti percentuali quindi fai ripartire il pezzo
+paraphrase|delta:-175,resume|riduci il ritmo di centosettantacinque punti percentuali quindi fai ripartire il pezzo|riduci il ritmo di centosettantacinque punti percentuali quindi fai ripartire il pezzo
+paraphrase|set:25,resume|porta la velocità a venticinque percento dopodiché rimetti in riproduzione la traccia|porta la velocità a venticinque percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:28,resume|porta la velocità a ventotto percento dopodiché rimetti in riproduzione la traccia|porta la velocità a ventotto percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:31,resume|porta la velocità a trentuno percento dopodiché rimetti in riproduzione la traccia|porta la velocità a trentuno percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:42,resume|porta la velocità a quarantadue percento dopodiché rimetti in riproduzione la traccia|porta la velocità a quarantadue percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:48,resume|porta la velocità a quarantotto percento dopodiché rimetti in riproduzione la traccia|porta la velocità a quarantotto percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:53,resume|porta la velocità a cinquantatré percento dopodiché rimetti in riproduzione la traccia|porta la velocità a cinquantatré percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:60,resume|porta la velocità a sessanta percento dopodiché rimetti in riproduzione la traccia|porta la velocità a sessanta percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:67,resume|porta la velocità a sessantasette percento dopodiché rimetti in riproduzione la traccia|porta la velocità a sessantasette percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:72,resume|porta la velocità a settantadue percento dopodiché rimetti in riproduzione la traccia|porta la velocità a settantadue percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:75,resume|porta la velocità a settantacinque percento dopodiché rimetti in riproduzione la traccia|porta la velocità a settantacinque percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:80,resume|porta la velocità a ottanta percento dopodiché rimetti in riproduzione la traccia|porta la velocità a ottanta percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:86,resume|porta la velocità a ottantasei percento dopodiché rimetti in riproduzione la traccia|porta la velocità a ottantasei percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:93,resume|porta la velocità a novantatré percento dopodiché rimetti in riproduzione la traccia|porta la velocità a novantatré percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:99,resume|porta la velocità a novantanove percento dopodiché rimetti in riproduzione la traccia|porta la velocità a novantanove percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:100,resume|porta la velocità a cento percento dopodiché rimetti in riproduzione la traccia|porta la velocità a cento percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:103,resume|porta la velocità a centotré percento dopodiché rimetti in riproduzione la traccia|porta la velocità a centotré percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:110,resume|porta la velocità a centodieci percento dopodiché rimetti in riproduzione la traccia|porta la velocità a centodieci percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:125,resume|porta la velocità a centoventicinque percento dopodiché rimetti in riproduzione la traccia|porta la velocità a centoventicinque percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:150,resume|porta la velocità a centocinquanta percento dopodiché rimetti in riproduzione la traccia|porta la velocità a centocinquanta percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:180,resume|porta la velocità a centottanta percento dopodiché rimetti in riproduzione la traccia|porta la velocità a centottanta percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:199,resume|porta la velocità a centonovantanove percento dopodiché rimetti in riproduzione la traccia|porta la velocità a centonovantanove percento dopodiché rimetti in riproduzione la traccia
+paraphrase|set:200,resume|porta la velocità a duecento percento dopodiché rimetti in riproduzione la traccia|porta la velocità a duecento percento dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-1,resume|riduci il ritmo di uno punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di uno punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-2,resume|riduci il ritmo di due punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di due punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-3,resume|riduci il ritmo di tre punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di tre punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-4,resume|riduci il ritmo di quattro punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di quattro punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-5,resume|riduci il ritmo di cinque punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di cinque punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-7,resume|riduci il ritmo di sette punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di sette punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-9,resume|riduci il ritmo di nove punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di nove punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-10,resume|riduci il ritmo di dieci punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di dieci punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-16,resume|riduci il ritmo di sedici punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di sedici punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-25,resume|riduci il ritmo di venticinque punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di venticinque punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-40,resume|riduci il ritmo di quaranta punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di quaranta punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-75,resume|riduci il ritmo di settantacinque punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di settantacinque punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-125,resume|riduci il ritmo di centoventicinque punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di centoventicinque punti percentuali dopodiché rimetti in riproduzione la traccia
+paraphrase|delta:-175,resume|riduci il ritmo di centosettantacinque punti percentuali dopodiché rimetti in riproduzione la traccia|riduci il ritmo di centosettantacinque punti percentuali dopodiché rimetti in riproduzione la traccia
+grammar|set:25,resume|porta la velocità a venticinque percento poi riprendi brano|porta la velocità a venticinque percento poi riprendi brano
+grammar|set:28,resume|porta la velocità a ventotto percento poi riprendi brano|porta la velocità a ventotto percento poi riprendi brano
+grammar|set:31,resume|porta la velocità a trentuno percento poi riprendi brano|porta la velocità a trentuno percento poi riprendi brano
+grammar|set:42,resume|porta la velocità a quarantadue percento poi riprendi brano|porta la velocità a quarantadue percento poi riprendi brano
+grammar|set:48,resume|porta la velocità a quarantotto percento poi riprendi brano|porta la velocità a quarantotto percento poi riprendi brano
+grammar|set:53,resume|porta la velocità a cinquantatré percento poi riprendi brano|porta la velocità a cinquantatré percento poi riprendi brano
+grammar|set:60,resume|porta la velocità a sessanta percento poi riprendi brano|porta la velocità a sessanta percento poi riprendi brano
+grammar|set:67,resume|porta la velocità a sessantasette percento poi riprendi brano|porta la velocità a sessantasette percento poi riprendi brano
+grammar|set:72,resume|porta la velocità a settantadue percento poi riprendi brano|porta la velocità a settantadue percento poi riprendi brano
+grammar|set:75,resume|porta la velocità a settantacinque percento poi riprendi brano|porta la velocità a settantacinque percento poi riprendi brano
+grammar|set:80,resume|porta la velocità a ottanta percento poi riprendi brano|porta la velocità a ottanta percento poi riprendi brano
+grammar|set:86,resume|porta la velocità a ottantasei percento poi riprendi brano|porta la velocità a ottantasei percento poi riprendi brano
+grammar|set:93,resume|porta la velocità a novantatré percento poi riprendi brano|porta la velocità a novantatré percento poi riprendi brano
+grammar|set:99,resume|porta la velocità a novantanove percento poi riprendi brano|porta la velocità a novantanove percento poi riprendi brano
+grammar|set:100,resume|porta la velocità a cento percento poi riprendi brano|porta la velocità a cento percento poi riprendi brano
+grammar|set:103,resume|porta la velocità a centotré percento poi riprendi brano|porta la velocità a centotré percento poi riprendi brano
+grammar|set:110,resume|porta la velocità a centodieci percento poi riprendi brano|porta la velocità a centodieci percento poi riprendi brano
+grammar|set:125,resume|porta la velocità a centoventicinque percento poi riprendi brano|porta la velocità a centoventicinque percento poi riprendi brano
+grammar|set:150,resume|porta la velocità a centocinquanta percento poi riprendi brano|porta la velocità a centocinquanta percento poi riprendi brano
+grammar|set:180,resume|porta la velocità a centottanta percento poi riprendi brano|porta la velocità a centottanta percento poi riprendi brano
+grammar|set:199,resume|porta la velocità a centonovantanove percento poi riprendi brano|porta la velocità a centonovantanove percento poi riprendi brano
+grammar|set:200,resume|porta la velocità a duecento percento poi riprendi brano|porta la velocità a duecento percento poi riprendi brano
+grammar|delta:-1,resume|riduci il ritmo di uno punti percentuali poi riprendi brano|riduci il ritmo di uno punti percentuali poi riprendi brano
+grammar|delta:-2,resume|riduci il ritmo di due punti percentuali poi riprendi brano|riduci il ritmo di due punti percentuali poi riprendi brano
+grammar|delta:-3,resume|riduci il ritmo di tre punti percentuali poi riprendi brano|riduci il ritmo di tre punti percentuali poi riprendi brano
+grammar|delta:-4,resume|riduci il ritmo di quattro punti percentuali poi riprendi brano|riduci il ritmo di quattro punti percentuali poi riprendi brano
+grammar|delta:-5,resume|riduci il ritmo di cinque punti percentuali poi riprendi brano|riduci il ritmo di cinque punti percentuali poi riprendi brano
+grammar|delta:-7,resume|riduci il ritmo di sette punti percentuali poi riprendi brano|riduci il ritmo di sette punti percentuali poi riprendi brano
+grammar|delta:-9,resume|riduci il ritmo di nove punti percentuali poi riprendi brano|riduci il ritmo di nove punti percentuali poi riprendi brano
+grammar|delta:-10,resume|riduci il ritmo di dieci punti percentuali poi riprendi brano|riduci il ritmo di dieci punti percentuali poi riprendi brano
+grammar|delta:-16,resume|riduci il ritmo di sedici punti percentuali poi riprendi brano|riduci il ritmo di sedici punti percentuali poi riprendi brano
+grammar|delta:-25,resume|riduci il ritmo di venticinque punti percentuali poi riprendi brano|riduci il ritmo di venticinque punti percentuali poi riprendi brano
+grammar|delta:-40,resume|riduci il ritmo di quaranta punti percentuali poi riprendi brano|riduci il ritmo di quaranta punti percentuali poi riprendi brano
+grammar|delta:-75,resume|riduci il ritmo di settantacinque punti percentuali poi riprendi brano|riduci il ritmo di settantacinque punti percentuali poi riprendi brano
+grammar|delta:-125,resume|riduci il ritmo di centoventicinque punti percentuali poi riprendi brano|riduci il ritmo di centoventicinque punti percentuali poi riprendi brano
+grammar|delta:-175,resume|riduci il ritmo di centosettantacinque punti percentuali poi riprendi brano|riduci il ritmo di centosettantacinque punti percentuali poi riprendi brano
+asr-like|set:42|imposta la velocità al quaranta due percento|imposta la velocità al quaranta due percento
+asr-like|set:42|porta il ritmo a quaranta due per cento|porta il ritmo a quaranta due per cento
+asr-like|set:42|regola la velocità su quaranta due|regola la velocità su quaranta due
+asr-like|set:67|imposta la velocità al sessanta sette percento|imposta la velocità al sessanta sette percento
+asr-like|set:67|porta il ritmo a sessanta sette per cento|porta il ritmo a sessanta sette per cento
+asr-like|set:67|regola la velocità su sessanta sette|regola la velocità su sessanta sette
+asr-like|set:72|imposta la velocità al settanta due percento|imposta la velocità al settanta due percento
+asr-like|set:72|porta il ritmo a settanta due per cento|porta il ritmo a settanta due per cento
+asr-like|set:72|regola la velocità su settanta due|regola la velocità su settanta due
+asr-like|set:75|imposta la velocità al settanta cinque percento|imposta la velocità al settanta cinque percento
+asr-like|set:75|porta il ritmo a settanta cinque per cento|porta il ritmo a settanta cinque per cento
+asr-like|set:75|regola la velocità su settanta cinque|regola la velocità su settanta cinque
+asr-like|set:86|imposta la velocità al ottanta sei percento|imposta la velocità al ottanta sei percento
+asr-like|set:86|porta il ritmo a ottanta sei per cento|porta il ritmo a ottanta sei per cento
+asr-like|set:86|regola la velocità su ottanta sei|regola la velocità su ottanta sei
+asr-like|set:99|imposta la velocità al novanta nove percento|imposta la velocità al novanta nove percento
+asr-like|set:99|porta il ritmo a novanta nove per cento|porta il ritmo a novanta nove per cento
+asr-like|set:99|regola la velocità su novanta nove|regola la velocità su novanta nove
+asr-like|set:110|imposta la velocità al cento dieci percento|imposta la velocità al cento dieci percento
+asr-like|set:110|porta il ritmo a cento dieci per cento|porta il ritmo a cento dieci per cento
+asr-like|set:110|regola la velocità su cento dieci|regola la velocità su cento dieci
+asr-like|set:150|imposta la velocità al cento cinquanta percento|imposta la velocità al cento cinquanta percento
+asr-like|set:150|porta il ritmo a cento cinquanta per cento|porta il ritmo a cento cinquanta per cento
+asr-like|set:150|regola la velocità su cento cinquanta|regola la velocità su cento cinquanta
+asr-like|set:199|imposta la velocità al cento novanta nove percento|imposta la velocità al cento novanta nove percento
+asr-like|set:199|porta il ritmo a cento novanta nove per cento|porta il ritmo a cento novanta nove per cento
+asr-like|set:199|regola la velocità su cento novanta nove|regola la velocità su cento novanta nove
+asr-like|set:25,resume|velocità venticinque per cento e poi riprendi|velocità venticinque per cento e poi riprendi
+asr-like|set:28,resume|velocità ventotto per cento e poi riprendi|velocità ventotto per cento e poi riprendi
+asr-like|set:31,resume|velocità trentuno per cento e poi riprendi|velocità trentuno per cento e poi riprendi
+asr-like|set:42,resume|velocità quarantadue per cento e poi riprendi|velocità quarantadue per cento e poi riprendi
+asr-like|set:48,resume|velocità quarantotto per cento e poi riprendi|velocità quarantotto per cento e poi riprendi
+asr-like|set:53,resume|velocità cinquantatré per cento e poi riprendi|velocità cinquantatré per cento e poi riprendi
+asr-like|set:60,resume|velocità sessanta per cento e poi riprendi|velocità sessanta per cento e poi riprendi
+asr-like|set:67,resume|velocità sessantasette per cento e poi riprendi|velocità sessantasette per cento e poi riprendi
+asr-like|set:72,resume|velocità settantadue per cento e poi riprendi|velocità settantadue per cento e poi riprendi
+asr-like|set:75,resume|velocità settantacinque per cento e poi riprendi|velocità settantacinque per cento e poi riprendi
+asr-like|set:86,resume|velocità ottantasei per cento e poi riprendi|velocità ottantasei per cento e poi riprendi
+asr-like|set:93,resume|velocità novantatré per cento e poi riprendi|velocità novantatré per cento e poi riprendi
+asr-like|set:99,resume|velocità novantanove per cento e poi riprendi|velocità novantanove per cento e poi riprendi
+asr-like|set:100,resume|velocità cento per cento e poi riprendi|velocità cento per cento e poi riprendi
+asr-like|set:103,resume|velocità centotré per cento e poi riprendi|velocità centotré per cento e poi riprendi
+asr-like|set:110,resume|velocità centodieci per cento e poi riprendi|velocità centodieci per cento e poi riprendi
+asr-like|set:125,resume|velocità centoventicinque per cento e poi riprendi|velocità centoventicinque per cento e poi riprendi
+asr-like|set:150,resume|velocità centocinquanta per cento e poi riprendi|velocità centocinquanta per cento e poi riprendi
+asr-like|set:180,resume|velocità centottanta per cento e poi riprendi|velocità centottanta per cento e poi riprendi
+asr-like|set:199,resume|velocità centonovantanove per cento e poi riprendi|velocità centonovantanove per cento e poi riprendi
+asr-like|set:200,resume|velocità duecento per cento e poi riprendi|velocità duecento per cento e poi riprendi
+negative|reject|non portare la velocità a 25 per cento|non portare la velocità a 25 per cento
+negative|reject|non portare la velocità a 31 per cento|non portare la velocità a 31 per cento
+negative|reject|non portare la velocità a 48 per cento|non portare la velocità a 48 per cento
+negative|reject|non portare la velocità a 60 per cento|non portare la velocità a 60 per cento
+negative|reject|non portare la velocità a 72 per cento|non portare la velocità a 72 per cento
+negative|reject|non portare la velocità a 80 per cento|non portare la velocità a 80 per cento
+negative|reject|non portare la velocità a 93 per cento|non portare la velocità a 93 per cento
+negative|reject|non portare la velocità a 100 per cento|non portare la velocità a 100 per cento
+negative|reject|non portare la velocità a 110 per cento|non portare la velocità a 110 per cento
+negative|reject|non portare la velocità a 150 per cento|non portare la velocità a 150 per cento
+negative|reject|non portare la velocità a 199 per cento|non portare la velocità a 199 per cento
+negative|reject|imposta il ritmo a 25 e poi non riprendere|imposta il ritmo a 25 e poi non riprendere
+negative|reject|imposta il ritmo a 31 e poi non riprendere|imposta il ritmo a 31 e poi non riprendere
+negative|reject|imposta il ritmo a 48 e poi non riprendere|imposta il ritmo a 48 e poi non riprendere
+negative|reject|imposta il ritmo a 60 e poi non riprendere|imposta il ritmo a 60 e poi non riprendere
+negative|reject|imposta il ritmo a 72 e poi non riprendere|imposta il ritmo a 72 e poi non riprendere
+negative|reject|imposta il ritmo a 80 e poi non riprendere|imposta il ritmo a 80 e poi non riprendere
+negative|reject|imposta il ritmo a 93 e poi non riprendere|imposta il ritmo a 93 e poi non riprendere
+negative|reject|imposta il ritmo a 100 e poi non riprendere|imposta il ritmo a 100 e poi non riprendere
+negative|reject|imposta il ritmo a 110 e poi non riprendere|imposta il ritmo a 110 e poi non riprendere
+negative|reject|imposta il ritmo a 150 e poi non riprendere|imposta il ritmo a 150 e poi non riprendere
+negative|reject|imposta il ritmo a 199 e poi non riprendere|imposta il ritmo a 199 e poi non riprendere
+negative|reject|se vuoi porta la velocità a 25 percento|se vuoi porta la velocità a 25 percento
+negative|reject|se vuoi porta la velocità a 31 percento|se vuoi porta la velocità a 31 percento
+negative|reject|se vuoi porta la velocità a 48 percento|se vuoi porta la velocità a 48 percento
+negative|reject|se vuoi porta la velocità a 60 percento|se vuoi porta la velocità a 60 percento
+negative|reject|se vuoi porta la velocità a 72 percento|se vuoi porta la velocità a 72 percento
+negative|reject|se vuoi porta la velocità a 80 percento|se vuoi porta la velocità a 80 percento
+negative|reject|se vuoi porta la velocità a 93 percento|se vuoi porta la velocità a 93 percento
+negative|reject|se vuoi porta la velocità a 100 percento|se vuoi porta la velocità a 100 percento
+negative|reject|se vuoi porta la velocità a 110 percento|se vuoi porta la velocità a 110 percento
+negative|reject|se vuoi porta la velocità a 150 percento|se vuoi porta la velocità a 150 percento
+negative|reject|se vuoi porta la velocità a 199 percento|se vuoi porta la velocità a 199 percento
+negative|reject|forse regola la velocità a 25 per cento|forse regola la velocità a 25 per cento
+negative|reject|forse regola la velocità a 31 per cento|forse regola la velocità a 31 per cento
+negative|reject|forse regola la velocità a 48 per cento|forse regola la velocità a 48 per cento
+negative|reject|forse regola la velocità a 60 per cento|forse regola la velocità a 60 per cento
+negative|reject|forse regola la velocità a 72 per cento|forse regola la velocità a 72 per cento
+negative|reject|forse regola la velocità a 80 per cento|forse regola la velocità a 80 per cento
+negative|reject|forse regola la velocità a 93 per cento|forse regola la velocità a 93 per cento
+negative|reject|forse regola la velocità a 100 per cento|forse regola la velocità a 100 per cento
+negative|reject|forse regola la velocità a 110 per cento|forse regola la velocità a 110 per cento
+negative|reject|forse regola la velocità a 150 per cento|forse regola la velocità a 150 per cento
+negative|reject|forse regola la velocità a 199 per cento|forse regola la velocità a 199 per cento
+negative|reject|imposta la velocità a 25 oppure a 81|imposta la velocità a 25 oppure a 81
+negative|reject|imposta la velocità a 31 oppure a 81|imposta la velocità a 31 oppure a 81
+negative|reject|imposta la velocità a 48 oppure a 81|imposta la velocità a 48 oppure a 81
+negative|reject|imposta la velocità a 60 oppure a 81|imposta la velocità a 60 oppure a 81
+negative|reject|imposta la velocità a 72 oppure a 81|imposta la velocità a 72 oppure a 81
+negative|reject|imposta la velocità a 80 oppure a 81|imposta la velocità a 80 oppure a 81
+negative|reject|imposta la velocità a 93 oppure a 81|imposta la velocità a 93 oppure a 81
+negative|reject|imposta la velocità a 100 oppure a 81|imposta la velocità a 100 oppure a 81
+negative|reject|imposta la velocità a 110 oppure a 81|imposta la velocità a 110 oppure a 81
+negative|reject|imposta la velocità a 150 oppure a 81|imposta la velocità a 150 oppure a 81
+negative|reject|imposta la velocità a 199 oppure a 81|imposta la velocità a 199 oppure a 81
+negative|reject|diminuisci e aumenta la velocità di 25 percento|diminuisci e aumenta la velocità di 25 percento
+negative|reject|diminuisci e aumenta la velocità di 31 percento|diminuisci e aumenta la velocità di 31 percento
+negative|reject|diminuisci e aumenta la velocità di 48 percento|diminuisci e aumenta la velocità di 48 percento
+negative|reject|diminuisci e aumenta la velocità di 60 percento|diminuisci e aumenta la velocità di 60 percento
+negative|reject|diminuisci e aumenta la velocità di 72 percento|diminuisci e aumenta la velocità di 72 percento
+negative|reject|diminuisci e aumenta la velocità di 80 percento|diminuisci e aumenta la velocità di 80 percento
+negative|reject|diminuisci e aumenta la velocità di 93 percento|diminuisci e aumenta la velocità di 93 percento
+negative|reject|diminuisci e aumenta la velocità di 100 percento|diminuisci e aumenta la velocità di 100 percento
+negative|reject|diminuisci e aumenta la velocità di 110 percento|diminuisci e aumenta la velocità di 110 percento
+negative|reject|diminuisci e aumenta la velocità di 150 percento|diminuisci e aumenta la velocità di 150 percento
+negative|reject|diminuisci e aumenta la velocità di 199 percento|diminuisci e aumenta la velocità di 199 percento
+negative|reject|metti il volume a 25 percento|metti il volume a 25 percento
+negative|reject|metti il volume a 31 percento|metti il volume a 31 percento
+negative|reject|metti il volume a 48 percento|metti il volume a 48 percento
+negative|reject|metti il volume a 60 percento|metti il volume a 60 percento
+negative|reject|metti il volume a 72 percento|metti il volume a 72 percento
+negative|reject|metti il volume a 80 percento|metti il volume a 80 percento
+negative|reject|metti il volume a 93 percento|metti il volume a 93 percento
+negative|reject|metti il volume a 100 percento|metti il volume a 100 percento
+negative|reject|metti il volume a 110 percento|metti il volume a 110 percento
+negative|reject|metti il volume a 150 percento|metti il volume a 150 percento
+negative|reject|metti il volume a 199 percento|metti il volume a 199 percento
+negative|reject|regola la luminosità al 25 percento|regola la luminosità al 25 percento
+negative|reject|regola la luminosità al 31 percento|regola la luminosità al 31 percento
+negative|reject|regola la luminosità al 48 percento|regola la luminosità al 48 percento
+negative|reject|regola la luminosità al 60 percento|regola la luminosità al 60 percento
+negative|reject|regola la luminosità al 72 percento|regola la luminosità al 72 percento
+negative|reject|regola la luminosità al 80 percento|regola la luminosità al 80 percento
+negative|reject|regola la luminosità al 93 percento|regola la luminosità al 93 percento
+negative|reject|regola la luminosità al 100 percento|regola la luminosità al 100 percento
+negative|reject|regola la luminosità al 110 percento|regola la luminosità al 110 percento
+negative|reject|regola la luminosità al 150 percento|regola la luminosità al 150 percento
+negative|reject|regola la luminosità al 199 percento|regola la luminosità al 199 percento
+negative|reject|quanto ci vuole per arrivare al 25 percento|quanto ci vuole per arrivare al 25 percento
+negative|reject|quanto ci vuole per arrivare al 31 percento|quanto ci vuole per arrivare al 31 percento
+negative|reject|quanto ci vuole per arrivare al 48 percento|quanto ci vuole per arrivare al 48 percento
+negative|reject|quanto ci vuole per arrivare al 60 percento|quanto ci vuole per arrivare al 60 percento
+negative|reject|quanto ci vuole per arrivare al 72 percento|quanto ci vuole per arrivare al 72 percento
+negative|reject|quanto ci vuole per arrivare al 80 percento|quanto ci vuole per arrivare al 80 percento
+negative|reject|quanto ci vuole per arrivare al 93 percento|quanto ci vuole per arrivare al 93 percento
+negative|reject|quanto ci vuole per arrivare al 100 percento|quanto ci vuole per arrivare al 100 percento
+negative|reject|quanto ci vuole per arrivare al 110 percento|quanto ci vuole per arrivare al 110 percento
+negative|reject|quanto ci vuole per arrivare al 150 percento|quanto ci vuole per arrivare al 150 percento
+negative|reject|quanto ci vuole per arrivare al 199 percento|quanto ci vuole per arrivare al 199 percento
+negative|reject|riprendi e poi imposta la velocità al 25 percento|riprendi e poi imposta la velocità al 25 percento
+negative|reject|riprendi e poi imposta la velocità al 31 percento|riprendi e poi imposta la velocità al 31 percento
+negative|reject|riprendi e poi imposta la velocità al 48 percento|riprendi e poi imposta la velocità al 48 percento
+negative|reject|riprendi e poi imposta la velocità al 60 percento|riprendi e poi imposta la velocità al 60 percento
+negative|reject|riprendi e poi imposta la velocità al 72 percento|riprendi e poi imposta la velocità al 72 percento
+negative|reject|riprendi e poi imposta la velocità al 80 percento|riprendi e poi imposta la velocità al 80 percento
+negative|reject|riprendi e poi imposta la velocità al 93 percento|riprendi e poi imposta la velocità al 93 percento
+negative|reject|riprendi e poi imposta la velocità al 100 percento|riprendi e poi imposta la velocità al 100 percento
+negative|reject|riprendi e poi imposta la velocità al 110 percento|riprendi e poi imposta la velocità al 110 percento
+negative|reject|riprendi e poi imposta la velocità al 150 percento|riprendi e poi imposta la velocità al 150 percento
+negative|reject|riprendi e poi imposta la velocità al 199 percento|riprendi e poi imposta la velocità al 199 percento
+negative|reject|porta la velocità al 25 percento e poi pausa|porta la velocità al 25 percento e poi pausa
+negative|reject|porta la velocità al 31 percento e poi pausa|porta la velocità al 31 percento e poi pausa
+negative|reject|porta la velocità al 48 percento e poi pausa|porta la velocità al 48 percento e poi pausa
+negative|reject|porta la velocità al 60 percento e poi pausa|porta la velocità al 60 percento e poi pausa
+negative|reject|porta la velocità al 72 percento e poi pausa|porta la velocità al 72 percento e poi pausa
+negative|reject|porta la velocità al 80 percento e poi pausa|porta la velocità al 80 percento e poi pausa
+negative|reject|porta la velocità al 93 percento e poi pausa|porta la velocità al 93 percento e poi pausa
+negative|reject|porta la velocità al 100 percento e poi pausa|porta la velocità al 100 percento e poi pausa
+negative|reject|porta la velocità al 110 percento e poi pausa|porta la velocità al 110 percento e poi pausa
+negative|reject|porta la velocità al 150 percento e poi pausa|porta la velocità al 150 percento e poi pausa
+negative|reject|porta la velocità al 199 percento e poi pausa|porta la velocità al 199 percento e poi pausa
+negative|reject|porta la velocità al 25 percento e poi riprendi e poi pausa|porta la velocità al 25 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 31 percento e poi riprendi e poi pausa|porta la velocità al 31 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 48 percento e poi riprendi e poi pausa|porta la velocità al 48 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 60 percento e poi riprendi e poi pausa|porta la velocità al 60 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 72 percento e poi riprendi e poi pausa|porta la velocità al 72 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 80 percento e poi riprendi e poi pausa|porta la velocità al 80 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 93 percento e poi riprendi e poi pausa|porta la velocità al 93 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 100 percento e poi riprendi e poi pausa|porta la velocità al 100 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 110 percento e poi riprendi e poi pausa|porta la velocità al 110 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 150 percento e poi riprendi e poi pausa|porta la velocità al 150 percento e poi riprendi e poi pausa
+negative|reject|porta la velocità al 199 percento e poi riprendi e poi pausa|porta la velocità al 199 percento e poi riprendi e poi pausa
+negative|reject|metti la velocità a 25,5 percento|metti la velocità a 25,5 percento
+negative|reject|metti la velocità a 31,5 percento|metti la velocità a 31,5 percento
+negative|reject|metti la velocità a 48,5 percento|metti la velocità a 48,5 percento
+negative|reject|metti la velocità a 60,5 percento|metti la velocità a 60,5 percento
+negative|reject|metti la velocità a 72,5 percento|metti la velocità a 72,5 percento
+negative|reject|metti la velocità a 80,5 percento|metti la velocità a 80,5 percento
+negative|reject|metti la velocità a 93,5 percento|metti la velocità a 93,5 percento
+negative|reject|metti la velocità a 100,5 percento|metti la velocità a 100,5 percento
+negative|reject|metti la velocità a 110,5 percento|metti la velocità a 110,5 percento
+negative|reject|metti la velocità a 150,5 percento|metti la velocità a 150,5 percento
+negative|reject|metti la velocità a 199,5 percento|metti la velocità a 199,5 percento
+negative|reject|metti la velocità a -25 percento|metti la velocità a -25 percento
+negative|reject|metti la velocità a -31 percento|metti la velocità a -31 percento
+negative|reject|metti la velocità a -48 percento|metti la velocità a -48 percento
+negative|reject|metti la velocità a -60 percento|metti la velocità a -60 percento
+negative|reject|metti la velocità a -72 percento|metti la velocità a -72 percento
+negative|reject|metti la velocità a -80 percento|metti la velocità a -80 percento
+negative|reject|metti la velocità a -93 percento|metti la velocità a -93 percento
+negative|reject|metti la velocità a -100 percento|metti la velocità a -100 percento
+negative|reject|metti la velocità a -110 percento|metti la velocità a -110 percento
+negative|reject|metti la velocità a -150 percento|metti la velocità a -150 percento
+negative|reject|metti la velocità a -199 percento|metti la velocità a -199 percento
+negative|reject|imposta la velocità a 0 percento|imposta la velocità a 0 percento
+negative|reject|imposta la velocità a 1 percento|imposta la velocità a 1 percento
+negative|reject|imposta la velocità a 20 percento|imposta la velocità a 20 percento
+negative|reject|imposta la velocità a 24 percento|imposta la velocità a 24 percento
+negative|reject|imposta la velocità a 201 percento|imposta la velocità a 201 percento
+negative|reject|imposta la velocità a 210 percento|imposta la velocità a 210 percento
+negative|reject|imposta la velocità a 250 percento|imposta la velocità a 250 percento
+negative|reject|imposta la velocità a 300 percento|imposta la velocità a 300 percento
+negative|reject|aumenta la velocità di 0 punti percentuali|aumenta la velocità di 0 punti percentuali
+negative|reject|aumenta la velocità di 176 punti percentuali|aumenta la velocità di 176 punti percentuali
+negative|reject|aumenta la velocità di 180 punti percentuali|aumenta la velocità di 180 punti percentuali
+negative|reject|aumenta la velocità di 200 punti percentuali|aumenta la velocità di 200 punti percentuali
+negative|reject|aumenta la velocità di 250 punti percentuali|aumenta la velocità di 250 punti percentuali
+negative|reject|riprendi la registrazione|riprendi la registrazione
+negative|reject|ferma il download|ferma il download
+negative|reject|avvia il timer|avvia il timer
+negative|reject|metti in pausa la stampa|metti in pausa la stampa
+negative|reject|come si fa a riprendere il brano|come si fa a riprendere il brano
+negative|reject|lui ha messo in pausa la traccia|lui ha messo in pausa la traccia
+negative|reject|non riprendere mai|non riprendere mai
+negative|reject|riprendi tra dieci secondi|riprendi tra dieci secondi

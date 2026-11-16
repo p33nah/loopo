@@ -1,0 +1,112 @@
+RESUME|prosegui con la riproduzione
+RESUME|riprendi a suonare
+RESUME|fai ripartire il pezzo da qui
+RESUME|torna a riprodurre il brano
+RESUME|riattiva la riproduzione musicale
+RESUME|riproduci di nuovo questa traccia
+RESUME|prosegui con il brano interrotto
+RESUME|continua il pezzo da dove eravamo
+RESUME|dai il via alla musica
+RESUME|rimettere in play il brano
+RESUME|prosegua la musica
+RESUME|riprndi la traccia
+RESUME|ripatire con la musica
+RESUME|riavviala
+RESUME|fallo suonare ancora
+RESUME|fai andare la traccia
+PAUSE|ferma subito il pezzo
+PAUSE|sospendi temporaneamente la musica
+PAUSE|puoi fermare la riproduzione per un momento
+PAUSE|metti il brano in pausa qui
+PAUSE|sospendere il playback
+PAUSE|interrompi un attimo il pezzo
+PAUSE|lascia la musica in pausa
+PAUSE|fermati qui con la riproduzione
+PAUSE|mantieni ferma la traccia
+PAUSE|puoi stoppare l'audio
+PAUSE|metterlo in pausa
+PAUSE|ferma l'audio che sta suonando
+PAUSE|frena la riproduzione
+PAUSE|ferm la musica
+PAUSE|sospndi il pezzo
+PAUSE|fallo fermare un momento
+SET_RATE|fissa la velocità di riproduzione al 74 per cento
+SET_RATE|porta il pezzo all'87 percento
+SET_RATE|vorrei la traccia a novantuno percento
+SET_RATE|al centodieci per cento metti il brano
+SET_RATE|regola l'andatura della riproduzione al 63 percento
+SET_RATE|mi porti il ritmo al 79 per cento per piacere
+SET_RATE|fai andare il brano al 94 percento
+SET_RATE|la velocità la voglio al 72 percento
+SET_RATE|impostare al 96 per cento il ritmo
+SET_RATE|su 82 per cento la velocità di riproduzione
+SET_RATE|fissa il ritmo al centoquindici percento
+SET_RATE|al 69 la velocita del brano
+SET_RATE|veloccità su 113 per cento
+SET_RATE|pota il ritmo al novantadue percento
+SET_RATE|seleziona una velocità del valore di 84 percento
+SET_RATE|riproduci la traccia al 68 percento
+INCREASE_RATE|alza la velocità di riproduzione di 6 punti percentuali
+INCREASE_RATE|fai salire il ritmo di 9 punti percentuali
+INCREASE_RATE|dammi un aumento di 3 punti percentuali sulla velocità
+INCREASE_RATE|incrementa il ritmo del 12 percento per cortesia
+INCREASE_RATE|porta in alto di 16 punti percentuali la velocità
+INCREASE_RATE|accelerami la traccia di 14 punti percentuali
+INCREASE_RATE|aumentare la velocità di due punti percentuali
+INCREASE_RATE|aggiungi sei punti percentuali alla velocità
+INCREASE_RATE|alza di sette punti percentuali la riproduzione
+INCREASE_RATE|dai un incremento del 15 percento alla velocità
+INCREASE_RATE|aumneta il ritmo di 11 punti percentuali
+INCREASE_RATE|velocità alza del 9 percento
+INCREASE_RATE|velocità su di 4 punti percentuali
+INCREASE_RATE|puoi dare un aumento di dieci punti percentuali al ritmo
+INCREASE_RATE|accelera di 8 punti percentuali il pezzo
+INCREASE_RATE|aumta il ritmo di 14 punti percentuali
+DECREASE_RATE|abbassa la velocità di riproduzione di 6 punti percentuali
+DECREASE_RATE|fai scendere il ritmo di 9 punti percentuali
+DECREASE_RATE|dammi una riduzione di 3 punti percentuali sulla velocità
+DECREASE_RATE|diminuisci il ritmo del 12 percento per cortesia
+DECREASE_RATE|porta in basso di 16 punti percentuali la velocità
+DECREASE_RATE|rallentami la traccia di 14 punti percentuali
+DECREASE_RATE|rallentare la velocità di due punti percentuali
+DECREASE_RATE|togli sei punti percentuali alla velocità
+DECREASE_RATE|abbassa di sette punti percentuali la riproduzione
+DECREASE_RATE|dai una riduzione del 15 percento alla velocità
+DECREASE_RATE|diminusci il ritmo di 11 punti percentuali
+DECREASE_RATE|velocità abbassa del 9 percento
+DECREASE_RATE|velocità giù di 4 punti percentuali
+DECREASE_RATE|puoi dare una riduzione di dieci punti percentuali al ritmo
+DECREASE_RATE|rallenta di 8 punti percentuali il pezzo
+DECREASE_RATE|diminuci il ritmo di 14 punti percentuali
+REJECT|avvia la registrazione del microfono
+REJECT|sospendi l'esportazione del file
+REJECT|interrompi il caricamento del brano
+REJECT|avvia la fotocamera
+REJECT|rimetti in pausa il video
+REJECT|ferma l'aggiornamento del telefono
+REJECT|riparti con il download del file
+REJECT|riprendi a registrare dal microfono
+REJECT|metti in pausa il cronometro
+REJECT|continua con la registrazione
+REJECT|la musica si ferma da sola
+REJECT|il brano dovrebbe ripartire automaticamente
+REJECT|mi spieghi come fermare la riproduzione
+REJECT|dimmi che velocità è impostata
+REJECT|a quanto va la velocità di riproduzione
+REJECT|porta la luminosità a 65 per cento
+REJECT|imposta il contrasto al settanta percento
+REJECT|metti il livello del microfono al 79 percento
+REJECT|abbassa il volume della musica di 6 punti percentuali
+REJECT|alza la luminosità di 9 punti percentuali
+REJECT|diminuisci il volume di tre punti percentuali
+REJECT|imposta la carica massima al novanta percento
+REJECT|regola il bilanciamento a 60 percento
+REJECT|abbassa di 5 punti percentuali il contrasto
+REJECT|aumenta e poi diminuisci il volume
+REJECT|quanto manca alla fine della traccia
+REJECT|porta la velocità al 65 o all'80 percento
+REJECT|non sospendere il brano
+REJECT|regola il volume e poi riprendi a registrare
+REJECT|imposta un timer di cinque minuti
+REJECT|riduci il ritardo della traccia di cinque secondi
+REJECT|cambia il punto di partenza del brano

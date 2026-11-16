@@ -1,0 +1,57 @@
+RESUME|riprendi
+RESUME|fai play
+RESUME|continua a suonare
+RESUME|parti con il pezzo
+RESUME|ripartire con il brano
+RESUME|fa ripartire la musica
+RESUME|avvia la riproduzione
+RESUME|rimetti in riproduzione
+RESUME|fai partire la traccia
+RESUME|riprendi il brano
+PAUSE|pausa
+PAUSE|metti in pausa la musica
+PAUSE|interrompi la riproduzione
+PAUSE|ferma la musica
+PAUSE|mettere in pausa il brano
+PAUSE|blocca un attimo la traccia
+PAUSE|sospendi il pezzo
+PAUSE|arresta il brano
+SET_RATE|velocità a 73
+SET_RATE|imposta la velocità al 91 percento
+SET_RATE|porta il ritmo all'84 per cento
+SET_RATE|metti la riproduzione al 95
+SET_RATE|rallenta al 58
+SET_RATE|rallentare la traccia al 55
+SET_RATE|regola il brano a 92 percento
+SET_RATE|al 105 la velocità
+SET_RATE|accelerare al 114
+SET_RATE|velocità su 115 percento
+INCREASE_RATE|aumenta la velocità del 4 per cento
+INCREASE_RATE|alza il ritmo di 8 percento
+INCREASE_RATE|incrementa la velocità di 11 punti percentuali
+INCREASE_RATE|accelera la riproduzione del 17 percento
+INCREASE_RATE|aumentare di 15 punti percentuali
+INCREASE_RATE|alza del 6 percento il brano
+INCREASE_RATE|sali di 12 percento con la velocità
+DECREASE_RATE|rallenta la velocità del 9 per cento
+DECREASE_RATE|abbassa il ritmo di 13 percento
+DECREASE_RATE|riduci di 16 punti percentuali la velocità
+DECREASE_RATE|diminuisci la riproduzione del 14 percento
+DECREASE_RATE|rallentare di 18 punti percentuali
+DECREASE_RATE|abbassa del 19 percento il brano
+DECREASE_RATE|scendi di 20 percento con la velocità
+REJECT|ehi luca
+REJECT|chiudi la finestra
+REJECT|che ore sono
+REJECT|spegni il telefono
+REJECT|apri le impostazioni
+REJECT|qual è la velocità attuale
+REJECT|quanto dura la musica
+REJECT|porta il volume al 50
+REJECT|cambia brano
+REJECT|torna all'inizio
+REJECT|la canzone è finita
+REJECT|manda un messaggio
+REJECT|interrompi il download
+REJECT|avvia il cronometro
+REJECT|fai partire il timer

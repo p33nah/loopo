@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.p33nah.loopo.data.audio.AndroidPcmDecoderFactory
 import com.p33nah.loopo.data.audio.AndroidPlaybackController
 import com.p33nah.loopo.data.audio.AndroidTrackInspector
+import com.p33nah.loopo.data.audio.PlaybackPauseResult
 import com.p33nah.loopo.data.audio.TrackInspection
 import com.p33nah.loopo.data.session.AndroidSessionRepository
 import com.p33nah.loopo.data.waveform.AndroidWaveformRepository
@@ -122,6 +123,9 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	internal suspend fun pause(shouldPause: () -> Boolean = { true }): Boolean = playbackController.pause(shouldPause)
+
+	internal suspend fun pauseWithPriorState(shouldPause: () -> Boolean = { true }): PlaybackPauseResult =
+		playbackController.pauseWithPriorState(shouldPause)
 
 	internal fun reportBackgroundPlaybackUnavailable() {
 		playbackController.reportBackgroundPlaybackUnavailable()

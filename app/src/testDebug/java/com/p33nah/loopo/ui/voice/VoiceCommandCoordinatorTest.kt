@@ -37,6 +37,19 @@ class VoiceCommandCoordinatorTest {
 	}
 
 	@Test
+	fun absoluteRateCanChainIntoRestart() = runBlocking {
+		val actions = mutableListOf<VoiceAction>()
+		val result = VoiceCommandCoordinator(
+			pause = { true },
+			transcribe = { TranscriptResult.Text("velocità al settanta e poi riavvia la riproduzione") },
+			dispatch = { actions += it; true },
+		).run()
+
+		assertEquals(VoiceStatus.CommandSent, result)
+		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(70)), VoiceAction.Restart), actions)
+	}
+
+	@Test
 	fun pausesBeforeListeningThenDispatchesACompleteOrderedTurn() = runBlocking {
 		val events = mutableListOf<String>()
 		val coordinator = VoiceCommandCoordinator(
@@ -46,6 +59,19 @@ class VoiceCommandCoordinatorTest {
 		)
 		assertEquals(VoiceStatus.CommandSent, coordinator.run())
 		assertEquals(listOf("pause", "rate-70", "play"), events)
+	}
+
+	@Test
+	fun restartUtteranceDispatchesOneDistinctAction() = runBlocking {
+		val actions = mutableListOf<VoiceAction>()
+		val result = VoiceCommandCoordinator(
+			pause = { true },
+			transcribe = { TranscriptResult.Text("ricomincia da capo") },
+			dispatch = { actions += it; true },
+		).run()
+
+		assertEquals(VoiceStatus.CommandSent, result)
+		assertEquals(listOf(VoiceAction.Restart), actions)
 	}
 
 	@Test
@@ -203,12 +229,36 @@ class ItalianVoiceCommandParserTest {
 	}
 
 	@Test
+	fun parsesExplicitRestartPhrasesWithoutChangingResumeCommands() {
+		val restart = listOf(VoiceAction.Restart)
+		for (phrase in listOf(
+			"ricomincia da capo", "ricomincia", "ricomincia da zero", "ricomincia dall'inizio",
+			"ricomincia il brano", "ricomincia il loop", "riproduci dall'inizio", "riproduci da capo",
+			"riproduci il brano dall'inizio", "riproduci il loop dall'inizio", "riparti dall'inizio",
+			"riprendi dall'inizio", "parti dall'inizio", "avvia dall'inizio", "dall'inizio", "all'inizio", "da capo", "da zero",
+			"riparti da capo", "riparti da zero", "riavvia da capo", "riavvia da zero", "riavvia dall'inizio",
+			"riavvia il brano", "riavvia il loop", "solo dall'inizio", "solamente dall'inizio",
+			"solo da capo", "solamente da capo", "torna all'inizio", "torna a zero", "inizia da capo",
+			"fai ripartire dall'inizio",
+			"ripeti da capo", "ripeti dall'inizio", "riavvia la riproduzione",
+		)) {
+			assertEquals(phrase, restart, ItalianVoiceCommandParser.parse(phrase)?.actions)
+		}
+
+		for (phrase in listOf("riprendi", "riparti", "parti", "continua", "play", "avvia la riproduzione")) {
+			assertEquals(phrase, listOf(VoiceAction.Resume), ItalianVoiceCommandParser.parse(phrase)?.actions)
+		}
+	}
+
+	@Test
 	fun rejectsUnclearSynonymCommandsWithoutDispatchablePlans() {
 		for (phrase in listOf(
 			"metti in pausa o riparti",
 			"riduci il ritmo di cinque",
 			"incrementa il ritmo di cinque o dieci punti percentuali",
 			"forse regola il ritmo sul 75 percento",
+			"non ricominciare", "forse da capo", "ricomincia un po'", "ricomincia e poi pausa",
+			"dall'inizio e poi riprendi", "dall'inizio con il loop",
 		)) {
 			assertNull(phrase, ItalianVoiceCommandParser.parse(phrase))
 		}

@@ -56,6 +56,55 @@ class AndroidPlaybackControllerFractionalLoopTest {
 		}
 	}
 
+	@Test
+	fun restartStartsAtEnabledLoopOrTrackBeginning() = runBlocking {
+		val name = "restart-from-beginning.wav"
+		val audioFile = WavFixture.pcmFile(context, name, frames = TRACK_FRAMES)
+		val controller = AndroidPlaybackController(context)
+		var activity: ActivityScenario<MainActivity>? = null
+		val enabledLoop = LoopRegion(aFrame = 24_000, bFrame = 84_000, enabled = true, crossfadeMs = 10)
+		try {
+			activity = ActivityScenario.launch(MainActivity::class.java)
+			val track = TrackInfo(
+				id = TrackId(name), uri = Uri.fromFile(audioFile), displayName = name,
+				container = AudioContainer.WAV, durationFrames = TRACK_FRAMES.toLong(),
+				sampleRate = SAMPLE_RATE, channelCount = 1, sourceMimeType = "audio/wav",
+			)
+			assertNull("Generated WAV must load", controller.load(track))
+			assertTrue("Loop settings must be accepted", controller.setLoopRegion(enabledLoop))
+			controller.seekToFrame(enabledLoop.bFrame - SAMPLE_RATE / 2L)
+
+			assertTrue("Restart with loop enabled must start playback", controller.restartFromBeginning())
+			assertHealthy(100L) {
+				val snapshot = controller.state.value
+				assertNull("Loop restart reported an error: $snapshot", snapshot.error)
+				assertTrue("Loop restart stopped unexpectedly: $snapshot", snapshot.isPlaying)
+				assertTrue(
+					"Loop restart did not start near marker A: $snapshot",
+					snapshot.positionFrame in enabledLoop.aFrame until enabledLoop.aFrame + SAMPLE_RATE / 2,
+				)
+			}
+
+			assertTrue("Playback must pause before changing the loop", controller.pause())
+			assertTrue("Loop disable must be accepted", controller.setLoopRegion(enabledLoop.copy(enabled = false)))
+			controller.seekToFrame(TRACK_FRAMES / 2L)
+			assertTrue("Restart with loop disabled must start playback", controller.restartFromBeginning())
+			assertHealthy(100L) {
+				val snapshot = controller.state.value
+				assertNull("Track restart reported an error: $snapshot", snapshot.error)
+				assertTrue("Track restart stopped unexpectedly: $snapshot", snapshot.isPlaying)
+				assertTrue("Track restart did not start near frame zero: $snapshot", snapshot.positionFrame in 0 until enabledLoop.aFrame)
+			}
+		} finally {
+			try {
+				controller.unload()
+			} finally {
+				activity?.close()
+				audioFile.delete()
+			}
+		}
+	}
+
 	private suspend fun assertStreamingCrossfadeSurvives(scenario: StreamingCrossfadeCase) {
 		val name = "streaming-crossfade-${scenario.sampleRate}-${scenario.crossfadeMs}-${scenario.playbackRatePercent}.wav"
 		val trackFrames = scenario.sampleRate * 4

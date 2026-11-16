@@ -163,16 +163,29 @@ class AndroidPlaybackController(context: Context) {
 		return mutableState.value.error == null && !mutableState.value.isPlaying
 	}
 
-	suspend fun play() = transitionMutex.withLock {
-		if (mutableState.value.isPlaying || engineHandle == 0L) return@withLock
+	suspend fun play() = transitionMutex.withLock { playUnsafe() }
+
+	suspend fun restartFromBeginning(shouldRestart: () -> Boolean = { true }): Boolean = transitionMutex.withLock {
+		if (!shouldRestart() || engineHandle == 0L || decoder == null) return@withLock false
+		if (focusTemporarilyLost) abandonAudioFocus()
+		resumeAfterFocusGain = false
+		val startFrame = mutableState.value.loopRegion?.restartFrame() ?: 0L
+		seekUnsafe(startFrame, resumeAfterSeek = false)
+		if (mutableState.value.error != null || !shouldRestart()) return@withLock false
+		playUnsafe(shouldStart = shouldRestart)
+		mutableState.value.isPlaying && mutableState.value.error == null
+	}
+
+	private suspend fun playUnsafe(shouldStart: () -> Boolean = { true }) {
+		if (mutableState.value.isPlaying || engineHandle == 0L) return
 		if (focusTemporarilyLost) {
 			resumeAfterFocusGain = true
-			return@withLock
+			return
 		}
 		resumeAfterFocusGain = false
 		if (mutableState.value.isEnded) {
 			seekUnsafe(0, resumeAfterSeek = false)
-			if (mutableState.value.isEnded) return@withLock
+			if (mutableState.value.isEnded) return
 		}
 		if (NativePlaybackBridge.outputNeedsReopen(engineHandle)) {
 			val resumeFrame = mutableState.value.positionFrame
@@ -182,16 +195,21 @@ class AndroidPlaybackController(context: Context) {
 			if (!reopened) {
 				abandonAudioFocus()
 				mutableState.update { it.copy(isPlaying = false, error = PlaybackError.OUTPUT_UNAVAILABLE) }
-				return@withLock
+				return
 			}
 			seekUnsafe(resumeFrame, resumeAfterSeek = false)
-			if (mutableState.value.error != null) return@withLock
+			if (mutableState.value.error != null) return
 		}
 		ensurePumpRunning()
 		awaitPrebuffer(engineHandle, mutableState.value.positionFrame)
+		if (!shouldStart()) return
 		if (!requestAudioFocus()) {
 			mutableState.update { it.copy(error = PlaybackError.AUDIO_FOCUS_DENIED) }
-			return@withLock
+			return
+		}
+		if (!shouldStart()) {
+			abandonAudioFocus()
+			return
 		}
 		if (startNativePlayback(engineHandle)) {
 			mutableState.update { it.copy(isPlaying = true, error = null) }

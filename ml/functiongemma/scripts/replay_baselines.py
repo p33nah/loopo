@@ -84,19 +84,17 @@ def write_pinned_baseline(root: Path) -> tuple[Path, Path]:
     return source_root, training_root
 
 
-def write_init_script(path: Path, source_root: Path) -> None:
-    escaped = str(source_root).replace("\", "\\").replace("'", "\'")
-    build_dir = str(REPLAY_BUILD_DIR).replace("\", "\\").replace("'", "\'")
+def write_init_script(path: Path) -> None:
     path.write_text(
         """gradle.beforeProject { project ->
     if (project.path == ':app') {
-        project.layout.buildDirectory.set(project.file('%s'))
+        project.layout.buildDirectory.set(project.file(project.property('loopoBenchmarkBuildDir')))
     }
 }
 allprojects { project ->
     afterEvaluate {
         if (project.path == ':app') {
-            def candidateSources = project.file('%s')
+            def candidateSources = project.file(project.property('loopoBenchmarkSourceDir'))
             def android = project.extensions.getByName('android')
             android.sourceSets.findAll { it.name == 'test' || it.name == 'testDebug' }.each {
                 it.java.srcDir(candidateSources)
@@ -111,7 +109,7 @@ allprojects { project ->
         }
     }
 }
-""" % (build_dir, escaped),
+""",
         encoding="utf-8",
     )
 
@@ -150,7 +148,7 @@ def main() -> None:
         normalized_input_path = temporary_root / "input.tsv"
         normalized_input_path.write_text(normalized_input, encoding="ascii")
         init_script = temporary_root / "benchmark.init.gradle"
-        write_init_script(init_script, source_root)
+        write_init_script(init_script)
         parser_tmp = temporary_root / parser_output.name
         classifier_tmp = temporary_root / classifier_output.name
         environment = os.environ.copy()
@@ -164,6 +162,8 @@ def main() -> None:
             [
                 "bash", "gradlew", "--init-script", str(init_script),
                 "--project-cache-dir", str(REPLAY_BUILD_DIR.parent / "jvm-replay-cache"),
+                f"-PloopoBenchmarkBuildDir={REPLAY_BUILD_DIR}",
+                f"-PloopoBenchmarkSourceDir={source_root}",
                 ":app:testDebugUnitTest", "--rerun", "--tests", BRIDGE_TEST, "--console=plain",
             ],
             cwd=REPO_ROOT,

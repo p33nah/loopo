@@ -35,6 +35,19 @@ class VoiceCommandCoordinatorTest {
 	}
 
 	@Test
+	fun absoluteRateCanChainIntoRestart() = runBlocking {
+		val actions = mutableListOf<VoiceAction>()
+		val result = VoiceCommandCoordinator(
+			pause = { VoicePauseOutcome.Paused(false) },
+			transcribe = { TranscriptResult.Text("velocità al settanta e poi riavvia la riproduzione") },
+			dispatch = { actions += it; true },
+		).run()
+
+		assertEquals(VoiceStatus.CommandSent, result)
+		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(70)), VoiceAction.Restart), actions)
+	}
+
+	@Test
 	fun pausesBeforeListeningThenDispatchesACompleteOrderedTurn() = runBlocking {
 		val events = mutableListOf<String>()
 		val coordinator = VoiceCommandCoordinator(
@@ -44,6 +57,19 @@ class VoiceCommandCoordinatorTest {
 		)
 		assertEquals(VoiceStatus.CommandSent, coordinator.run())
 		assertEquals(listOf("pause", "rate-70", "play"), events)
+	}
+
+	@Test
+	fun restartWhilePlayingDispatchesOneStartingAction() = runBlocking {
+		val actions = mutableListOf<VoiceAction>()
+		val result = VoiceCommandCoordinator(
+			pause = { VoicePauseOutcome.Paused(true) },
+			transcribe = { TranscriptResult.Text("ricomincia da capo") },
+			dispatch = { actions += it; true },
+		).run()
+
+		assertEquals(VoiceStatus.CommandSent, result)
+		assertEquals(listOf(VoiceAction.Restart), actions)
 	}
 
 	@Test
@@ -65,6 +91,7 @@ class VoiceCommandCoordinatorTest {
 		).run()
 		assertEquals(VoiceStatus.CommandSent, resumeResult)
 		assertEquals(listOf(VoiceAction.Resume), actions)
+
 	}
 
 	@Test
@@ -83,16 +110,15 @@ class VoiceCommandCoordinatorTest {
 
 	@Test
 	fun rateCommandsPreserveRateArithmeticAndStayPausedWhenAlreadyPaused() = runBlocking {
-		val relative = ItalianVoiceCommandParser.parse("aumenta del 5% la velocità")!!
-		val relativeAction = relative as VoiceAction.AdjustRate
+		val relativeAction = ItalianVoiceCommandParser.parse("aumenta del 5% la velocità")!!.actions.single() as VoiceAction.AdjustRate
 		assertEquals(VoiceAction.AdjustRate(RateDeltaPercent.from(5)!!), relativeAction)
-		assertEquals(75, (ItalianVoiceCommandParser.parse("aumenta del cinque per cento la velocità") as VoiceAction.AdjustRate).delta.resolve(70)?.percent)
+		assertEquals(75, (ItalianVoiceCommandParser.parse("aumenta del cinque per cento la velocità")!!.actions.single() as VoiceAction.AdjustRate).delta.resolve(70)?.percent)
 		assertEquals(75, relativeAction.delta.resolve(70)?.percent)
 		assertNull(relativeAction.delta.resolve(198))
-		val absolute = ItalianVoiceCommandParser.parse("aumenta a 80 la velocità")!!
+		val absolute = ItalianVoiceCommandParser.parse("aumenta a 80 la velocità")!!.actions.single()
 		assertEquals(VoiceAction.SetRate(PlaybackRate(80)), absolute)
-		assertEquals(VoiceAction.SetRate(PlaybackRate(80)), ItalianVoiceCommandParser.parse("aumenta la velocità a 80"))
-		assertEquals(VoiceAction.SetRate(PlaybackRate(80)), ItalianVoiceCommandParser.parse("aumenta la velocità a ottanta per cento"))
+		assertEquals(VoiceAction.SetRate(PlaybackRate(80)), ItalianVoiceCommandParser.parse("aumenta la velocità a 80")?.actions?.single())
+		assertEquals(VoiceAction.SetRate(PlaybackRate(80)), ItalianVoiceCommandParser.parse("aumenta la velocità a ottanta per cento")?.actions?.single())
 
 		val actions = mutableListOf<VoiceAction>()
 		val result = VoiceCommandCoordinator(
@@ -118,7 +144,7 @@ class VoiceCommandCoordinatorTest {
 	@Test
 	fun malformedOrOutOfRangeUtterancesCauseNoDispatch() = runBlocking {
 		val invalid = listOf(
-			"non riprendere", "forse velocità al settanta", "velocità al settanta e poi riprendi",
+			"non riprendere", "forse velocità al settanta",
 			"velocità al settanta e poi pausa", "aumenta del 5 la velocità", "velocità al 201",
 		)
 		for (phrase in invalid) {
@@ -196,48 +222,74 @@ class VoiceCommandCoordinatorTest {
 class ItalianVoiceCommandParserTest {
 	@Test
 	fun preservesLegacyExactCommandsAndRateForms() {
-		assertEquals(VoiceAction.Resume, ItalianVoiceCommandParser.parse("Riprendi."))
-		assertEquals(VoiceAction.StayPaused, ItalianVoiceCommandParser.parse("pausa"))
-		assertEquals(VoiceAction.SetRate(PlaybackRate(70)), ItalianVoiceCommandParser.parse("rallenta al settanta per cento"))
-		assertEquals(VoiceAction.SetRate(PlaybackRate(125)), ItalianVoiceCommandParser.parse("velocità al 125%"))
-		assertEquals(VoiceAction.SetRate(PlaybackRate(83)), ItalianVoiceCommandParser.parse("velocità al ottantatré"))
-		assertEquals(VoiceAction.SetRate(PlaybackRate(100)), ItalianVoiceCommandParser.parse("velocità al cento"))
-		assertEquals(VoiceAction.SetRate(PlaybackRate(200)), ItalianVoiceCommandParser.parse("velocità al duecento"))
+		assertEquals(VoiceAction.Resume, ItalianVoiceCommandParser.parse("Riprendi.")?.actions?.single())
+		assertEquals(VoiceAction.StayPaused, ItalianVoiceCommandParser.parse("pausa")?.actions?.single())
+		assertEquals(VoiceAction.SetRate(PlaybackRate(70)), ItalianVoiceCommandParser.parse("rallenta al settanta per cento")?.actions?.single())
+		assertEquals(VoiceAction.SetRate(PlaybackRate(125)), ItalianVoiceCommandParser.parse("velocità al 125%")?.actions?.single())
+		assertEquals(VoiceAction.SetRate(PlaybackRate(83)), ItalianVoiceCommandParser.parse("velocità al ottantatré")?.actions?.single())
+		assertEquals(VoiceAction.SetRate(PlaybackRate(100)), ItalianVoiceCommandParser.parse("velocità al cento")?.actions?.single())
+		assertEquals(VoiceAction.SetRate(PlaybackRate(200)), ItalianVoiceCommandParser.parse("velocità al duecento")?.actions?.single())
 	}
 
 	@Test
 	fun acceptsCommonCommandSynonymsAndFlexibleRatePhrasing() {
-		assertEquals(VoiceAction.Resume, ItalianVoiceCommandParser.parse("riparti"))
-		assertEquals(VoiceAction.Resume, ItalianVoiceCommandParser.parse("avvia la riproduzione"))
-		assertEquals(VoiceAction.StayPaused, ItalianVoiceCommandParser.parse("metti in pausa"))
-		assertEquals(VoiceAction.StayPaused, ItalianVoiceCommandParser.parse("interrompi la riproduzione"))
+		assertEquals(VoiceAction.Resume, ItalianVoiceCommandParser.parse("riparti")?.actions?.single())
+		assertEquals(VoiceAction.Resume, ItalianVoiceCommandParser.parse("avvia la riproduzione")?.actions?.single())
+		assertEquals(VoiceAction.StayPaused, ItalianVoiceCommandParser.parse("metti in pausa")?.actions?.single())
+		assertEquals(VoiceAction.StayPaused, ItalianVoiceCommandParser.parse("interrompi la riproduzione")?.actions?.single())
 
 		assertEquals(
 			VoiceAction.SetRate(PlaybackRate(75)),
-			ItalianVoiceCommandParser.parse("regola il ritmo sul 75 percento"),
+			ItalianVoiceCommandParser.parse("regola il ritmo sul 75 percento")?.actions?.single(),
 		)
 		assertEquals(
 			VoiceAction.SetRate(PlaybackRate(75)),
-			ItalianVoiceCommandParser.parse("imposta il ritmo al settantacinque per cento"),
+			ItalianVoiceCommandParser.parse("imposta il ritmo al settantacinque per cento")?.actions?.single(),
 		)
 		assertEquals(
 			VoiceAction.AdjustRate(RateDeltaPercent.from(5)!!),
-			ItalianVoiceCommandParser.parse("incrementa di 5 punti percentuali il ritmo"),
+			ItalianVoiceCommandParser.parse("incrementa di 5 punti percentuali il ritmo")?.actions?.single(),
 		)
 		assertEquals(
 			VoiceAction.AdjustRate(RateDeltaPercent.from(-10)!!),
-			ItalianVoiceCommandParser.parse("riduci il ritmo di dieci punti percentuali"),
+			ItalianVoiceCommandParser.parse("riduci il ritmo di dieci punti percentuali")?.actions?.single(),
 		)
-		assertNull(ItalianVoiceCommandParser.parse("regola il ritmo sul 75 percento e poi avvia la riproduzione"))
+		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(75)), VoiceAction.Resume), ItalianVoiceCommandParser.parse("regola il ritmo sul 75 percento e poi avvia la riproduzione")?.actions)
+		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(70)), VoiceAction.Resume), ItalianVoiceCommandParser.parse("rallenta al settanta e poi riprendi")?.actions)
+	}
+
+	@Test
+	fun parsesExplicitRestartPhrasesWithoutChangingResumeCommands() {
+		val restart = listOf(VoiceAction.Restart)
+		for (phrase in listOf(
+			"ricomincia da capo", "ricomincia", "ricomincia da zero", "ricomincia dall'inizio",
+			"ricomincia il brano", "ricomincia il loop", "riproduci dall'inizio", "riproduci da capo",
+			"riproduci il brano dall'inizio", "riproduci il loop dall'inizio", "riparti dall'inizio",
+			"riprendi dall'inizio", "parti dall'inizio", "avvia dall'inizio", "dall'inizio", "all'inizio", "da capo", "da zero",
+			"riparti da capo", "riparti da zero", "riavvia da capo", "riavvia da zero", "riavvia dall'inizio",
+			"riavvia il brano", "riavvia il loop", "solo dall'inizio", "solamente dall'inizio",
+			"solo da capo", "solamente da capo", "torna all'inizio", "torna a zero", "inizia da capo",
+			"fai ripartire dall'inizio",
+			"ripeti da capo", "ripeti dall'inizio", "riavvia la riproduzione",
+		)) {
+			assertEquals(phrase, restart, ItalianVoiceCommandParser.parse(phrase)?.actions)
+		}
+
+		for (phrase in listOf("riprendi", "riparti", "parti", "continua", "play", "avvia la riproduzione")) {
+			assertEquals(phrase, listOf(VoiceAction.Resume), ItalianVoiceCommandParser.parse(phrase)?.actions)
+		}
 	}
 
 	@Test
 	fun rejectsUnclearSynonymCommandsWithoutActions() {
+
 		for (phrase in listOf(
 			"metti in pausa o riparti",
 			"riduci il ritmo di cinque",
 			"incrementa il ritmo di cinque o dieci punti percentuali",
 			"forse regola il ritmo sul 75 percento",
+			"non ricominciare", "forse da capo", "ricomincia un po'", "ricomincia e poi pausa",
+			"dall'inizio e poi riprendi", "dall'inizio con il loop",
 		)) {
 			assertNull(phrase, ItalianVoiceCommandParser.parse(phrase))
 		}
@@ -262,7 +314,7 @@ class ItalianVoiceCommandParserTest {
 			"velocità all’ottanta",
 			"porta la velocità all'ottanta per cento",
 		)) {
-			assertEquals(phrase, expected, ItalianVoiceCommandParser.parse(phrase))
+			assertEquals(phrase, listOf(expected), ItalianVoiceCommandParser.parse(phrase)?.actions)
 		}
 	}
 
@@ -275,7 +327,7 @@ class ItalianVoiceCommandParserTest {
 			"diminuisci la velocità a 70" to VoiceAction.SetRate(PlaybackRate(70)),
 		)
 		for ((phrase, expected) in cases) {
-			assertEquals(phrase, expected, ItalianVoiceCommandParser.parse(phrase))
+			assertEquals(phrase, listOf(expected), ItalianVoiceCommandParser.parse(phrase)?.actions)
 		}
 
 		val increase = VoiceAction.AdjustRate(RateDeltaPercent.from(5)!!)
@@ -284,13 +336,13 @@ class ItalianVoiceCommandParserTest {
 			"alza la velocità del cinque per cento",
 			"aumenta la velocità del cinque per cento",
 		)) {
-			assertEquals(phrase, increase, ItalianVoiceCommandParser.parse(phrase))
+			assertEquals(phrase, listOf(increase), ItalianVoiceCommandParser.parse(phrase)?.actions)
 		}
 		for (phrase in listOf(
 			"abbassa la velocità del cinque per cento",
 			"diminuisci la velocità del cinque per cento",
 		)) {
-			assertEquals(phrase, decrease, ItalianVoiceCommandParser.parse(phrase))
+			assertEquals(phrase, listOf(decrease), ItalianVoiceCommandParser.parse(phrase)?.actions)
 		}
 	}
 
@@ -299,14 +351,14 @@ class ItalianVoiceCommandParserTest {
 		val increase = VoiceAction.AdjustRate(RateDeltaPercent.from(5)!!)
 		val decrease = VoiceAction.AdjustRate(RateDeltaPercent.from(-10)!!)
 		for (phrase in listOf("aumenta del 5% la velocità", "aumenta la velocità del cinque per cento")) {
-			assertEquals(phrase, increase, ItalianVoiceCommandParser.parse(phrase))
+			assertEquals(phrase, listOf(increase), ItalianVoiceCommandParser.parse(phrase)?.actions)
 		}
 		assertEquals(
 			VoiceAction.AdjustRate(RateDeltaPercent.from(100)!!),
-			ItalianVoiceCommandParser.parse("aumenta del cento per cento la velocità"),
+			ItalianVoiceCommandParser.parse("aumenta del cento per cento la velocità")?.actions?.single(),
 		)
 		for (phrase in listOf("diminuisci di 10 per cento la velocità", "diminuisci la velocità del dieci per cento")) {
-			assertEquals(phrase, decrease, ItalianVoiceCommandParser.parse(phrase))
+			assertEquals(phrase, listOf(decrease), ItalianVoiceCommandParser.parse(phrase)?.actions)
 		}
 	}
 
@@ -331,6 +383,6 @@ class ItalianVoiceCommandParserTest {
 		)) {
 			assertNull(phrase, ItalianVoiceCommandParser.parse(phrase))
 		}
-		assertNull(ItalianVoiceCommandParser.parse("aumenta la velocità a 80 e poi continua"))
+		assertEquals(listOf(VoiceAction.SetRate(PlaybackRate(80)), VoiceAction.Resume), ItalianVoiceCommandParser.parse("aumenta la velocità a 80 e poi continua")?.actions)
 	}
 }

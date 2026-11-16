@@ -19,6 +19,7 @@ internal value class RateDeltaPercent private constructor(val value: Int) {
 
 internal sealed interface VoiceAction {
 	data object Resume : VoiceAction
+	data object Restart : VoiceAction
 	data object StayPaused : VoiceAction
 	data class SetRate(val rate: PlaybackRate) : VoiceAction
 	data class AdjustRate(val delta: RateDeltaPercent) : VoiceAction
@@ -27,6 +28,20 @@ internal sealed interface VoiceAction {
 internal sealed interface VoicePauseOutcome {
 	data object Failed : VoicePauseOutcome
 	data class Paused(val wasPlaying: Boolean) : VoicePauseOutcome
+}
+
+internal class VoicePlan private constructor(val actions: List<VoiceAction>) {
+	companion object {
+		fun validated(actions: List<VoiceAction>): VoicePlan? {
+			val valid = actions.size == 1 ||
+				(actions.size == MAX_ACTIONS &&
+					(actions.firstOrNull() is VoiceAction.SetRate || actions.firstOrNull() is VoiceAction.AdjustRate) &&
+					(actions.lastOrNull() == VoiceAction.Resume || actions.lastOrNull() == VoiceAction.Restart))
+			return if (valid) VoicePlan(actions.toList()) else null
+		}
+
+		private const val MAX_ACTIONS = 2
+	}
 }
 
 internal enum class VoiceStatus {
@@ -65,17 +80,21 @@ internal class VoiceCommandCoordinator(
 		return when (transcript) {
 			is TranscriptResult.Text -> {
 				onTranscript(transcript.value)
-				val action = ItalianVoiceCommandParser.parse(transcript.value) ?: return VoiceStatus.Unrecognized
-				currentCoroutineContext().ensureActive()
-				if (!isCurrent()) return VoiceStatus.Cancelled
-				onStatus(VoiceStatus.Applying)
-				if (!dispatch(action)) return VoiceStatus.Failed
-				if (pauseOutcome.wasPlaying && action != VoiceAction.StayPaused && action != VoiceAction.Resume) {
+				val plan = ItalianVoiceCommandParser.parse(transcript.value) ?: return VoiceStatus.Unrecognized
+				for (action in plan.actions) {
+					currentCoroutineContext().ensureActive()
+					if (!isCurrent()) return VoiceStatus.Cancelled
+					onStatus(VoiceStatus.Applying)
+					if (!dispatch(action)) return VoiceStatus.Failed
+				}
+				val rateOnly = plan.actions.size == 1 &&
+					(plan.actions.single() is VoiceAction.SetRate || plan.actions.single() is VoiceAction.AdjustRate)
+				if (pauseOutcome.wasPlaying && rateOnly) {
 					currentCoroutineContext().ensureActive()
 					if (!isCurrent()) return VoiceStatus.Cancelled
 					if (!dispatch(VoiceAction.Resume)) return VoiceStatus.Failed
 				}
-				if (action == VoiceAction.StayPaused) VoiceStatus.Paused else VoiceStatus.CommandSent
+				if (plan.actions.last() == VoiceAction.StayPaused) VoiceStatus.Paused else VoiceStatus.CommandSent
 			}
 			TranscriptResult.TimedOut -> VoiceStatus.TimedOut
 			TranscriptResult.Unavailable -> VoiceStatus.Unavailable
@@ -95,6 +114,7 @@ internal object ItalianVoiceCommandParser {
 	private val spaces = Regex("\\s+")
 	private val punctuation = Regex("[^\\p{L}\\p{N}%]+")
 	private val signedNumber = Regex("[-+](?=\\d)")
+	private val chain = Regex("\\be poi\\b")
 	private val increaseWords = setOf("aumenta", "accelera", "alza", "incrementa")
 	private val decreaseWords = setOf("abbassa", "diminuisci", "rallenta", "riduci")
 	private val setWords = setOf("imposta", "porta", "metti", "regola")
@@ -105,7 +125,24 @@ internal object ItalianVoiceCommandParser {
 	private val resumePhrases = setOf(
 		listOf("riprendi"), listOf("continua"), listOf("play"), listOf("parti"), listOf("riparti"), listOf("avvia"),
 		listOf("fai", "play"),
-		listOf("avvia", "la", "riproduzione"), listOf("riavvia", "la", "riproduzione"),
+		listOf("avvia", "la", "riproduzione"),
+	)
+	private val restartPhrases = setOf(
+		listOf("ricomincia"), listOf("ricomincia", "da", "capo"), listOf("ricomincia", "da", "zero"),
+		listOf("ricomincia", "dalla", "inizio"), listOf("ricomincia", "il", "brano"), listOf("ricomincia", "il", "loop"),
+		listOf("riproduci", "dalla", "inizio"), listOf("riproduci", "da", "capo"), listOf("riproduci", "da", "zero"),
+		listOf("riproduci", "il", "brano", "dalla", "inizio"), listOf("riproduci", "il", "loop", "dalla", "inizio"),
+		listOf("riparti", "dalla", "inizio"), listOf("riprendi", "dalla", "inizio"),
+		listOf("parti", "dalla", "inizio"), listOf("avvia", "dalla", "inizio"),
+		listOf("dalla", "inizio"), listOf("alla", "inizio"), listOf("da", "capo"), listOf("da", "zero"),
+		listOf("riparti", "da", "capo"), listOf("riparti", "da", "zero"),
+		listOf("riavvia", "da", "capo"), listOf("riavvia", "da", "zero"), listOf("riavvia", "dalla", "inizio"),
+		listOf("riavvia", "il", "brano"), listOf("riavvia", "il", "loop"),
+		listOf("solo", "dalla", "inizio"), listOf("solamente", "dalla", "inizio"),
+		listOf("solo", "da", "capo"), listOf("solamente", "da", "capo"),
+		listOf("torna", "alla", "inizio"), listOf("torna", "a", "zero"), listOf("inizia", "da", "capo"),
+		listOf("fai", "ripartire", "dalla", "inizio"), listOf("riavvia", "la", "riproduzione"),
+		listOf("ripeti", "da", "capo"), listOf("ripeti", "dalla", "inizio"),
 	)
 	private val pausePhrases = setOf(
 		listOf("pausa"), listOf("ferma"), listOf("interrompi"), listOf("metti", "in", "pausa"),
@@ -114,13 +151,16 @@ internal object ItalianVoiceCommandParser {
 	private val articles = setOf("il", "lo", "la")
 	private val rateUnits = setOf("%", "percento", "per", "cento", "punto", "punti", "percentuale", "percentuali")
 	private val commandWords = increaseWords + decreaseWords + setWords + targetWords + relativeWords + rateWords +
-		articles + rateUnits + setOf("non") + playbackWords
+		articles + rateUnits + setOf("non", "e", "poi") + playbackWords
 
-	fun parse(raw: String): VoiceAction? {
+	fun parse(raw: String): VoicePlan? {
 		if (signedNumber.containsMatchIn(raw)) return null
 		val phrase = normalize(raw)
 		if (phrase.isEmpty()) return null
-		return parseAction(phrase.split(' '))
+		val clauses = chain.split(phrase)
+		if (clauses.size > 2 || clauses.any(String::isBlank)) return null
+		val actions = clauses.map { parseAction(it.trim().split(' ')) ?: return null }
+		return VoicePlan.validated(actions)
 	}
 
 	private fun normalize(raw: String): String = raw.trim().lowercase(Locale.ITALIAN)
@@ -132,13 +172,14 @@ internal object ItalianVoiceCommandParser {
 		.replace(spaces, " ").trim()
 
 	private fun parseAction(tokens: List<String>): VoiceAction? = when (tokens) {
+		in restartPhrases -> VoiceAction.Restart
 		in resumePhrases -> VoiceAction.Resume
 		in pausePhrases -> VoiceAction.StayPaused
 		else -> parseRate(tokens)
 	}
 
 	private fun parseRate(tokens: List<String>): VoiceAction? {
-		if (tokens.isEmpty() || tokens.any { it == "non" || it in playbackWords }) return null
+		if (tokens.isEmpty() || tokens.any { it == "non" || it == "e" || it == "poi" || it in playbackWords }) return null
 		val verbs = tokens.filter { it in increaseWords || it in decreaseWords || it in setWords }
 		if (verbs.size > 1) return null
 		val rateNounCount = tokens.count { it in rateWords }

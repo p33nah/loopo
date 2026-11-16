@@ -30,6 +30,8 @@ data class LoopRegion(
 		(bFrame - aFrame) / MAX_CROSSFADE_LOOP_DIVISOR,
 	)
 
+	fun restartFrame(): Long = if (enabled) aFrame else 0L
+
 	fun normalizePlaybackPosition(positionFrame: Long, sampleRate: Int): Long {
 		if (!enabled) return positionFrame
 		if (positionFrame < aFrame) return aFrame

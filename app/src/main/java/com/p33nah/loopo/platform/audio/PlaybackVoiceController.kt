@@ -152,6 +152,7 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 		if (!isCurrent()) return false
 		return when (action) {
 			VoiceAction.Resume -> service.voiceSession.requestVoicePlay(isCurrent)
+			VoiceAction.Restart -> service.voiceSession.requestVoiceRestart(isCurrent)
 			VoiceAction.StayPaused -> true
 			is VoiceAction.SetRate -> service.voiceSession.setVoiceRate(action.rate, isCurrent)
 			is VoiceAction.AdjustRate -> {

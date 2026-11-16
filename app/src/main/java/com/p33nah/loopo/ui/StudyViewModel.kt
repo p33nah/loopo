@@ -122,6 +122,13 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 		return result.isPlaying && result.error == null
 	}
 
+	internal suspend fun restartForVoice(isCurrent: () -> Boolean): Boolean {
+		if (state.value !is StudyUiState.Ready || !isCurrent()) return false
+		val restarted = playbackController.restartFromBeginning(isCurrent)
+		if (restarted) requestSaveSoon()
+		return restarted
+	}
+
 	internal suspend fun pause(shouldPause: () -> Boolean = { true }): Boolean = playbackController.pause(shouldPause)
 
 	internal suspend fun pauseWithPriorState(shouldPause: () -> Boolean = { true }): PlaybackPauseResult =

@@ -91,6 +91,10 @@ class PlaybackService : Service() {
 			if (isCurrent()) study.playForVoice() else false
 		}
 
+		suspend fun requestVoiceRestart(isCurrent: () -> Boolean): Boolean = runVoiceCommand {
+			if (isCurrent()) study.restartForVoice(isCurrent) else false
+		}
+
 		suspend fun setVoiceRate(rate: com.p33nah.loopo.domain.model.PlaybackRate, isCurrent: () -> Boolean): Boolean =
 			runVoiceCommand { if (isCurrent()) study.applyVoiceRate(rate) else false }
 

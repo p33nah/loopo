@@ -24,6 +24,7 @@ import com.p33nah.loopo.domain.model.SessionState
 import com.p33nah.loopo.domain.waveform.WaveformState
 import com.p33nah.loopo.domain.waveform.WaveformViewport
 import com.p33nah.loopo.platform.audio.PlaybackService
+import com.p33nah.loopo.ui.voice.VoicePauseOutcome
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
@@ -155,10 +156,11 @@ class MainActivityAudioIntegrationTest {
 				scenario.onActivity { session.requestPlay() }
 				waitFor("native playback start") { study.playbackState.value.isPlaying }
 
-				assertFalse(runBlocking { withTimeout(5_000) { session.pauseForVoice { false } } })
+				assertEquals(VoicePauseOutcome.Failed, runBlocking { withTimeout(5_000) { session.pauseForVoice { false } } })
 				assertTrue("An obsolete voice request must leave playback running", study.playbackState.value.isPlaying)
-				repeat(2) {
-					assertTrue("Native pause must succeed", runBlocking { withTimeout(5_000) { session.pauseForVoice() } })
+				repeat(2) { index ->
+					val expected = VoicePauseOutcome.Paused(wasPlaying = index == 0)
+					assertEquals("Voice pause reports prior play state", expected, runBlocking { withTimeout(5_000) { session.pauseForVoice() } })
 					assertFalse(study.playbackState.value.isPlaying)
 				}
 			}

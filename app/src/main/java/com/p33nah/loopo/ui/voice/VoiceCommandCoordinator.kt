@@ -24,16 +24,9 @@ internal sealed interface VoiceAction {
 	data class AdjustRate(val delta: RateDeltaPercent) : VoiceAction
 }
 
-internal class VoicePlan private constructor(val actions: List<VoiceAction>) {
-	companion object {
-		fun validated(actions: List<VoiceAction>): VoicePlan? {
-			val valid = actions.size == 1 ||
-				(actions.size == MAX_ACTIONS && (actions.firstOrNull() is VoiceAction.SetRate || actions.firstOrNull() is VoiceAction.AdjustRate) && actions.lastOrNull() == VoiceAction.Resume)
-			return if (valid) VoicePlan(actions.toList()) else null
-		}
-
-		private const val MAX_ACTIONS = 2
-	}
+internal sealed interface VoicePauseOutcome {
+	data object Failed : VoicePauseOutcome
+	data class Paused(val wasPlaying: Boolean) : VoicePauseOutcome
 }
 
 internal enum class VoiceStatus {
@@ -52,7 +45,7 @@ internal sealed interface TranscriptResult {
 }
 
 internal class VoiceCommandCoordinator(
-	private val pause: suspend () -> Boolean,
+	private val pause: suspend () -> VoicePauseOutcome,
 	private val transcribe: suspend (onListening: () -> Unit) -> TranscriptResult,
 	private val dispatch: suspend (VoiceAction) -> Boolean,
 	private val isCurrent: () -> Boolean = { true },
@@ -61,7 +54,9 @@ internal class VoiceCommandCoordinator(
 	suspend fun run(onStatus: (VoiceStatus) -> Unit = {}): VoiceStatus {
 		if (!isCurrent()) return VoiceStatus.Cancelled
 		onStatus(VoiceStatus.Pausing)
-		if (!pause() || !isCurrent()) return VoiceStatus.PauseFailed
+		val pauseOutcome = pause()
+		if (!isCurrent()) return VoiceStatus.Cancelled
+		if (pauseOutcome !is VoicePauseOutcome.Paused) return VoiceStatus.PauseFailed
 		currentCoroutineContext().ensureActive()
 		val transcript = transcribe { onStatus(VoiceStatus.Listening) }
 		currentCoroutineContext().ensureActive()
@@ -70,14 +65,17 @@ internal class VoiceCommandCoordinator(
 		return when (transcript) {
 			is TranscriptResult.Text -> {
 				onTranscript(transcript.value)
-				val plan = ItalianVoiceCommandParser.parse(transcript.value) ?: return VoiceStatus.Unrecognized
-				for (action in plan.actions) {
+				val action = ItalianVoiceCommandParser.parse(transcript.value) ?: return VoiceStatus.Unrecognized
+				currentCoroutineContext().ensureActive()
+				if (!isCurrent()) return VoiceStatus.Cancelled
+				onStatus(VoiceStatus.Applying)
+				if (!dispatch(action)) return VoiceStatus.Failed
+				if (pauseOutcome.wasPlaying && action != VoiceAction.StayPaused && action != VoiceAction.Resume) {
 					currentCoroutineContext().ensureActive()
 					if (!isCurrent()) return VoiceStatus.Cancelled
-					onStatus(VoiceStatus.Applying)
-					if (!dispatch(action)) return VoiceStatus.Failed
+					if (!dispatch(VoiceAction.Resume)) return VoiceStatus.Failed
 				}
-				if (plan.actions.last() == VoiceAction.StayPaused) VoiceStatus.Paused else VoiceStatus.CommandSent
+				if (action == VoiceAction.StayPaused) VoiceStatus.Paused else VoiceStatus.CommandSent
 			}
 			TranscriptResult.TimedOut -> VoiceStatus.TimedOut
 			TranscriptResult.Unavailable -> VoiceStatus.Unavailable
@@ -97,9 +95,8 @@ internal object ItalianVoiceCommandParser {
 	private val spaces = Regex("\\s+")
 	private val punctuation = Regex("[^\\p{L}\\p{N}%]+")
 	private val signedNumber = Regex("[-+](?=\\d)")
-	private val chain = Regex("\\be poi\\b")
 	private val increaseWords = setOf("aumenta", "accelera", "alza", "incrementa")
-	private val decreaseWords = setOf("diminuisci", "rallenta", "riduci")
+	private val decreaseWords = setOf("abbassa", "diminuisci", "rallenta", "riduci")
 	private val setWords = setOf("imposta", "porta", "metti", "regola")
 	private val targetWords = setOf("a", "al", "alla", "su", "sul", "sulla", "sullo", "sull")
 	private val relativeWords = setOf("di", "del")
@@ -117,16 +114,13 @@ internal object ItalianVoiceCommandParser {
 	private val articles = setOf("il", "lo", "la")
 	private val rateUnits = setOf("%", "percento", "per", "cento", "punto", "punti", "percentuale", "percentuali")
 	private val commandWords = increaseWords + decreaseWords + setWords + targetWords + relativeWords + rateWords +
-		articles + rateUnits + setOf("non", "e", "poi") + playbackWords
+		articles + rateUnits + setOf("non") + playbackWords
 
-	fun parse(raw: String): VoicePlan? {
+	fun parse(raw: String): VoiceAction? {
 		if (signedNumber.containsMatchIn(raw)) return null
 		val phrase = normalize(raw)
 		if (phrase.isEmpty()) return null
-		val clauses = chain.split(phrase)
-		if (clauses.size > 2 || clauses.any(String::isBlank)) return null
-		val actions = clauses.map { parseAction(it.trim().split(' ')) ?: return null }
-		return VoicePlan.validated(actions)
+		return parseAction(phrase.split(' '))
 	}
 
 	private fun normalize(raw: String): String = raw.trim().lowercase(Locale.ITALIAN)
@@ -144,7 +138,7 @@ internal object ItalianVoiceCommandParser {
 	}
 
 	private fun parseRate(tokens: List<String>): VoiceAction? {
-		if (tokens.isEmpty() || tokens.any { it == "non" || it == "e" || it == "poi" || it in playbackWords }) return null
+		if (tokens.isEmpty() || tokens.any { it == "non" || it in playbackWords }) return null
 		val verbs = tokens.filter { it in increaseWords || it in decreaseWords || it in setWords }
 		if (verbs.size > 1) return null
 		val rateNounCount = tokens.count { it in rateWords }

@@ -3,6 +3,7 @@ package com.p33nah.loopo.ui.voice
 import com.p33nah.loopo.domain.model.PlaybackRate
 import com.p33nah.loopo.domain.model.PlaybackRate.Companion.MAX_PERCENT
 import com.p33nah.loopo.domain.model.PlaybackRate.Companion.MIN_PERCENT
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import java.util.Locale
@@ -63,9 +64,11 @@ internal class VoiceCommandCoordinator(
 	private val pause: suspend () -> VoicePauseOutcome,
 	private val transcribe: suspend (onListening: () -> Unit) -> TranscriptResult,
 	private val dispatch: suspend (VoiceAction) -> Boolean,
+	private val interpret: suspend (String) -> VoicePlan? = ItalianVoiceCommandParser::parse,
 	private val isCurrent: () -> Boolean = { true },
 	private val onTranscript: (String) -> Unit = {},
 ) {
+	/** A non-cancellation exception from [interpret] reports [VoiceStatus.Failed]; cancellation propagates. */
 	suspend fun run(onStatus: (VoiceStatus) -> Unit = {}): VoiceStatus {
 		if (!isCurrent()) return VoiceStatus.Cancelled
 		onStatus(VoiceStatus.Pausing)
@@ -80,7 +83,16 @@ internal class VoiceCommandCoordinator(
 		return when (transcript) {
 			is TranscriptResult.Text -> {
 				onTranscript(transcript.value)
-				val plan = ItalianVoiceCommandParser.parse(transcript.value) ?: return VoiceStatus.Unrecognized
+				val plan = try {
+					interpret(transcript.value)
+				} catch (cancelled: CancellationException) {
+					throw cancelled
+				} catch (_: Exception) {
+					return VoiceStatus.Failed
+				}
+				currentCoroutineContext().ensureActive()
+				if (!isCurrent()) return VoiceStatus.Cancelled
+				plan ?: return VoiceStatus.Unrecognized
 				for (action in plan.actions) {
 					currentCoroutineContext().ensureActive()
 					if (!isCurrent()) return VoiceStatus.Cancelled

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools==82.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loopo-functiongemma"
+version = "0.1.0"
+description = "Reproducible FunctionGemma command interpretation experiments for Loopo"
+requires-python = ">=3.11,<3.14"
+
+[project.optional-dependencies]
+ml = [
+    "torch==2.10.0",
+    "transformers==5.3.0",
+    "datasets==4.5.0",
+    "trl==0.29.0",
+    "peft==0.18.1",
+    "accelerate==1.13.0",
+    "tensorboard==2.20.0",
+    "sentencepiece==0.2.1",
+]
+test = ["pytest==9.0.2", "nbformat==5.10.4"]
+
+[tool.setuptools.packages.find]
+include = ["loopo_functiongemma*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

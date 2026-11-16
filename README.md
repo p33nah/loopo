@@ -19,3 +19,5 @@ Run `gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidT
 See [Testing](docs/testing.md), [architecture](docs/architecture.md), [release readiness](docs/release-readiness.md), and [release procedure](docs/releasing.md) for commands, evidence, and remaining hardware checks. GitHub Actions runs automated checks on pull requests. The release workflow signs an APK and creates a draft only after verification.
 
 Read [Contributing](CONTRIBUTING.md) before changing the code and [Security](SECURITY.md) to report a vulnerability. Loopo uses the [MIT license](LICENSE). Dependencies retain their [upstream licenses](THIRD_PARTY_NOTICES.md).
+
+See the [Italian FunctionGemma experiment](ml/functiongemma/README.md) for the voice-command benchmark and Colab notebook.

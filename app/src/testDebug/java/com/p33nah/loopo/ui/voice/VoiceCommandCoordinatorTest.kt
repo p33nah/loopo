@@ -3,6 +3,7 @@ package com.p33nah.loopo.ui.voice
 import com.p33nah.loopo.domain.model.PlaybackRate
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.Continuation
@@ -57,6 +58,90 @@ class VoiceCommandCoordinatorTest {
 		)
 		assertEquals(VoiceStatus.CommandSent, coordinator.run())
 		assertEquals(listOf("pause", "rate-70", "play"), events)
+	}
+
+	@Test
+	fun optInInterpreterRunsAfterCaptureAndDispatchesItsValidatedPlanInOrder() = runBlocking {
+		val events = mutableListOf<String>()
+		val plan = VoicePlan.validated(listOf(VoiceAction.SetRate(PlaybackRate(70)), VoiceAction.Restart))!!
+		val result = VoiceCommandCoordinator(
+			pause = { events += "pause"; VoicePauseOutcome.Paused(true) },
+			transcribe = { events += "transcribe"; TranscriptResult.Text("ricomincia") },
+			interpret = { transcript ->
+				assertEquals("ricomincia", transcript)
+				events += "interpret"
+				plan
+			},
+			dispatch = { action ->
+				events += when (action) {
+					is VoiceAction.SetRate -> "rate-${action.rate.percent}"
+					VoiceAction.Restart -> "restart"
+					VoiceAction.Resume -> "resume"
+					VoiceAction.StayPaused -> "stay-paused"
+					is VoiceAction.AdjustRate -> "adjust-rate"
+				}
+				true
+			},
+		).run()
+
+		assertEquals(VoiceStatus.CommandSent, result)
+		assertEquals(
+			listOf("pause", "transcribe", "interpret", "rate-70", "restart"),
+			events,
+		)
+	}
+
+	@Test
+	fun staleSessionAfterOptInInferenceCannotDispatchTheReturnedPlan() = runBlocking {
+		var current = true
+		var dispatches = 0
+		val result = VoiceCommandCoordinator(
+			pause = { VoicePauseOutcome.Paused(false) },
+			transcribe = { TranscriptResult.Text("riprendi") },
+			interpret = {
+				current = false
+				VoicePlan.validated(listOf(VoiceAction.Resume))
+			},
+			dispatch = { dispatches++; true },
+			isCurrent = { current },
+		).run()
+
+		assertEquals(VoiceStatus.Cancelled, result)
+		assertEquals(0, dispatches)
+	}
+
+	@Test
+	fun optInInterpreterFailureReportsFailureWithoutDispatch() = runBlocking {
+		var dispatches = 0
+		val result = VoiceCommandCoordinator(
+			pause = { VoicePauseOutcome.Paused(false) },
+			transcribe = { TranscriptResult.Text("riprendi") },
+			interpret = { throw IllegalStateException("runtime unavailable") },
+			dispatch = { dispatches++; true },
+		).run()
+
+		assertEquals(VoiceStatus.Failed, result)
+		assertEquals(0, dispatches)
+	}
+
+	@Test
+	fun coroutineCancellationDuringOptInInferencePreventsDispatch() = runBlocking {
+		val inferenceStarted = CompletableDeferred<Unit>()
+		val inferenceResult = CompletableDeferred<VoicePlan?>()
+		var dispatches = 0
+		val coordinator = VoiceCommandCoordinator(
+			pause = { VoicePauseOutcome.Paused(false) },
+			transcribe = { TranscriptResult.Text("riprendi") },
+			interpret = { inferenceStarted.complete(Unit); inferenceResult.await() },
+			dispatch = { dispatches++; true },
+		)
+		val job = launch(start = CoroutineStart.UNDISPATCHED) { coordinator.run() }
+
+		inferenceStarted.await()
+		job.cancelAndJoin()
+
+		assertTrue(job.isCancelled)
+		assertEquals(0, dispatches)
 	}
 
 	@Test

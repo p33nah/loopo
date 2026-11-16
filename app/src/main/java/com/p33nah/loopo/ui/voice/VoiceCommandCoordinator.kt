@@ -96,7 +96,7 @@ internal object ItalianVoiceCommandParser {
 	private val punctuation = Regex("[^\\p{L}\\p{N}%]+")
 	private val signedNumber = Regex("[-+](?=\\d)")
 	private val increaseWords = setOf("aumenta", "accelera", "alza", "incrementa")
-	private val decreaseWords = setOf("diminuisci", "rallenta", "riduci")
+	private val decreaseWords = setOf("abbassa", "diminuisci", "rallenta", "riduci")
 	private val setWords = setOf("imposta", "porta", "metti", "regola")
 	private val targetWords = setOf("a", "al", "alla", "su", "sul", "sulla", "sullo", "sull")
 	private val relativeWords = setOf("di", "del")

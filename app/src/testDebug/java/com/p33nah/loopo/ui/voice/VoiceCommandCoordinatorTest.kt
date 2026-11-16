@@ -267,6 +267,34 @@ class ItalianVoiceCommandParserTest {
 	}
 
 	@Test
+	fun acceptsRaiseAndLowerSynonymsForAbsoluteSpeed() {
+		val cases = mapOf(
+			"abbassa la velocità a 70" to VoiceAction.SetRate(PlaybackRate(70)),
+			"alza la velocità a 80" to VoiceAction.SetRate(PlaybackRate(80)),
+			"aumenta la velocità a 80" to VoiceAction.SetRate(PlaybackRate(80)),
+			"diminuisci la velocità a 70" to VoiceAction.SetRate(PlaybackRate(70)),
+		)
+		for ((phrase, expected) in cases) {
+			assertEquals(phrase, expected, ItalianVoiceCommandParser.parse(phrase))
+		}
+
+		val increase = VoiceAction.AdjustRate(RateDeltaPercent.from(5)!!)
+		val decrease = VoiceAction.AdjustRate(RateDeltaPercent.from(-5)!!)
+		for (phrase in listOf(
+			"alza la velocità del cinque per cento",
+			"aumenta la velocità del cinque per cento",
+		)) {
+			assertEquals(phrase, increase, ItalianVoiceCommandParser.parse(phrase))
+		}
+		for (phrase in listOf(
+			"abbassa la velocità del cinque per cento",
+			"diminuisci la velocità del cinque per cento",
+		)) {
+			assertEquals(phrase, decrease, ItalianVoiceCommandParser.parse(phrase))
+		}
+	}
+
+	@Test
 	fun parsesRelativeSpeedInEitherOrderAndKeepsPercentUnit() {
 		val increase = VoiceAction.AdjustRate(RateDeltaPercent.from(5)!!)
 		val decrease = VoiceAction.AdjustRate(RateDeltaPercent.from(-10)!!)

@@ -37,6 +37,11 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.coroutines.coroutineContext
 
+internal sealed interface PlaybackPauseResult {
+	data object Failed : PlaybackPauseResult
+	data class Paused(val wasPlaying: Boolean) : PlaybackPauseResult
+}
+
 class AndroidPlaybackController(context: Context) {
 	private val appContext = context.applicationContext
 	private val decoderFactory = AndroidPcmDecoderFactory(appContext)
@@ -223,6 +228,13 @@ class AndroidPlaybackController(context: Context) {
 	suspend fun pause(shouldPause: () -> Boolean = { true }): Boolean = transitionMutex.withLock {
 		if (!shouldPause()) return@withLock false
 		pauseUnsafe(abandonFocus = true)
+	}
+
+	internal suspend fun pauseWithPriorState(shouldPause: () -> Boolean = { true }): PlaybackPauseResult = transitionMutex.withLock {
+		if (!shouldPause()) return@withLock PlaybackPauseResult.Failed
+		val wasPlaying = mutableState.value.isPlaying
+		if (pauseUnsafe(abandonFocus = true)) PlaybackPauseResult.Paused(wasPlaying)
+		else PlaybackPauseResult.Failed
 	}
 
 	fun reportBackgroundPlaybackUnavailable() {

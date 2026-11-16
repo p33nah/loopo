@@ -14,7 +14,7 @@ class WakeCommandCoordinatorTest {
 	fun closesWakeCaptureBeforePausingAndStartingCommandRecognition() = runBlocking {
 		val events = mutableListOf<String>()
 		val voice = VoiceCommandCoordinator(
-			pause = { events += "pause"; true },
+			pause = { events += "pause"; VoicePauseOutcome.Paused(false) },
 			transcribe = {
 				assertEquals("pause", events.last())
 				events += "command recognition"
@@ -42,7 +42,7 @@ class WakeCommandCoordinatorTest {
 		var pauseRuns = 0
 		var dispatchRuns = 0
 		val voice = VoiceCommandCoordinator(
-			pause = { pauseRuns++; true },
+			pause = { pauseRuns++; VoicePauseOutcome.Paused(false) },
 			transcribe = { TranscriptResult.Text("riprendi") },
 			dispatch = { dispatchRuns++; true },
 		)
@@ -116,7 +116,7 @@ class WakeCommandCoordinatorTest {
 		var wakeCount = 0
 		var commandCount = 0
 		val command = VoiceCommandCoordinator(
-			pause = { playing = false; true },
+			pause = { val wasPlaying = playing; playing = false; VoicePauseOutcome.Paused(wasPlaying) },
 			transcribe = { TranscriptResult.Text("riprendi") },
 			dispatch = { parsed ->
 				commandCount++
@@ -141,7 +141,7 @@ class WakeCommandCoordinatorTest {
 	fun aWakeTurnDispatchesAtMostOneCommand() = runBlocking {
 		var commandCount = 0
 		val command = VoiceCommandCoordinator(
-			pause = { true },
+			pause = { VoicePauseOutcome.Paused(false) },
 			transcribe = { TranscriptResult.Text("pausa") },
 			dispatch = { commandCount++; true },
 		)

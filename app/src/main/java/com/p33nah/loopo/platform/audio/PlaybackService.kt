@@ -23,6 +23,7 @@ import com.p33nah.loopo.R
 import com.p33nah.loopo.ui.StudyUiState
 import com.p33nah.loopo.ui.StudyViewModel
 import com.p33nah.loopo.ui.voice.VoiceEdgeGlowOverlay
+import com.p33nah.loopo.ui.voice.VoicePauseOutcome
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -97,11 +98,17 @@ class PlaybackService : Service() {
 		suspend fun setVoiceRate(rate: com.p33nah.loopo.domain.model.PlaybackRate, isCurrent: () -> Boolean): Boolean =
 			runVoiceCommand { if (isCurrent()) study.applyVoiceRate(rate) else false }
 
-		suspend fun pauseForVoice(isCurrent: () -> Boolean = { true }): Boolean = withContext(Dispatchers.Main.immediate) {
-			val result = CompletableDeferred<Boolean>()
+		suspend fun pauseForVoice(isCurrent: () -> Boolean = { true }): VoicePauseOutcome = withContext(Dispatchers.Main.immediate) {
+			val result = CompletableDeferred<VoicePauseOutcome>()
 			val request = currentCoroutineContext()
 			val job = runCommand {
-				result.complete(study.pause { request.isActive && isCurrent() })
+				val pauseResult = study.pauseWithPriorState { request.isActive && isCurrent() }
+				result.complete(
+					when (pauseResult) {
+						com.p33nah.loopo.data.audio.PlaybackPauseResult.Failed -> VoicePauseOutcome.Failed
+						is com.p33nah.loopo.data.audio.PlaybackPauseResult.Paused -> VoicePauseOutcome.Paused(pauseResult.wasPlaying)
+					},
+				)
 			}
 			job.invokeOnCompletion { failure ->
 				if (failure != null) result.completeExceptionally(failure)

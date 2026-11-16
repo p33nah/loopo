@@ -2,36 +2,50 @@
 
 Use JDK 17, SDK Platform 37.0, Build Tools 36.0.0, NDK 27.0.12077973, and CMake 3.22.1. The Gradle wrapper pins Gradle 9.9.0 and verifies the distribution checksum. Test dependencies are pinned in `app/build.gradle.kts`. Playback accepts mono or stereo PCM at 8 to 192 kHz and rejects unsupported configurations before native allocation.
 
-Run JVM tests, lint, debug and release packaging, and instrumentation APK compilation on Windows:
+Run JVM tests, lint, debug and release packaging, and instrumentation APK compilation in Ubuntu WSL with the Linux toolchain described below:
 
-```powershell
-.\gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleRelease assembleDebugAndroidTest --console=plain
-python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk --allow-model
-python scripts/verify_apk.py app/build/outputs/apk/release/app-release-unsigned.apk
+```sh
+bash gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease assembleDebugAndroidTest --console=plain
+python3 scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk --allow-model
+python3 scripts/verify_apk.py app/build/outputs/apk/release/app-release-unsigned.apk
 ```
 
 The release APK contains the Vosk runtime but must not contain `loopo-vosk-it-0.22.zip`. The debug build can bundle the official [`vosk-model-small-it-0.22.zip`](https://alphacephei.com/vosk/models/vosk-model-small-it-0.22.zip) for testing; Gradle verifies SHA-256 `9ec65e75861d1c6c2e457cccd932705340dcdf233f5b239f00733b4de0bf3267`:
 
-```powershell
-.\gradlew.bat assembleDebug '-PloopoWakeModel=C:/path/to/vosk-model-small-it-0.22.zip' --console=plain
-python scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk --allow-model
+```sh
+bash gradlew assembleDebug '-PloopoWakeModel=/mnt/c/path/to/vosk-model-small-it-0.22.zip' --console=plain
+python3 scripts/verify_apk.py app/build/outputs/apk/debug/app-debug.apk --allow-model
 ```
 
-The acoustic fixture strategy uses live, consenting Italian speakers on physical devices rather than storing voice recordings in the repository. Record only the prompt, device/room condition, transcript shown by Loopo, resulting rate/play state, and pass/fail; do not retain raw audio. At minimum, repeat **Ehi Lupo** three times, then test **riprendi**, **pausa**, **aumenta la velocità a ottanta**, **aumenta del cinque per cento la velocità**, **rallenta al settanta e poi riprendi**, an unknown phrase, and an out-of-range request. Repeat in quiet and ordinary room noise, at normal speaking distance and with a second speaker when possible. This is manual acoustic evidence; parser and action-plan cases remain deterministic automated tests.
+The acoustic fixture strategy uses live, consenting Italian speakers on physical devices rather than storing voice recordings in the repository. Record only the prompt, device/room condition, transcript shown by Loopo, resulting rate/play state, and pass/fail; do not retain raw audio. At minimum, repeat **Ehi Lupo** three times, then test **riprendi**, **pausa**, **aumenta la velocità a ottanta**, **alza la velocità a ottanta**, **diminuisci la velocità a settanta**, **abbassa la velocità a settanta**, **aumenta del cinque per cento la velocità**, **diminuisci la velocità del cinque per cento**, **rallenta al settanta**, the supported compound phrase **rallenta al settanta e poi riprendi**, an unknown phrase, and an out-of-range request. Repeat in quiet and ordinary room noise, at normal speaking distance and with a second speaker when possible. This is manual acoustic evidence; parser and action behavior remain deterministic automated tests.
 
 For a debug device check, install the model-enabled APK, open a track, and confirm voice is off without a permission prompt. Tap the wolf-and-microphone mark and grant microphone access. When Android opens **Display over other apps**, grant access to test background glow. Verify the toggle animation and passive **In ascolto per Ehi Lupo…** state. Confirm that wake listening shows the marker A glow without the board outline. With the release APK, verify first-activation download progress, cancel, retry, successful install, then enable voice again in airplane mode to confirm cached offline use. Check insufficient storage and invalid/missing model errors if available.
 
 On the study screen, confirm the Fade slider, dropout count, and latency estimate are not visible. Confirm loop A/B, seek, rate controls, and playback error messages remain available. This is a temporary presentation change; the fade state and diagnostics remain active internally.
 
-Say **Ehi Lupo**. Wait for **Ti ascolto…**, the marker B edge glow, and the board outline. Then try **riprendi**, **pausa**, **velocità al settanta**, **aumenta a 80 la velocità**, **aumenta la velocità a 80**, **aumenta del 5% la velocità**, and **aumenta la velocità del 5%**. Starting at 70%, confirm that either relative word order selects 75% and leaves playback paused. Starting at 75%, confirm that either absolute word order selects 80% and leaves playback paused. Note the exact recognized transcript in the feedback if a command is rejected.
+Say **Ehi Lupo**. Wait for **Ti ascolto…**, the marker B edge glow, and the board outline. Then try **riprendi**, **pausa**, **velocità al settanta**, **aumenta a 80 la velocità**, **aumenta la velocità a 80**, **alza la velocità a 80**, **diminuisci la velocità a 70**, **abbassa la velocità a 70**, **aumenta del 5% la velocità**, **aumenta la velocità del 5%**, and **diminuisci la velocità del 5%**. While a track is playing, confirm that relative adjustments change the rate and resume playback. Starting at 75% while paused, confirm that absolute rate commands select the requested value and remain paused. Confirm that **velocità al settanta e poi riprendi** remains an accepted explicit chain. Confirm that a rate-only command resumes playback after wake only when playback was active beforehand. Note the exact recognized transcript in the feedback if a command is rejected.
 
 With loop mode enabled and A set after frame 0, seek into the loop and say **ricomincia da capo**. Confirm playback starts from A. Disable loop mode without moving A, seek into the track, and say **riproduci dall'inizio**. Confirm playback starts from 0:00. Also try **dall'inizio**, **da capo**, **ricomincia**, **riparti da zero**, and **riavvia la riproduzione**. Confirm that **riparti**, **riprendi**, **continua**, and **play** resume from the current position.
 
-Say **velocità al settanta e poi riprendi**. Confirm that Play starts after the rate transition. Confirm that speed-only commands stay paused. Try an unknown phrase, a recognition failure or timeout, and an out-of-range relative result. Confirm that playback stays paused and that the board shows an error and the recognized text when available. Confirm that the top status returns to passive wake listening and the board result clears after four seconds. A new command or cancellation clears it sooner. The outline must disappear when recognition ends.
+When a rate command follows wake listening, confirm playback resumes only if it was active before the wake; if it was already paused, confirm it stays paused. Confirm that **velocità al settanta e poi riprendi** resumes after the rate change. Say **pausa** during a voice turn and confirm playback stays paused. Try an unknown phrase, a recognition failure or timeout, and an out-of-range relative result. Confirm that playback stays paused and that the board shows an error and the recognized text when available. Confirm that the top status returns to passive wake listening and the board result clears after four seconds. A new command or cancellation clears it sooner. The outline must disappear when recognition ends.
 
 Repeat after pressing Home with overlay access granted and the display awake. During wake and command capture, confirm that the A and B edge glows appear over another app and do not intercept its touch input. Revoke overlay access, return to Loopo, and confirm that voice continues with an in-app glow and the background-access notice. Repeat with the display locked and awake; record whether the device keyguard covers the glow. Do not bypass the lock screen. Turn the display off and confirm Loopo does not wake or keep it on; no screen-off glow is expected. Confirm **riprendi** starts playback from each state. Confirm that manual controls and notification Pause cancel an active turn. Change tracks during a turn and confirm that the stale turn cannot resume playback. Close the track and confirm that capture stops. Toggle voice off and confirm the microphone indicator and foreground service stop when playback is paused. Repeat with speaker and Bluetooth where available. Voice permission and Vosk code are expected in release; only the large model archive is excluded. A compiled instrumentation APK is not device evidence.
 
 On Linux and macOS, use `bash gradlew` instead of `gradlew.bat`. JVM boundary tests use Robolectric, not a physical device. Robolectric downloads an Android runtime on the first run and cannot prove vendor MediaCodec or Oboe behavior. See the [Robolectric setup](https://robolectric.org/getting-started/) for its JDK access flags.
+
+
+### WSL Android toolchain and device install
+
+Run Gradle builds and native checks in Ubuntu WSL with a Linux JDK 17 and Linux Android SDK. A Windows SDK mounted under `/mnt/c` contains `.exe` build tools; Gradle in WSL can report Build Tools as corrupted because it expects Linux tools such as `aapt`. On this machine, login shells load `JAVA_HOME` and `ANDROID_HOME` from `.bashrc`; the JDK and SDK live under `$HOME/.local/share/loopo-toolchain/jdk17` and `$HOME/.local/share/android-sdk`. The SDK packages required by this project are `platforms;android-37.0`, `build-tools;36.0.0`, `ndk;27.0.12077973`, and `cmake;3.22.1`. If provisioning another WSL environment, install the Linux command-line tools from [Android Developers](https://developer.android.com/studio/install), then install those packages with its SDK manager. If the app was previously installed from Windows, copy the existing Windows debug keystore to WSL's `~/.android/debug.keystore` before the first WSL debug build to preserve its install signature and app data; keep the keystore outside the repository.
+
+For a physical install when Linux `adb` is unavailable, call the Windows SDK bridge from WSL and convert the APK path for Windows:
+
+```sh
+WIN_LOCALAPPDATA="$(cmd.exe /C echo %LOCALAPPDATA% | tr -d '\r')"
+WIN_ANDROID_SDK="$(wslpath -u "$WIN_LOCALAPPDATA")/Android/Sdk"
+"$WIN_ANDROID_SDK/platform-tools/adb.exe" devices -l
+"$WIN_ANDROID_SDK/platform-tools/adb.exe" install -r "$(wslpath -w app/build/outputs/apk/debug/app-debug.apk)"
+```
 
 Run the host C++ checks with a C++20 compiler and CMake:
 
@@ -41,7 +55,7 @@ cmake --build native-tests/build --parallel 2
 ctest --test-dir native-tests/build --output-on-failure
 ```
 
-Repeat in a separate build directory with `-DLOOPO_SANITIZER=thread` for SPSC concurrency checks. AddressSanitizer and ThreadSanitizer are separate runs. These tests compile the actual ring and time-stretcher headers without Oboe. They verify sample behavior, not physical output latency or glitch freedom.
+Repeat in a separate build directory with `-DLOOPO_SANITIZER=thread` for SPSC concurrency checks. AddressSanitizer and ThreadSanitizer are separate runs. Under WSL, ThreadSanitizer can fail at startup with `FATAL: ThreadSanitizer: unexpected memory mapping`; treat that as an environment limitation and use the Linux CI sanitizer result. These tests compile the actual ring and time-stretcher headers without Oboe. They verify sample behavior, not physical output latency or glitch freedom.
 
 Connect a test Android device or start an emulator, then run:
 

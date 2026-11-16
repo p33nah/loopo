@@ -16,6 +16,7 @@ This file is the persistent entry point. Other Markdown files are references rea
 2. Follow the branch workflow below. Preserve existing changes. If the current checkout is dirty or belongs to another task, use a clean isolated worktree from updated `main` rather than stashing or resetting another task's work.
 3. Add behavior tests at the owning boundary and make the smallest change that meets the criteria. Keep one owner for playback state and one for study/session state. Extract deterministic logic when it enables a concrete regression test; avoid speculative interfaces.
 4. Run the relevant checks from `docs/testing.md`. For audio, parser, persistence, JNI, or build changes, run the full JVM suite, native sanitizer suites, lint, APK packaging checks, and Android instrumentation as applicable. A compiled test APK is not an executed integration test. Report unavailable hardware or tools explicitly.
+   Run Android builds and checks in WSL with the Linux JDK/SDK setup in `docs/testing.md`; use the Windows `adb.exe` bridge from WSL for device installs when needed.
 5. Review the actual diff and test outputs. Push the branch, open or update one PR for the issue, link its closing reference, and inspect CI on the current head. Fix failures attributable to the change. Keep unresolved checks visible in the PR.
 6. Finish with the PR link, verified behavior, and remaining risks. Update durable architecture or release evidence when the task changes it. Keep the issue open until its fix is merged, and leave merging to the owner.
 

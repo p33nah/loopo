@@ -25,6 +25,11 @@ internal sealed interface VoiceAction {
 	data class AdjustRate(val delta: RateDeltaPercent) : VoiceAction
 }
 
+internal sealed interface VoicePauseOutcome {
+	data object Failed : VoicePauseOutcome
+	data class Paused(val wasPlaying: Boolean) : VoicePauseOutcome
+}
+
 internal class VoicePlan private constructor(val actions: List<VoiceAction>) {
 	companion object {
 		fun validated(actions: List<VoiceAction>): VoicePlan? {
@@ -55,7 +60,7 @@ internal sealed interface TranscriptResult {
 }
 
 internal class VoiceCommandCoordinator(
-	private val pause: suspend () -> Boolean,
+	private val pause: suspend () -> VoicePauseOutcome,
 	private val transcribe: suspend (onListening: () -> Unit) -> TranscriptResult,
 	private val dispatch: suspend (VoiceAction) -> Boolean,
 	private val isCurrent: () -> Boolean = { true },
@@ -64,7 +69,9 @@ internal class VoiceCommandCoordinator(
 	suspend fun run(onStatus: (VoiceStatus) -> Unit = {}): VoiceStatus {
 		if (!isCurrent()) return VoiceStatus.Cancelled
 		onStatus(VoiceStatus.Pausing)
-		if (!pause() || !isCurrent()) return VoiceStatus.PauseFailed
+		val pauseOutcome = pause()
+		if (!isCurrent()) return VoiceStatus.Cancelled
+		if (pauseOutcome !is VoicePauseOutcome.Paused) return VoiceStatus.PauseFailed
 		currentCoroutineContext().ensureActive()
 		val transcript = transcribe { onStatus(VoiceStatus.Listening) }
 		currentCoroutineContext().ensureActive()
@@ -79,6 +86,13 @@ internal class VoiceCommandCoordinator(
 					if (!isCurrent()) return VoiceStatus.Cancelled
 					onStatus(VoiceStatus.Applying)
 					if (!dispatch(action)) return VoiceStatus.Failed
+				}
+				val rateOnly = plan.actions.size == 1 &&
+					(plan.actions.single() is VoiceAction.SetRate || plan.actions.single() is VoiceAction.AdjustRate)
+				if (pauseOutcome.wasPlaying && rateOnly) {
+					currentCoroutineContext().ensureActive()
+					if (!isCurrent()) return VoiceStatus.Cancelled
+					if (!dispatch(VoiceAction.Resume)) return VoiceStatus.Failed
 				}
 				if (plan.actions.last() == VoiceAction.StayPaused) VoiceStatus.Paused else VoiceStatus.CommandSent
 			}
@@ -102,7 +116,7 @@ internal object ItalianVoiceCommandParser {
 	private val signedNumber = Regex("[-+](?=\\d)")
 	private val chain = Regex("\\be poi\\b")
 	private val increaseWords = setOf("aumenta", "accelera", "alza", "incrementa")
-	private val decreaseWords = setOf("diminuisci", "rallenta", "riduci")
+	private val decreaseWords = setOf("abbassa", "diminuisci", "rallenta", "riduci")
 	private val setWords = setOf("imposta", "porta", "metti", "regola")
 	private val targetWords = setOf("a", "al", "alla", "su", "sul", "sulla", "sullo", "sull")
 	private val relativeWords = setOf("di", "del")

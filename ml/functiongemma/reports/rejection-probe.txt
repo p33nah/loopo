@@ -7,10 +7,10 @@ reject:ambiguous | contradictory_intent | Si continua o si ricomincia da capo?
 reject:ambiguous | contradictory_intent | Meglio continuare o aspettare in pausa?
 reject:ambiguous | contradictory_intent | Potresti riavviarla, magari no
 reject:ambiguous | contradictory_intent | Lascia che decida dopo se farla partire
-reject:ambiguous | unspecified_direction | Abbassa al centonove percento
-reject:ambiguous | unspecified_direction | Incrementa fino al cinquantasei percento
+reject:ambiguous | unspecified_direction | Abbassa di quanto, avevamo un numero?
+reject:ambiguous | unspecified_direction | Di cinquantasei o fino a cinquantasei, come dicevi?
 reject:ambiguous | unspecified_direction | Riparti da circa due terzi del pezzo
-reject:ambiguous | unspecified_direction | Portami più su, al trenta percento
+reject:ambiguous | unspecified_direction | Decido dopo se portare la velocità su o giù
 reject:negated | prohibition | Non voglio sentire il pezzo ripartire da capo
 reject:negated | prohibition | Per favore, niente riavvio
 reject:negated | prohibition | Non farlo tornare a suonare
@@ -46,4 +46,4 @@ set_rate:96+restart | clear_request | Porta la velocità al novantasei percento,
 adjust_rate:-14+resume | clear_request | Riduci di quattordici punti e riprendi a suonare
 adjust_rate:3+restart | clear_request | Alza la velocità di tre punti e rimetti il pezzo da capo
 set_rate:106 | clear_request | Metti il tempo al centosei per cento e basta
-resume | clear_request | audio avanti da qui riprendi
+set_rate:109 | clear_request | Abbassa al centonove percento

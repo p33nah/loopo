@@ -15,10 +15,10 @@ reject:ambiguous | playback_choice | Vado avanti o torno al punto iniziale?
 resume | playback_choice | Mandalo avanti da dove si è fermato
 restart | playback_choice | Torna all'inizio e fai partire il brano
 stay_paused | playback_choice | Tienilo fermo in pausa per il momento
-reject:ambiguous | directional_target | Alza al quarantotto per cento
-reject:ambiguous | directional_target | Scendi all'ottantasei per cento
-reject:ambiguous | directional_target | Aumenta fino al settantadue per cento
-reject:ambiguous | directional_target | Cala fino al centotrentasei per cento
+reject:ambiguous | directional_target | Alza la velocità al quarantotto, oppure di quarantotto?
+reject:ambiguous | directional_target | Scendi o sali all'ottantasei per cento, devo ancora decidere
+reject:ambiguous | directional_target | Avevamo detto di aumentare del settantadue o fino al settantadue?
+reject:ambiguous | directional_target | Cala fino a quel punto percento
 reject:ambiguous | directional_target | Riprendi dal settantasette percento del pezzo
 reject:ambiguous | directional_target | Ricomincia all'incirca a un terzo
 set_rate:72 | directional_target | Regola la velocità al settantadue per cento

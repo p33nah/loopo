@@ -10,17 +10,23 @@ not pause playback or capture a wake command.
 
 ## Export a merged Hugging Face checkpoint
 
-Start with a merged Hugging Face directory containing the model config, safetensors weights, the
-matching tokenizer files (`tokenizer.json` and preferably `tokenizer.model`), and the model's
-FunctionGemma chat template. `litert-torch export_hf` accepts a local model directory as well as a
-Hub identifier and packages LiteRT-LM bundles. The following is the current released-toolchain
-candidate, not yet verified against Loopo's custom merged checkpoint:
+Use `python -m loopo_functiongemma.model merge <adapter-dir> <merged-dir>` in the experiment
+environment with access to the pinned base model. The merge saves the weights, tokenizer, and
+FunctionGemma chat template. Run the export in a separate Python 3.13 environment. This combination
+converted the `rejection-02` checkpoint on Colab using CPU. LiteRT Torch imports TensorFlow during
+conversion. Builder 0.18.0 supplies the `TfLiteModelType` API required by this exporter.
 
 ```sh
-python -m venv .venv
-. .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install litert-torch==0.10.0
+python -m pip install torch==2.10.0 torchvision==0.25.0 \
+  --index-url https://download.pytorch.org/whl/cpu
+python -m pip install litert-torch==0.10.0 litert-lm-builder==0.18.0 tensorflow-cpu==2.21.0
+
+cat > functiongemma.textproto <<'PROTO'
+start_token { token_ids { ids: 2 } }
+stop_tokens { token_str: "<end_of_turn>" }
+stop_tokens { token_str: "<start_function_response>" }
+llm_model_type { function_gemma {} }
+PROTO
 
 litert-torch export_hf \
   --model=/path/to/merged-functiongemma-hf \
@@ -31,27 +37,21 @@ litert-torch export_hf \
   --single_token_embedder=True \
   --prefill_lengths=128 \
   --cache_length=1024 \
-  --quantization_recipe=dynamic_wi8_afp32
+  --quantization_recipe=dynamic_wi8_afp32 \
+  --use_jinja_template=False \
+  --litert_lm_model_type_override=function_gemma \
+  --litert_lm_llm_metadata_override=functiongemma.textproto \
+  --tokenizer_path_override=/path/to/merged-functiongemma-hf/tokenizer.model
 ```
 
-Inspect the bundle with Google's [LiteRT-LM builder](https://github.com/google-ai-edge/LiteRT-LM/blob/v0.18.0/docs/litert_lm_builder.md).
-Use the produced bundle path in these commands.
+Check the bundle with Google's [LiteRT-LM builder](https://github.com/google-ai-edge/LiteRT-LM/blob/v0.18.0/docs/litert_lm_builder.md).
 
 ```sh
-python -m pip install litert-lm-builder==0.18.0
-litert-lm-builder unpack --input /path/to/model.litertlm --output out/unpacked
+litert-lm-builder unpack --input out/functiongemma/model.litertlm --output out/unpacked
 ```
 
-Before using the output, confirm its extracted model metadata declares `function_gemma`, its start token
-matches the checkpoint (Google's stock checkpoint uses token id 2), and its stop tokens include
-`<end_of_turn>` and `<start_function_response>`. `<end_function_call>` closes the generated tool-call
-block; `<start_function_response>` is the additional inference stop sequence. Load the bundle with
-LiteRT-LM and compare prompts
-rendered by the merged checkpoint's template to prompts rendered by the Android runtime. FunctionGemma
-tool declarations have had template-versus-runtime formatting differences, so a successful export
-alone does not establish correct tool prompting. Run the same paired literal and paraphrase routing
-set on CPU and on each target phone; do not treat generation speed or a correct tool name as evidence
-that its arguments are valid.
+The pilot uses LiteRT-LM's native FunctionGemma formatter. Prompt parity with Hugging Face needs
+separate validation because the [two tool declaration renderers differ](https://github.com/google-ai-edge/LiteRT-LM/issues/3638).
 
 ## FunctionGemma wire shape
 
@@ -70,12 +70,6 @@ then returns the typed argument map in `Message.toolCalls`. This establishes the
 the custom fine-tune still needs a routing/argument evaluation to show it learned to emit it. The
 FunctionGemma documentation identifies `<start_function_response>` as the extra inference stop marker;
 it is not interchangeable with the call delimiter `<end_function_call>`.
-
-The command is based on Google's `export_hf` API and the released `litert-torch` 0.10.0 package. There
-is no official, pinned recipe that has been verified specifically with an arbitrary merged
-FunctionGemma checkpoint. If 0.10.0 fails or emits the wrong model type/template, preserve the
-conversion log and inspect the HF `config.json`, template and exporter metadata builder before
-trying another release. Do not silently ship a bundle tagged as a generic model.
 
 ## Kotlin structured result boundary
 
@@ -149,9 +143,16 @@ Install the resulting `app/build/outputs/apk/debug/app-debug.apk` beside Loopo. 
 bundle at app-private `files/functiongemma/model.litertlm` (model bundles stay outside Git):
 
 ```sh
-adb push model.litertlm /data/local/tmp/model.litertlm
-adb shell run-as com.p33nah.loopo.functiongemma sh -c \
-  'mkdir -p files/functiongemma && cp /data/local/tmp/model.litertlm files/functiongemma/model.litertlm'
+adb shell run-as com.p33nah.loopo.functiongemma mkdir -p files/functiongemma
+adb exec-in "run-as com.p33nah.loopo.functiongemma sh -c 'cat > files/functiongemma/model.litertlm.part'" < model.litertlm
+adb shell run-as com.p33nah.loopo.functiongemma sha256sum files/functiongemma/model.litertlm.part
+```
+
+Compare the printed hash with the model you exported. If it matches, rename the staged file and run a
+typed command.
+
+```sh
+adb shell run-as com.p33nah.loopo.functiongemma mv files/functiongemma/model.litertlm.part files/functiongemma/model.litertlm
 adb shell am start -n \
   com.p33nah.loopo.functiongemma/com.p33nah.loopo.ui.voice.FunctionGemmaPilotActivity \
   --es com.p33nah.loopo.functiongemma.TRANSCRIPT 'aumenta la velocità a ottanta'
@@ -165,3 +166,17 @@ the app. Test refusal, invalid/out-of-range rates, literal requests, and paraphr
 and model proposals; do not treat a correct tool name as an accepted plan unless Kotlin validation
 accepts its full ordered arguments. This harness does not test playback dispatch, wake detection, model
 export parity, or acoustic accuracy on other manufacturers.
+
+## Redmi results on 2026-11-17
+
+The ARM64 Redmi Note 14 Pro 4G ran Android 15 (API 35) with a 4 KB page size. The side-by-side APK
+had SHA-256 `8f82c490e07065c7eb792583b3d08598bae8520f1e1561af8e2097c0fb09ffc0` and lacked
+INTERNET permission. The 452,594,560-byte `rejection-02` INT8 bundle had SHA-256
+`5170cd1e6684dbbdd9fc84e37d1783b74661313eb579c45f4a005d76ab06f7cc` on both Colab and the phone.
+
+After a cold launch, a typed `riprendi` returned `resume` in 2,211 ms. The live Vosk trial recorded
+two accepted restart plans and three rejected rate plans. The rate calls arrived with null arguments
+and the Kotlin validator rejected them. The parser produced a usable
+plan on all five transcribed requests. The five model requests took 1,711–2,309 ms, measured around
+`sendMessage` only. The trial establishes offline speech-to-plan execution on this phone. It leaves
+rate argument generation or decoding, wake-word activation, and playback dispatch unverified.

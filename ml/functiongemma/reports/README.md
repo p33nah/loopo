@@ -31,4 +31,31 @@ The test input SHA-256 is `44b2c5ace0d67db010461a8dcbbf76d43ec26af5036d3e9e672bf
 
 The Colab T4 run trained for three epochs on the 380-example seed. The selected checkpoint was checkpoint-144. The base model matched 53/89 test rows and 2/32 challenge rows. The tuned model matched 62/89 test rows and 5/32 challenge rows. It also proposed 32 valid but wrong or unwanted plans across both sets, compared with zero for the production parser. See the [PR evidence](https://github.com/p33nah/loopo/pull/73) for the run details.
 
-The balanced follow-up uses 3,000 training examples by default, including 1,200 no-call examples. Its validation split has 134 rows and 43 no-call examples. The test and challenge bytes match the Kotlin and Colab seed replay. Compare both exact plans and proposed wrong actions on those same held-out files after training. The balanced run, custom LiteRT-LM conversion, and Android inference are pending.
+The balanced run used 3,000 training examples, including 1,200 no-call examples. Its validation split had 134 rows and 43 no-call examples. The test and challenge bytes matched the Kotlin and Colab seed replay. The selected checkpoint was checkpoint-1125. It matched 70/89 test rows and 8/32 challenge rows. Its 14 wrong or unwanted challenge plans included 12 calls on the 26 negative rows. Custom LiteRT-LM conversion and Android inference are pending.
+
+## Targeted rejection follow-up
+
+The [additional training phrases](../examples/rejection-followup.txt) cover the main error classes in the balanced challenge replay, including missing values, alternatives, negation, absent playback controls, and unsupported sequences. The file has 51 no-call phrases and 20 supported commands. Generate the training split from the `ml/functiongemma` directory and keep the standard training configuration.
+
+```sh
+python -m loopo_functiongemma.corpus generate runs/rejection-data \
+  --examples examples/rejection-followup.txt
+python -m loopo_functiongemma.model validate-format runs/rejection-data
+python -m loopo_functiongemma.train runs/rejection-data configs/train.toml runs/rejection-training
+```
+
+For the follow-up, use the original challenge as a regression set. The [48 new transcripts](rejection-probe.txt) were frozen before the corrected run and kept out of training and checkpoint selection. Of these, 32 should produce no call and 16 should produce an exact plan. These curated rows measure the targeted behavior and do not estimate its frequency in live speech.
+
+```sh
+python - <<'PY'
+from pathlib import Path
+
+from loopo_functiongemma.corpus import read_examples
+from loopo_functiongemma.dataset import _write_jsonl
+
+rows = read_examples(Path("reports/rejection-probe.txt"), "rejection_probe")
+_write_jsonl(Path("runs/rejection-probe.jsonl"), rows)
+PY
+```
+
+The probe JSONL has SHA-256 `d51d261b3f72c63cc712db190be9102f6ef7197e3bb89e56d4a398ac13a6fd35`. Use the [replay and comparison commands](../README.md#local-training-and-comparison) on that file for the parser and both adapters. The production parser rejected 32/32 negatives and matched 3/16 positive plans. The PR #67 classifier rejected 31/32 negatives and matched 8/16 positive plans, with one valid wrong plan on a positive. See the [PR evidence](https://github.com/p33nah/loopo/pull/73) for the adapter comparison.

@@ -111,7 +111,7 @@ This prepares a full-precision Hugging Face checkpoint, tokenizer and provenance
 
 ## Reference versions
 
-The experiment pins `google/functiongemma-270m-it` at `39eccb091651513a5dfb56892d3714c1b5b8276c`. The Python package pins PyTorch 2.10.0, Transformers 5.3.0, Datasets 4.5.0, TRL 0.29.0, PEFT 0.18.1, Accelerate 1.13.0, TensorBoard 2.20.0 and SentencePiece 0.2.1. The local CPU dependency and tiny-model SFT fixture checks use these pins. Colab T4 verified the official tokenizer round-trip, GPU smoke, and seed benchmark. The balanced profile and custom model conversion need separate model runs. The conversion candidate is LiteRT Torch 0.10.0 in its own environment.
+The experiment pins `google/functiongemma-270m-it` at `39eccb091651513a5dfb56892d3714c1b5b8276c`. The Python package pins PyTorch 2.10.0, Transformers 5.3.0, Datasets 4.5.0, TRL 0.29.0, PEFT 0.18.1, Accelerate 1.13.0, TensorBoard 2.20.0 and SentencePiece 0.2.1. The local CPU dependency and tiny-model SFT fixture checks use these pins. Colab T4 verified the official tokenizer round-trip, GPU smoke, and seed and balanced benchmarks. See the [replay results](reports/README.md) for the benchmarks and targeted rejection follow-up. Custom model conversion needs a separate run. The conversion candidate is LiteRT Torch 0.10.0 in its own environment.
 
 Primary references checked on 2026-11-16.
 [FunctionGemma overview](https://ai.google.dev/gemma/docs/functiongemma) ·

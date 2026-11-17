@@ -1,0 +1,197 @@
+reject:negated | negated_resume | Non voglio riprendere adesso.
+reject:negated | negated_resume | Lascia perdere, non far ripartire la musica.
+reject:negated | negated_resume | Non avviare la traccia, per favore.
+reject:negated | negated_resume | Aspetta prima di far suonare il brano.
+reject:negated | negated_resume | Non continuare ancora con l'ascolto.
+reject:negated | negated_resume | Ti ho detto di non farlo partire.
+reject:negated | negated_resume | Niente play per il momento.
+reject:negated | negated_resume | Non iniziare finché non te lo dico.
+reject:negated | negated_resume | Evita di rimettere in moto la riproduzione.
+reject:negated | negated_resume | Per ora non si riparte.
+
+reject:negated | negated_stop | Non interrompere la traccia, lasciala andare.
+reject:negated | negated_stop | Non mettere la musica in pausa.
+reject:negated | negated_stop | Non fermare quello che sta suonando.
+reject:negated | negated_stop | Aspetta, non bloccare l'ascolto.
+reject:negated | negated_stop | Non tenere fermo il brano.
+reject:negated | negated_stop | Non sospendere la riproduzione adesso.
+reject:negated | negated_stop | Evita di premere di nuovo pausa.
+reject:negated | negated_stop | Non voglio che la musica si fermi.
+reject:negated | negated_stop | Cerca di non interrompere di nuovo la base.
+reject:negated | negated_stop | Non far tacere il pezzo.
+
+reject:negated | negated_rate | Non modificare il tempo della registrazione.
+reject:negated | negated_rate | Non accelerare il pezzo, mantienilo così.
+reject:negated | negated_rate | Non rallentare la base musicale.
+reject:negated | negated_rate | Non alzare il ritmo di ascolto.
+reject:negated | negated_rate | Non abbassare la velocità del brano.
+reject:negated | negated_rate | Evita di cambiare la velocità.
+reject:negated | negated_rate | Non toccare il tempo, lascialo com'è.
+reject:negated | negated_rate | Non portare il pezzo a un altro ritmo.
+reject:negated | negated_rate | Non fare nessuna variazione di velocità.
+reject:negated | negated_rate | Non regolare la velocità per ora.
+
+reject:unsupported | unsupported_compound | Fallo partire e subito dopo fermalo.
+reject:ambiguous | contradictory_transport | Voglio ascoltare, però non deve suonare.
+reject:ambiguous | contradictory_transport | Riprendi la traccia ma tienila bloccata.
+reject:ambiguous | contradictory_transport | Avvia il pezzo senza farlo partire davvero.
+reject:ambiguous | contradictory_transport | Fermalo e lascialo continuare.
+reject:ambiguous | contradictory_transport | Mettilo in pausa e non interrompere la musica.
+reject:ambiguous | contradictory_transport | Fai ripartire l'audio, ma resta in silenzio.
+reject:ambiguous | contradictory_transport | Tieni fermo il brano e fallo andare avanti.
+reject:ambiguous | contradictory_transport | Vorrei che partisse, ma non avviarlo.
+reject:ambiguous | contradictory_transport | Interrompi l'ascolto e continua a suonare.
+
+reject:ambiguous | contradictory_rate | Alza il tempo e contemporaneamente abbassalo.
+reject:ambiguous | contradictory_rate | Rallenta e accelera la traccia nello stesso momento.
+reject:ambiguous | contradictory_rate | Porta la velocità più su, anzi più giù.
+reject:ambiguous | contradictory_rate | Aumenta il ritmo, ma non renderlo più veloce.
+reject:ambiguous | contradictory_rate | Riduci il tempo senza rallentare il brano.
+reject:ambiguous | contradictory_rate | Fai un aumento e una diminuzione della velocità.
+reject:ambiguous | contradictory_rate | Voglio un ritmo più lento e anche più rapido.
+reject:ambiguous | contradictory_rate | Mettila al cinquanta oppure al centodieci percento, scegli tu.
+reject:ambiguous | contradictory_rate | Prima abbassa il tempo, ma invece alzalo.
+reject:ambiguous | contradictory_rate | Cambia la velocità in entrambe le direzioni.
+
+reject:ambiguous | missing_rate_amount | Rallenta un pochino, quanto basta.
+reject:ambiguous | missing_rate_amount | Puoi dargli una spinta di velocità?
+reject:ambiguous | missing_rate_amount | Abbassa un po' il ritmo, non so di quanto.
+reject:ambiguous | missing_rate_amount | Fammi sentire il brano più rapido.
+reject:ambiguous | missing_rate_amount | Vorrei che andasse appena più piano.
+reject:ambiguous | missing_rate_amount | Aumenta la velocità di una quantità ragionevole.
+reject:ambiguous | missing_rate_amount | Diminuisci il tempo un pochino.
+reject:ambiguous | missing_rate_amount | Rendila sensibilmente più veloce.
+reject:ambiguous | missing_rate_amount | Togli un po' di lentezza alla musica.
+reject:ambiguous | missing_rate_amount | Cambia leggermente il ritmo, come preferisci.
+
+reject:ambiguous | missing_rate_target | Portala a settantacinque.
+reject:ambiguous | missing_rate_target | Imposta il valore su novanta.
+reject:ambiguous | missing_rate_target | Metti il pezzo a centodieci.
+reject:ambiguous | missing_rate_target | Non ho ancora deciso se ottanta indica i battiti o la percentuale.
+reject:ambiguous | missing_rate_target | Regola tutto su sessanta.
+reject:ambiguous | missing_rate_target | Fissa il centoquaranta, grazie.
+reject:ambiguous | missing_rate_target | Porta il numero a centoventi.
+reject:ambiguous | missing_rate_target | Vorrei settanta, non so se come tempo o come punto.
+reject:ambiguous | missing_rate_target | Imposta la traccia sul valore abituale.
+reject:ambiguous | missing_rate_target | Fammi andare a una velocità più o meno normale.
+
+reject:unsupported | unsupported_loop_edit | Sposta il marcatore iniziale al cambio di accordo.
+reject:unsupported | unsupported_loop_edit | Metti il confine finale dopo la seconda battuta.
+reject:unsupported | unsupported_loop_edit | Porta il punto d'inizio tre misure più avanti.
+reject:unsupported | unsupported_loop_edit | Allarga il tratto selezionato fino alla coda.
+reject:unsupported | unsupported_loop_edit | Stringi il loop togliendo l'ultima battuta.
+reject:unsupported | unsupported_loop_edit | Inverti la posizione dei due indicatori.
+reject:unsupported | unsupported_loop_edit | Crea un nuovo intervallo tra questi due accordi.
+reject:unsupported | unsupported_loop_edit | Metti il marcatore di chiusura sul battere successivo.
+reject:unsupported | unsupported_loop_edit | Seleziona le prime quattro battute per ripeterle.
+reject:unsupported | unsupported_loop_edit | Sposta l'inizio del ciclo alla nota lunga.
+
+reject:unsupported | unsupported_repetitions | Fai ripetere questa parte per quattro passaggi.
+reject:unsupported | unsupported_repetitions | Riproduci l'intero brano due volte di fila.
+reject:unsupported | unsupported_repetitions | Ripassa quel frammento finché non ti fermo.
+reject:unsupported | unsupported_repetitions | Fai sette cicli tra il ritornello e la strofa.
+reject:unsupported | unsupported_repetitions | Ripeti l'ultima battuta una dozzina di volte.
+reject:unsupported | unsupported_repetitions | Lascia girare il pezzo in continuo.
+reject:unsupported | unsupported_repetitions | Suona il passaggio tre volte e poi fermati.
+reject:unsupported | unsupported_repetitions | Continua il giro finché non conto fino a otto.
+reject:unsupported | unsupported_repetitions | Metti il brano in ripetizione per tutta la lezione.
+reject:unsupported | unsupported_repetitions | Esegui cinque passaggi della sezione centrale.
+
+reject:unsupported | unsupported_seek | Vai alla battuta numero diciotto.
+reject:unsupported | unsupported_seek | Cerca il secondo ritornello e posizionati lì.
+reject:unsupported | unsupported_seek | Salta avanti fino alla parte con il solo.
+reject:unsupported | unsupported_seek | Porta la riproduzione indietro di quaranta secondi.
+reject:unsupported | unsupported_seek | Raggiungi l'ultima nota del file.
+reject:unsupported | unsupported_seek | Spostati sul minuto tre e mezzo.
+reject:unsupported | unsupported_seek | Torna al punto in cui entra la batteria.
+reject:unsupported | unsupported_seek | Salta oltre l'introduzione.
+reject:unsupported | unsupported_seek | Cerca la terza misura dopo il cambio.
+reject:unsupported | unsupported_seek | Vai al passaggio che inizia con il piano.
+
+reject:unsupported | unsupported_compound | Metti in pausa e poi ricomincia dall'inizio.
+reject:unsupported | unsupported_compound | Riprendi, poi abbassa il ritmo di sette punti.
+reject:unsupported | unsupported_compound | Cambia la velocità e in seguito sospendi l'ascolto.
+reject:unsupported | unsupported_compound | Riavvia il brano, quindi porta il tempo a novanta.
+reject:unsupported | unsupported_compound | Aumenta il ritmo, fermati e poi riparti.
+reject:unsupported | unsupported_compound | Tienilo in pausa e dopo imposta il tempo a ottanta.
+reject:unsupported | unsupported_compound | Prima riparti da capo, poi metti tutto in pausa.
+reject:unsupported | unsupported_compound | Regola il tempo, sposta il loop e infine riprendi.
+reject:unsupported | unsupported_compound | Cambia la velocità, torna al ritornello e avvia.
+reject:unsupported | unsupported_compound | Riprendi, cambia il tempo e poi sospendi.
+
+reject:unrelated | quoted_commands | Nel film il direttore diceva: «riprendi da capo».
+reject:unrelated | quoted_commands | Ho letto il messaggio: “metti il ritmo a novanta”.
+reject:unrelated | quoted_commands | Il mio insegnante ha detto di rallentare, ma parlava del mio arco.
+reject:unrelated | quoted_commands | Sto citando una prova vocale, non sto dando un comando.
+reject:unrelated | quoted_commands | La frase “ferma la musica” compare nel testo della canzone.
+reject:unrelated | quoted_commands | Nel copione c'è scritto: “avvia la riproduzione”.
+reject:unrelated | quoted_commands | Mio fratello ha chiesto di alzare il tempo, io no.
+reject:unrelated | quoted_commands | L'esempio sullo schermo diceva “ricomincia”.
+reject:unrelated | quoted_commands | Puoi spiegarmi cosa significa “abbassa di cinque punti”?
+reject:unrelated | quoted_commands | La registrazione contiene la voce di qualcuno che dice “pausa”.
+
+reject:unrelated | microphone_chatter | Prova, uno due, mi arriva la voce?
+reject:unrelated | microphone_chatter | Lupo, controlla se il microfono è acceso.
+reject:unrelated | microphone_chatter | Si sente un fruscio quando parlo vicino al telefono.
+reject:unrelated | microphone_chatter | Aspetta che sposto il cavo delle cuffie.
+reject:unrelated | microphone_chatter | Grazie, ho capito come funziona il comando vocale.
+reject:unrelated | microphone_chatter | Ehi, c'è qualcuno in cucina?
+reject:unrelated | microphone_chatter | La lezione comincia tra cinque minuti.
+reject:unrelated | microphone_chatter | Oggi provo il microfono nuovo del tablet.
+reject:unrelated | microphone_chatter | Non riesco a sentire bene la tua risposta.
+reject:unrelated | microphone_chatter | Lupo, mi stai ascoltando oppure no?
+
+reject:ambiguous | asr_garbled_fragments | No, riprendi pausa, cioè aspetta un attimo.
+reject:ambiguous | asr_garbled_fragments | Velo più, cento forse, non ho finito.
+reject:ambiguous | asr_garbled_fragments | Rallenta a cinque, oppure cinque dal ritmo.
+reject:ambiguous | asr_garbled_fragments | Parti da ottanta e poi... niente, lascia stare.
+reject:ambiguous | asr_garbled_fragments | Ferma riparti non quello, l'altro.
+reject:ambiguous | asr_garbled_fragments | Meno tempo a novanta, no, non so.
+reject:ambiguous | asr_garbled_fragments | Alza il cento con cinque di differenza.
+reject:ambiguous | asr_garbled_fragments | Ripe... ripeti? Non, aspetta.
+reject:ambiguous | asr_garbled_fragments | Metti sessanta e aumenta, ma non so il numero.
+reject:ambiguous | asr_garbled_fragments | Velocità per cento, poi suona o fermo.
+
+reject:out_of_range | out_of_range_set | Per questa frase musicale fammi sentire il ventiquattro percento del tempo originale.
+reject:out_of_range | out_of_range_set | Imposta il brano al duecentododici per cento.
+reject:out_of_range | out_of_range_set | Metti il ritmo a diciannove percento.
+reject:out_of_range | out_of_range_set | Vorrei la traccia al duecentoventi percento.
+reject:out_of_range | out_of_range_set | Fissa la velocità a ventuno per cento.
+reject:out_of_range | out_of_range_set | Porta il tempo al duecentocinque percento.
+reject:out_of_range | out_of_range_set | Imposta la riproduzione al ventidue percento.
+reject:out_of_range | out_of_range_set | Metti la musica a duecentotrenta percento.
+reject:out_of_range | out_of_range_set | Regola la traccia a ventitré per cento.
+reject:out_of_range | out_of_range_set | Voglio sentire il brano al duecentoquindici percento.
+
+reject:out_of_range | out_of_range_delta | Aggiungi centottanta punti percentuali al ritmo.
+reject:out_of_range | out_of_range_delta | Riduci la velocità di centottanta punti.
+reject:out_of_range | out_of_range_delta | Accelera di centosettantanove percento.
+reject:out_of_range | out_of_range_delta | Rallenta il brano di centottantadue punti percentuali.
+reject:out_of_range | out_of_range_delta | Aumenta il tempo di duecento punti.
+reject:out_of_range | out_of_range_delta | Togli centosettantasei punti percentuali alla velocità.
+reject:out_of_range | out_of_range_delta | Incrementa il ritmo di centonovanta punti.
+reject:out_of_range | out_of_range_delta | Abbassa di centottantacinque percento il tempo.
+reject:out_of_range | out_of_range_delta | Diminuisci la velocità di duecentotrenta punti.
+reject:out_of_range | out_of_range_delta | Alza il ritmo di duecentoquaranta punti percentuali.
+
+reject:unrelated | unrelated_conversation | Domani devo accordare il violino prima della prova.
+reject:unrelated | unrelated_conversation | Mi ricordi il nome di quel compositore?
+reject:unrelated | unrelated_conversation | Questa registrazione è stata fatta in una sala piccola.
+reject:unrelated | unrelated_conversation | Ho lasciato lo spartito sul leggio vicino alla finestra.
+reject:unrelated | unrelated_conversation | Quanti minuti mancano alla fine della lezione?
+reject:unrelated | unrelated_conversation | La chitarra ha bisogno di corde nuove.
+reject:unrelated | unrelated_conversation | Oggi il metronomo sembra andare più veloce del solito.
+reject:unrelated | unrelated_conversation | Cerca il titolo del brano nella mia playlist.
+reject:unrelated | unrelated_conversation | Ho sbagliato l'accordo nella battuta precedente.
+reject:unrelated | unrelated_conversation | La canzone che cerco è nell'album dell'anno scorso.
+
+reject:negated | negated_restart | Non far partire il brano dalla prima nota.
+reject:negated | negated_restart | Evita di rimandarmi alla battuta iniziale.
+reject:negated | negated_restart | Per adesso niente riavvio dall'inizio del giro.
+reject:negated | negated_restart | Tieni il punto attuale, evita una ripartenza da zero.
+reject:negated | negated_restart | Non voglio un altro ascolto dall'attacco.
+reject:negated | negated_restart | Per favore, nessun ritorno all'inizio della traccia.
+reject:negated | negated_restart | Loopo, guarda che non ti ho chiesto di ripartire da capo.
+reject:negated | negated_restart | Non azzerare la posizione del brano.
+reject:negated | negated_restart | Evita di rifarmi il giro dall'inizio.
+reject:negated | negated_restart | La ripetizione dalla prima battuta può aspettare.

@@ -1,0 +1,7 @@
+# label | famiglia | frase che diresti a Loopo
+# Usa la stessa famiglia per frasi simili o per varianti con numeri diversi.
+resume | ripresa_da_qui | Rimanda avanti la musica da questo punto preciso.
+set_rate:64 | velocita_studio | Per questa prova dammi una velocità pari al 64 per cento.
+adjust_rate:-8+restart | diminuisci_e_riparti | Leva otto punti di velocità e riparti subito dall'attacco.
+reject:negated | non_toccare | Evita di far ripartire la registrazione ora che è ferma.
+reject:ambiguous | velocita_senza_valore | Quel controllo della velocità andrebbe cambiato, decido dopo.

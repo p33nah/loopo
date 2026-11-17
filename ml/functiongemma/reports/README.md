@@ -27,4 +27,8 @@ Each baseline made three untimed warmup passes followed by one timed JVM interpr
 
 The test input SHA-256 is `44b2c5ace0d67db010461a8dcbbf76d43ec26af5036d3e9e672bfde385bf1d61`. The challenge input SHA-256 is `ddb83b388ef28f784e6bf0b865764c1209a739b7b9070e60adb28ac7bcbe14ba`. Reproduce the report with the replay and comparison commands in the [experiment README](../README.md#local-training-and-comparison).
 
-The official tokenizer and weights require Hugging Face approval. The unauthenticated pinned download returned HTTP 401. Base and fine-tuned FunctionGemma scores, custom LiteRT-LM conversion and Android inference are pending.
+## Colab seed and balanced follow-up
+
+The Colab T4 run trained for three epochs on the 380-example seed. The selected checkpoint was checkpoint-144. The base model matched 53/89 test rows and 2/32 challenge rows. The tuned model matched 62/89 test rows and 5/32 challenge rows. It also proposed 32 valid but wrong or unwanted plans across both sets, compared with zero for the production parser. See the [PR evidence](https://github.com/p33nah/loopo/pull/73) for the run details.
+
+The balanced follow-up uses 3,000 training examples by default, including 1,200 no-call examples. Its validation split has 134 rows and 43 no-call examples. The test and challenge bytes match the Kotlin and Colab seed replay. Compare both exact plans and proposed wrong actions on those same held-out files after training. The balanced run, custom LiteRT-LM conversion, and Android inference are pending.

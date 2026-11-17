@@ -1,0 +1,148 @@
+resume | resume_bare | vai avanti da dove si era fermata
+resume | resume_bare | riprendi l'ascolto da qui
+resume | resume_bare | continua dal passaggio corrente
+resume | resume_bare | fai proseguire la traccia
+resume | resume_bare | rimetti in moto il pezzo
+resume | resume_bare | torna a far suonare la musica
+resume | resume_bare | riparti dal punto lasciato
+resume | resume_bare | fai continuare l'audio
+resume | resume_bare | rimanda in play quello che ascoltavo
+resume | resume_bare | riattiva la riproduzione corrente
+resume | resume_bare | lascia scorrere di nuovo il brano
+resume | resume_bare | fai andare avanti la canzone
+resume | resume_bare | recupera la riproduzione interrotta
+resume | resume_bare | procedi con la traccia in corso
+resume | resume_request | puoi rimettere l'audio in movimento
+resume | resume_request | vorrei sentire ancora il pezzo
+resume | resume_request | fammi riprendere da quel punto
+resume | resume_request | torna a suonare per favore
+resume | resume_request | mi fai andare avanti con l'ascolto
+resume | resume_request | rimetti il brano a suonare da qui
+resume | resume_request | dai di nuovo voce alla traccia
+resume | resume_request | vorrei continuare l'esercizio musicale
+resume | resume_request | riprendi pure la lezione dal punto attuale
+resume | resume_asr | riprende dal punto corrente
+resume | resume_asr | continua la riproduzzione
+resume | resume_asr | fai ripartire l'audio da qui
+resume | resume_asr | riprendi il pezzo dove si era fermato
+resume | resume_asr | dai il via al brano da questo passaggio
+resume | resume_asr | riprendi la canzone dal cursore attuale
+restart | restart_bare | fai ripartire dall'attacco
+restart | restart_bare | rimetti tutto dall'inizio del brano
+restart | restart_bare | riparti dal primo istante
+restart | restart_bare | ricomincia dalla partenza
+restart | restart_bare | riavvia l'ascolto da zero
+restart | restart_bare | torna all'apertura della traccia
+restart | restart_bare | rifai partire dal principio
+restart | restart_bare | torna all'avvio del loop
+restart | restart_bare | riproduci ancora dall'incipit
+restart | restart_bare | fai ricominciare il pezzo
+restart | restart_bare | riporta la musica al punto di partenza
+restart | restart_bare | riparti dal marker iniziale
+restart | restart_request | puoi far ricominciare questa traccia
+restart | restart_request | vorrei risentire il brano dall'attacco
+restart | restart_request | rimettila al via e falla suonare
+restart | restart_request | riproduci il pezzo dal suo primo momento
+restart | restart_request | fai tornare l'ascolto all'inizio
+restart | restart_request | ricomincia la sessione musicale
+restart | restart_request | riparti dall'inizio della registrazione
+restart | restart_request | rimetti il loop al suo avvio
+restart | restart_asr | riparti dalla inizio della traccia
+restart | restart_asr | ricomincia dal primo secondo del brano
+restart | restart_asr | riavvia da capo la riproduzione
+restart | restart_asr | fai ricominciare dall'incipit
+restart | restart_asr | ricomincia dal marcatore a
+restart | restart_asr | riavvia il pezzo dal via
+stay_paused | paused_hold | lascia il player in pausa
+stay_paused | paused_hold | mantieni fermo questo brano
+stay_paused | paused_hold | tieni sospesa la riproduzione
+stay_paused | paused_hold | per ora niente audio
+stay_paused | paused_hold | non avviare ancora la traccia
+stay_paused | paused_hold | continua a tenerla in pausa
+stay_paused | paused_hold | fai restare fermo il loop
+stay_paused | paused_hold | lascia fermo il flusso musicale
+stay_paused | paused_hold | resta in pausa con l'audio
+stay_paused | paused_hold | per il momento non far suonare nulla
+stay_paused | paused_hold | tieni l'ascolto congelato
+stay_paused | paused_hold | mantieni sospeso il pezzo che sentivo
+stay_paused | paused_hold | ferma qui la riproduzione e lasciala ferma
+stay_paused | paused_request | puoi lasciare il brano fermo
+stay_paused | paused_request | vorrei che restasse tutto in pausa
+stay_paused | paused_request | lascia il suono spento per adesso
+stay_paused | paused_request | non far ripartire ancora l'ascolto
+set_rate:70 | set_rate_direct | scegli come valore di ascolto il 70 per cento
+set_rate:85 | set_rate_direct | imposta il tempo musicale sul valore 85 percento
+set_rate:95 | set_rate_direct | per la sessione imposta un passo del 95%
+set_rate:105 | set_rate_direct | fai corrispondere la velocità al 105 per cento
+set_rate:115 | set_rate_direct | porta il playback al livello 115 percento
+set_rate:130 | set_rate_direct | voglio il brano regolato al 130 percento
+set_rate:160 | set_rate_direct | metti il tempo complessivo a 160 per cento
+set_rate:180 | set_rate_direct | scegli un'andatura pari a 180 percento
+set_rate:200 | set_rate_direct | stabilisci il massimo, 200 per cento
+set_rate:60 | set_rate_direct | la velocità richiesta è sessanta percento
+set_rate:75 | set_rate_direct | vorrei ascoltare a settantacinque per cento
+set_rate:88 | set_rate_context | questa traccia va impostata a ottantotto percento
+set_rate:92 | set_rate_context | durante lo studio metti il passo su novantadue
+set_rate:108 | set_rate_context | riproduci il brano a centotto per cento
+set_rate:122 | set_rate_context | scelgo centoventidue per cento per l'esercizio
+set_rate:135 | set_rate_context | fai procedere la musica al centotrentacinque percento
+set_rate:155 | set_rate_context | porta la sessione al centocinquantacinque per cento
+set_rate:170 | set_rate_context | regola l'ascolto sul centosettanta percento
+set_rate:190 | set_rate_context | assegna alla traccia il valore centonovanta
+set_rate:65 | set_rate_asr | imposta il tempo al sessanta cinque percento
+set_rate:78 | set_rate_asr | la ve lo cita deve essere settantotto per cento
+set_rate:112 | set_rate_asr | metti il playback a cento dodici percento
+adjust_rate:3 | adjust_up | aggiungi tre punti al passo musicale
+adjust_rate:6 | adjust_up | fai salire di sei punti il tempo della traccia
+adjust_rate:9 | adjust_up | guadagna nove punti di velocità
+adjust_rate:12 | adjust_up | spingi il ritmo dodici punti più in alto
+adjust_rate:18 | adjust_up | somma diciotto punti alla riproduzione
+adjust_rate:22 | adjust_up | aumenta il valore attuale di ventidue punti percentuali
+adjust_rate:30 | adjust_up | accelera il brano di trenta punti
+adjust_rate:45 | adjust_up | voglio un incremento di quarantacinque punti sul passo
+adjust_rate:65 | adjust_up | aggiungi sessantacinque punti percentuali al ritmo
+adjust_rate:80 | adjust_up | fai crescere la velocità di ottanta punti
+adjust_rate:125 | adjust_up | porta in su il valore corrente di centoventicinque punti percentuali
+adjust_rate:175 | adjust_up | aumenta di centosettantacinque punti il valore della velocità
+adjust_rate:-2 | adjust_down | togli due punti dal tempo del brano
+adjust_rate:-4 | adjust_down | scala quattro punti dalla velocità attuale
+adjust_rate:-7 | adjust_down | rallenta il pezzo di sette punti percentuali
+adjust_rate:-11 | adjust_down | fai calare di undici punti il passo musicale
+adjust_rate:-14 | adjust_down | sottrai quattordici punti dal ritmo
+adjust_rate:-20 | adjust_down | abbassa il valore corrente di venti punti
+adjust_rate:-35 | adjust_down | riduci di trentacinque punti il tempo della traccia
+adjust_rate:-60 | adjust_down | scendi di sessanta punti sul passo
+adjust_rate:-90 | adjust_down | diminuisci il ritmo di novanta punti percentuali
+adjust_rate:-120 | adjust_down | taglia centoventi punti dal valore di riproduzione
+adjust_rate:-150 | adjust_down | porta giù di centocinquanta punti il tempo musicale
+adjust_rate:-175 | adjust_down | scala centosettantacinque punti percentuali al valore attuale
+adjust_rate:5 | adjust_asr | alza il passo di cinque punti per cento
+adjust_rate:-8 | adjust_asr | abbasa di otto punti il tempo del brano
+adjust_rate:16 | adjust_asr | fai salire sedici punti percento la velocita
+adjust_rate:-25 | adjust_asr | leva venticinque punti alla velocita della musica
+set_rate:70+resume | compound_absolute_resume | metti la base al 70 percento, poi prosegui dal punto attuale
+set_rate:86+resume | compound_absolute_resume | scegli ottantasei per cento e lascia scorrere il pezzo
+set_rate:98+resume | compound_absolute_resume | assegna novantotto percento al ritmo; continua ad ascoltare
+set_rate:112+resume | compound_absolute_resume | imposta il livello a 112 e rimetti in moto l'audio
+set_rate:140+resume | compound_absolute_resume | porta il passo a 140 per cento, facendolo poi suonare
+set_rate:165+resume | compound_absolute_resume | cambia il valore a 165 percento e vai avanti da qui
+set_rate:72+restart | compound_absolute_restart | scegli 72 percento e ricomincia dall'attacco
+set_rate:90+restart | compound_absolute_restart | porta la traccia a novanta, poi falla ripartire da zero
+set_rate:118+restart | compound_absolute_restart | metti 118 per cento e riavvia dal principio
+set_rate:150+restart | compound_absolute_restart | assegna centocinquanta al tempo, tornando all'avvio
+adjust_rate:4+resume | compound_adjust_resume | alza il tempo di quattro punti e prosegui da dove eri
+adjust_rate:13+resume | compound_adjust_resume | aggiungi tredici punti percentuali, poi fai continuare il brano
+adjust_rate:28+resume | compound_adjust_resume | spingi il ritmo di ventotto punti e torna all'ascolto
+adjust_rate:55+resume | compound_adjust_resume | aumenta di cinquantacinque punti e lascia andare la traccia
+adjust_rate:-3+resume | compound_adjust_resume | scala tre punti e riprendi dal cursore
+adjust_rate:-17+resume | compound_adjust_resume | rallenta di diciassette punti, poi continua la lezione
+adjust_rate:-40+resume | compound_adjust_resume | togli quaranta punti al passo e rimetti il pezzo in moto
+adjust_rate:-100+resume | compound_adjust_resume | riduci di cento punti; continua da questo punto
+adjust_rate:7+restart | compound_adjust_restart | aggiungi sette punti al passo e fai ripartire dall'inizio
+adjust_rate:19+restart | compound_adjust_restart | accelera di diciannove punti, poi ricomincia il brano
+adjust_rate:33+restart | compound_adjust_restart | alza di trentatré punti percentuali e torna all'attacco
+adjust_rate:75+restart | compound_adjust_restart | incrementa settantacinque punti, quindi riavvia
+adjust_rate:-6+restart | compound_adjust_restart | sottrai sei punti dal tempo e rifai partire da zero
+adjust_rate:-12+restart | compound_adjust_restart | diminuisci di dodici punti e riparti dal marker iniziale
+adjust_rate:-50+restart | compound_adjust_restart | togli cinquanta punti percentuali, poi ricomincia dall'incipit
+adjust_rate:-175+restart | compound_adjust_restart | scala centosettantacinque punti e avvia di nuovo dall'inizio

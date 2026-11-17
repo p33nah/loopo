@@ -24,5 +24,8 @@ test = ["pytest==9.0.2", "nbformat==5.10.4"]
 [tool.setuptools.packages.find]
 include = ["loopo_functiongemma*"]
 
+[tool.setuptools.package-data]
+loopo_functiongemma = ["examples/*.txt"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

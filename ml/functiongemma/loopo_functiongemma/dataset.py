@@ -32,13 +32,13 @@ def italian_number(value: int) -> str:
         tens, ones = divmod(value, 10)
         stem = TENS[tens][:-1] if ones in (1, 8) else TENS[tens]
         return stem + ONES[ones]
-    if value == 200:
-        return "duecento"
-    rest = italian_number(value - 100) if value > 100 else ""
-    return ("cent" if rest.startswith("ott") else "cento") + rest
+    hundreds, remainder = divmod(value, 100)
+    stem = (ONES[hundreds] if hundreds > 1 else "") + "cento"
+    rest = italian_number(remainder) if remainder else ""
+    return (stem[:-1] if rest.startswith("ott") else stem) + rest
 
 
-NUMBERS = {italian_number(value): str(value) for value in range(201)}
+NUMBERS = {italian_number(value): str(value) for value in range(1000)}
 
 
 def text_key(text: str) -> str:
@@ -444,7 +444,10 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
 def validate_dataset(path: str | Path) -> dict[str, int]:
     """Validate split files, row schema, plans, IDs, and family isolation."""
     root = Path(path)
-    datasets = {split: _read_jsonl(root / f"{split}.jsonl") for split in SPLITS}
+    return validate_splits({split: _read_jsonl(root / f"{split}.jsonl") for split in SPLITS})
+
+
+def validate_splits(datasets: dict[str, list[dict]]) -> dict[str, int]:
     all_ids: set[str] = set()
     all_texts: dict[str, tuple[str, list[dict]]] = {}
     shapes: dict[str, str] = {}

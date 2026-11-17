@@ -20,6 +20,47 @@ On Windows PowerShell activate with `.venv\Scripts\Activate.ps1`. The checked-in
 
 The generator assigns a parameterized family to one split. Validation checks schema, typed plans, unique IDs, normalized text, contradictory labels and normalized numeric template shapes across splits. Held-out replay uses the checked-in files. Keep them fixed after the first full experiment. Use `--expand-train 2500` when generating an expanded corpus. It adds unique numeric variants to training with seed 67 and leaves the validation, test and challenge bytes fixed. Expansion increases numeric coverage and reduces the proportion of no-call rows. Compare rejection scores with the seed experiment before choosing this corpus.
 
+## Expand the corpus and add your own phrases
+
+The seed run proposed valid but unwanted actions for 11 of 26 negative challenge transcripts. Its 380 training rows have just 22 rejection examples. The old numeric expansion keeps those same 22 even at 2,500 rows. The balanced profile adds 328 authored training phrases and 68 authored validation phrases. It generates variants of the training families to reach the requested size and samples each family in turn within its category.
+
+| Split | Original rows | Original rejections | Balanced rows | Balanced rejections |
+| --- | ---: | ---: | ---: | ---: |
+| Training | 380 | 22 | 3,000 | 1,200 |
+| Validation | 66 | 5 | 134 | 43 |
+| Test | 89 | 12 | 89 | 12 |
+| Challenge | 32 | 26 | 32 | 26 |
+
+Training includes resume, restart, pause, absolute and relative rates, and rate changes followed by resume or restart. Rejections cover negation, ambiguity, unsupported requests, invalid values, and unrelated conversation. The added validation phrases use independent families. Both test files retain their original bytes and hashes. Review generated context and numeric variants as synthetic training data.
+
+From the project directory, generate or inspect the corpus with Python:
+
+```sh
+python -m loopo_functiongemma.corpus generate generated/balanced-v1
+python -m loopo_functiongemma.corpus inspect generated/balanced-v1
+```
+
+Use `--rows 5000` for the larger profile. The default rejection share is 40%. Use `--reject-percent` to try another share with enough examples on each side. This percentage is an experiment setting.
+
+To add your own phrases, copy [le-mie-frasi.txt](examples/le-mie-frasi.txt). Write one transcript per line as `label | family | phrase`. Reuse the family name for paraphrases and variants of the same template.
+
+```text
+set_rate:64 | velocita_studio | Per questa prova dammi una velocità pari al 64 per cento.
+adjust_rate:-8+restart | diminuisci_e_riparti | Leva otto punti di velocità e riparti subito dall'attacco.
+reject:negated | non_toccare | Evita di far ripartire la registrazione ora che è ferma.
+```
+
+The other action labels are `resume`, `restart`, and `stay_paused`. Use `+` to append `resume` or `restart` after a rate change. Rejection reasons are `ambiguous`, `negated`, `out_of_range`, `unrelated`, and `unsupported`. Use short family names with lowercase ASCII letters, numbers, underscores, or hyphens.
+
+```sh
+python -m loopo_functiongemma.corpus generate generated/contributi --examples examples/le-mie-frasi.txt
+python -m loopo_functiongemma.corpus import generated/personale --examples examples/le-mie-frasi.txt
+```
+
+`generate` adds your annotated examples to the balanced corpus before sampling. `import` uses your examples as the entire training split and keeps the original evaluation splits. Repeat `--examples` to read several files. The importer reports invalid labels, normalized duplicates, and numeric templates shared with evaluation. Human review is still needed for semantic duplicates.
+
+For the next Colab run, choose `balanced` and a fresh run name. To add personal examples, upload your text file to Colab and set `examples_file` to its runtime path, such as `/content/le-mie-frasi.txt`.
+
 ## Colab smoke and full run
 
 1. Open the [notebook](notebooks/loopo_functiongemma_finetuning.ipynb) in Google Colab using **File → Open notebook → GitHub**. Choose this repository, the ref containing the notebook and the notebook path. You can also download its `.ipynb` file and upload it in the **Upload** tab.
@@ -27,7 +68,7 @@ The generator assigns a parameterized family to one split. Validation checks sch
 3. Choose **Runtime → Change runtime type → T4 GPU** or an available NVIDIA GPU. In the options cell use the same repository ref as step 1. Keep `experiment = "smoke"`, leave `resume` and `export_merged` off, and run all cells. A CPU runtime can exercise the same small smoke against the official model, with longer processing time.
 4. Confirm format validation, base and tuned smoke reports, two optimizer steps, and a saved adapter and checkpoint. Inspect `training/run.json` and `training/training-metrics.json`. The smoke covers four validation transcripts for generation and uses six validation rows for loss. Its scores are a pipeline check.
 5. Set `experiment = "seed"` and choose a fresh run name to run the first full comparison. Enable `use_drive` if you need checkpoints across Colab sessions. The output is under `/content/loopo-runs/<experiment>/<run_name>` or `MyDrive/loopo-functiongemma/<experiment>/<run_name>`. For interrupted training, use the same exact code ref, configuration, output and runtime type, then enable `resume`. A run interrupted before its first checkpoint needs a fresh run name.
-6. Review training and validation loss by epoch. Later training loss improvements paired with rising validation loss suggest overfitting. The trainer selects the lowest validation-loss checkpoint. Once the seed experiment is reproducible, try `expanded` with a fresh run name on the same frozen evaluation sets.
+6. Review training and validation loss by epoch. Later training loss improvements paired with rising validation loss suggest overfitting. The trainer selects the lowest validation-loss checkpoint. The rejection-focused follow-up uses `balanced` with a fresh run name and the same frozen test and challenge sets.
 
 The notebook supports `base` to run the original model alone. The trained artifact stays on the chosen machine or Drive. The notebook does not publish weights or corpora.
 
@@ -70,7 +111,7 @@ This prepares a full-precision Hugging Face checkpoint, tokenizer and provenance
 
 ## Reference versions
 
-The experiment pins `google/functiongemma-270m-it` at `39eccb091651513a5dfb56892d3714c1b5b8276c`. The Python package pins PyTorch 2.10.0, Transformers 5.3.0, Datasets 4.5.0, TRL 0.29.0, PEFT 0.18.1, Accelerate 1.13.0, TensorBoard 2.20.0 and SentencePiece 0.2.1. The local CPU dependency and tiny-model SFT fixture checks use these pins. GPU training, the gated official tokenizer round-trip and custom model conversion need separate runs. The conversion candidate is LiteRT Torch 0.10.0 in its own environment.
+The experiment pins `google/functiongemma-270m-it` at `39eccb091651513a5dfb56892d3714c1b5b8276c`. The Python package pins PyTorch 2.10.0, Transformers 5.3.0, Datasets 4.5.0, TRL 0.29.0, PEFT 0.18.1, Accelerate 1.13.0, TensorBoard 2.20.0 and SentencePiece 0.2.1. The local CPU dependency and tiny-model SFT fixture checks use these pins. Colab T4 verified the official tokenizer round-trip, GPU smoke, and seed benchmark. The balanced profile and custom model conversion need separate model runs. The conversion candidate is LiteRT Torch 0.10.0 in its own environment.
 
 Primary references checked on 2026-11-16.
 [FunctionGemma overview](https://ai.google.dev/gemma/docs/functiongemma) ·

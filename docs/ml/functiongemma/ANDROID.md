@@ -121,40 +121,47 @@ does not permit.
 The model can suggest a plan; it cannot dispatch playback. The coordinator's existing cancellation
 checks guard every dispatch in the optional interpreter path.
 
-The current project targets minSdk 26 and packages `armeabi-v7a`, `arm64-v8a`, and `x86_64`. This
-change does not add the LiteRT-LM Android dependency: the artifact's native ABI footprint and package
-size have not been checked against all three app ABIs. Google has exercised manual structured tool
-results on Android with `litertlm-android:0.16.0`; newer API artifacts may also impose Kotlin compiler
-requirements. Check the selected artifact and resulting APK before adding it to the app.
+The project targets minSdk 26 and packages `armeabi-v7a`, `arm64-v8a`, and `x86_64`. The opt-in pilot
+uses `litertlm-android:0.18.0` with the project's Kotlin 2.4.21 compiler. It packaged and passed the
+APK ELF/ZIP alignment verifier for the app's three ABI filters; the LiteRT-LM JNI library is present
+for ARM64 and x86_64 but not ARMv7. The pilot target is the ARM64 Redmi; do not treat that build as
+ARMv7 inference evidence.
 
 ## Redmi Note 14 Pro 4G offline pilot
 
-The target physical device used for Loopo voice work is a Redmi Note 14 Pro 4G. The app currently
-contains the offline Italian Vosk wake/command recognizer, but this experimental branch does not yet
-ship a LiteRT-LM dependency, bundle staging route, or FunctionGemma runtime adapter; the FunctionGemma
-pilot below is therefore a handoff recipe, not a runnable in-app check yet.
+The debug-only manual pilot is enabled with `-PloopoFunctionGemmaPilot=true`. It creates a separate
+`com.p33nah.loopo.functiongemma` installation and launcher entry, and adds the pinned
+`litertlm-android:0.18.0` runtime only to that variant. The pilot-only manifest removes INTERNET;
+ordinary debug and release variants retain their normal manifest and application ID. The activity
+keeps one CPU engine while open and creates one `Conversation` per request with
+`automaticToolCalling=false`. It records typed or Vosk-transcribed input, the Kotlin parser plan,
+raw text and structured tool calls, validated model plan or rejection, and monotonic request time.
+History is visible/selectable and held only in activity memory. It never sends a plan to playback.
 
-Once an app-private staging path and runtime adapter exist:
+Build from WSL with the existing Italian model archive so speech works on first launch offline:
 
-1. Install the debug APK on the Redmi. While network is available, download the Vosk archive through
-   the existing opt-in flow, and stage the converted `.litertlm` bundle through the debug model-loader
-   path. Record the APK and model SHA-256 values. Keep model files outside Git.
-2. Turn on airplane mode, then separately confirm both Wi-Fi and mobile data are disabled. Force-stop
-   and relaunch Loopo so no already-open runtime or network session is reused. Open a local audio file
-   already stored on the phone.
-3. Run a small fixed set containing literal Italian requests, paraphrases, no-op requests, and invalid
-   or out-of-range rate values. Record the in-memory trace (transcript, structured tool calls,
-   normalized plan and monotonic request duration) and compare each intended action with the observed
-   playback state. A refusal or wrong plan must dispatch nothing. Confirm the existing parser remains
-   the default when the experimental adapter is not selected.
-4. Cancel one command during inference, then unload the track and turn voice off during separate
-   attempts. Each stale/canceled inference must dispatch nothing. Repeat the accepted actions after
-   a cold app restart while still offline.
-5. Capture Android version, build fingerprint, ABI, APK/model hashes, routing results, dispatch
-   results, and logcat exceptions. Adapter exceptions should surface as `VoiceStatus.Failed`; canceling
-   the coroutine must not be translated to failure or dispatch a partial plan. Do not save microphone
-   recordings or raw transcripts to persistent logs. The current implementation's trace callback is
-   in-memory only.
+```sh
+bash gradlew :app:assembleDebug -PloopoFunctionGemmaPilot=true \
+  -PloopoWakeModel=/mnt/c/path/to/vosk-model-small-it-0.22.zip --console=plain
+```
 
-This procedure verifies offline availability and safe dispatch on that device. It does not establish
-accuracy on other manufacturers; repeat the routing gate on every target platform.
+Install the resulting `app/build/outputs/apk/debug/app-debug.apk` beside Loopo. Stage the converted
+bundle at app-private `files/functiongemma/model.litertlm` (model bundles stay outside Git):
+
+```sh
+adb push model.litertlm /data/local/tmp/model.litertlm
+adb shell run-as com.p33nah.loopo.functiongemma sh -c \
+  'mkdir -p files/functiongemma && cp /data/local/tmp/model.litertlm files/functiongemma/model.litertlm'
+adb shell am start -n \
+  com.p33nah.loopo.functiongemma/com.p33nah.loopo.ui.voice.FunctionGemmaPilotActivity \
+  --es com.p33nah.loopo.functiongemma.TRANSCRIPT 'aumenta la velocità a ottanta'
+```
+
+The explicit `TRANSCRIPT` extra runs one typed phrase for repeatable checks. For live ASR, tap
+**Tocca e parla**, grant microphone access, and say one command. Select/copy the visible numbered
+history or inspect it with Android UI text dumps. No transcript or audio is written to storage or
+logcat. Record model/APK hashes, Android version, build fingerprint, ABI, and routing outcomes outside
+the app. Test refusal, invalid/out-of-range rates, literal requests, and paraphrases. Compare parser
+and model proposals; do not treat a correct tool name as an accepted plan unless Kotlin validation
+accepts its full ordered arguments. This harness does not test playback dispatch, wake detection, model
+export parity, or acoustic accuracy on other manufacturers.

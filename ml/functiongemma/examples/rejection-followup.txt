@@ -1,0 +1,72 @@
+# Additional training examples for the rejection follow-up. Keep probe phrases in reports/rejection-probe.txt.
+reject:ambiguous | missing_target | Portami la velocità a
+reject:ambiguous | missing_target | Fissa il ritmo al valore
+reject:ambiguous | missing_target | Come prima ma col tempo più
+reject:ambiguous | missing_target | Sposta un po' la percentuale
+reject:ambiguous | missing_target | Riduci di quanti punti avevamo detto
+reject:ambiguous | missing_target | Aggiusta quella cosa della velocità
+set_rate:82 | missing_target | Fissa il ritmo all'ottantadue per cento
+adjust_rate:-8 | missing_target | Riduci di otto punti percentuali
+reject:ambiguous | playback_choice | Mandalo avanti oppure torna all'inizio
+reject:ambiguous | playback_choice | Riprendi o tienilo in pausa, non so
+reject:ambiguous | playback_choice | Posso riprendere oppure devo ricominciare?
+reject:ambiguous | playback_choice | Forse fai partire, ma aspetto che mi dica lei
+reject:ambiguous | playback_choice | Vado avanti o torno al punto iniziale?
+resume | playback_choice | Mandalo avanti da dove si è fermato
+restart | playback_choice | Torna all'inizio e fai partire il brano
+stay_paused | playback_choice | Tienilo fermo in pausa per il momento
+reject:ambiguous | directional_target | Alza al quarantotto per cento
+reject:ambiguous | directional_target | Scendi all'ottantasei per cento
+reject:ambiguous | directional_target | Aumenta fino al settantadue per cento
+reject:ambiguous | directional_target | Cala fino al centotrentasei per cento
+reject:ambiguous | directional_target | Riprendi dal settantasette percento del pezzo
+reject:ambiguous | directional_target | Ricomincia all'incirca a un terzo
+set_rate:72 | directional_target | Regola la velocità al settantadue per cento
+adjust_rate:12 | directional_target | Alza di dodici punti percentuali
+adjust_rate:-13 | directional_target | Cala di tredici punti percentuali
+reject:negated | vetoed_transport | Mi raccomando, evita di ripartire dall'inizio
+reject:negated | vetoed_transport | Niente ripresa per ora
+reject:negated | vetoed_transport | Non ti ho detto di tornare a suonare
+reject:negated | vetoed_transport | Aspetta, non rimetterlo dall'inizio
+reject:negated | vetoed_transport | Non serve che tu riprenda adesso
+reject:negated | vetoed_transport | Ti chiedo solo di non toccare la riproduzione
+reject:negated | vetoed_transport | Lascia perdere la ripartenza dall'inizio
+reject:negated | vetoed_transport | Adesso eviterei di far riprendere l'audio
+restart | vetoed_transport | Rimetti il pezzo dall'inizio
+resume | vetoed_transport | Ti chiedo di far riprendere l'audio adesso
+reject:unsupported | controls_outside_voice | Metti il ritornello in ripetizione
+reject:unsupported | controls_outside_voice | Disattiva la ripetizione della sezione
+reject:unsupported | controls_outside_voice | Abilita il ciclo tra i due marcatori
+reject:unsupported | controls_outside_voice | Fai passare al brano seguente
+reject:unsupported | controls_outside_voice | Seleziona l'audio che c'era prima
+reject:unsupported | controls_outside_voice | Spegni il riconoscimento dei comandi
+reject:unsupported | controls_outside_voice | Chiudi il microfono e continua ad ascoltare la musica
+reject:unsupported | controls_outside_voice | Interrompi la registrazione della voce
+reject:unsupported | controls_outside_voice | Riprendi il brano nella cartella successiva
+restart | controls_outside_voice | Ricomincia dall'inizio del loop che ho già impostato
+stay_paused | controls_outside_voice | Lascia fermo il brano corrente
+reject:unsupported | continuous_tempo | Fai un crescendo di velocità nell'ultima battuta
+reject:unsupported | continuous_tempo | Fai salire il tempo un punto per ogni giro
+reject:unsupported | continuous_tempo | Accelera a poco a poco finché arrivo al ritornello
+reject:unsupported | continuous_tempo | Rallenta progressivamente ogni quattro battute
+reject:unsupported | continuous_tempo | Tieni una rampa dal settanta al novanta percento
+adjust_rate:6 | continuous_tempo | Alza il tempo di sei punti in un colpo
+set_rate:79 | continuous_tempo | Da adesso usa il settantanove percento della velocità
+reject:unsupported | unsupported_sequence | Vai al settantuno per cento e metti in pausa
+reject:unsupported | unsupported_sequence | Lascia in pausa dopo aver alzato di nove punti
+reject:unsupported | unsupported_sequence | Cambia il tempo al novantatré per cento, riprendi e poi fermati
+reject:unsupported | unsupported_sequence | Mettiti al centoquattordici per cento, poi riprendi e poi ricomincia
+reject:unsupported | unsupported_sequence | Riprendi e dopo porta la velocità al centosette percento
+reject:unsupported | unsupported_sequence | Rallenta di sette punti, riprendi e passa al file dopo
+reject:ambiguous | unsupported_sequence | Mettiti a novantotto per cento e forse riprendi, vediamo
+reject:ambiguous | unsupported_sequence | Prima il ritmo a settantacinque, poi scegli se ripartire
+set_rate:71+resume | unsupported_sequence | Vai al settantuno per cento e riprendi a suonare
+adjust_rate:9+restart | unsupported_sequence | Alza di nove punti e riparti dall'inizio del pezzo
+set_rate:93+resume | unsupported_sequence | Cambia il tempo al novantatré per cento e riprendi a suonare
+set_rate:98+restart | unsupported_sequence | Imposta la velocità al novantotto per cento e ricomincia da capo
+reject:ambiguous | broken_transcript | ritmo boh trentadue parte
+reject:ambiguous | broken_transcript | punto due pausa poi forse
+reject:ambiguous | broken_transcript | cento quanto continua non
+reject:ambiguous | broken_transcript | velocità parola ripresa o
+set_rate:64+resume | broken_transcript | velocita sessantaquattro percento riprendi
+adjust_rate:-11+restart | broken_transcript | undici punti piu piano e ricomincia

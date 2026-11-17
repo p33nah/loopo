@@ -175,8 +175,18 @@ INTERNET permission. The 452,594,560-byte `rejection-02` INT8 bundle had SHA-256
 `5170cd1e6684dbbdd9fc84e37d1783b74661313eb579c45f4a005d76ab06f7cc` on both Colab and the phone.
 
 After a cold launch, a typed `riprendi` returned `resume` in 2,211 ms. The live Vosk trial recorded
-two accepted restart plans and three rejected rate plans. The rate calls arrived with null arguments
-and the Kotlin validator rejected them. The parser produced a usable
-plan on all five transcribed requests. The five model requests took 1,711–2,309 ms, measured around
+two accepted restart plans and three rejected rate plans. The original Kotlin boundary rejected the rate calls because it did not recognize the Gson
+`Number` representation from LiteRT-LM. The trace also rendered those values as null. The parser
+produced a usable plan on all five transcripts. The model requests took 1,711–2,309 ms, measured around
 `sendMessage` only. The trial establishes offline speech-to-plan execution on this phone. It leaves
 rate argument generation or decoding, wake-word activation, and playback dispatch unverified.
+
+The corrected pilot APK had SHA-256
+`5de7a5e93187c4cbeeb908ba383874045474b9d6f6e790a071c3d5485355af07`. I replayed the three rate
+transcripts as text on the same Redmi with the same bundle. All three calls had valid numeric
+arguments. The model got one plan exactly right (−7 points). It returned an absolute 71% instead
+of 70% for one transcript and proposed a relative −90 points instead of an absolute 70% for
+another. A separate typed negation produced a malformed call in the response text and no structured
+call. The validator returned no plan. The four cold-launch inference calls took 2,663–3,283 ms.
+The corrected build passed the exact-integer regression, rejecting fractional, nonfinite and
+overflowing values.

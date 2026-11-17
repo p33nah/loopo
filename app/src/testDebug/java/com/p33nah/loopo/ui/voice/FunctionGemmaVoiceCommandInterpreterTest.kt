@@ -1,6 +1,7 @@
 package com.p33nah.loopo.ui.voice
 
 import com.p33nah.loopo.domain.model.PlaybackRate
+import java.math.BigDecimal
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -26,6 +27,22 @@ class FunctionGemmaVoiceCommandInterpreterTest {
 		assertAction("stay_paused", emptyMap(), VoiceAction.StayPaused)
 		assertAction("set_rate", mapOf("percent" to 125.0), VoiceAction.SetRate(PlaybackRate(125)))
 		assertAction("adjust_rate", mapOf("delta_percent" to -5), VoiceAction.AdjustRate(RateDeltaPercent.from(-5)!!))
+	}
+
+	@Test
+	fun acceptsExactIntegersFromGenericJsonNumberRepresentations() {
+		assertAction("set_rate", mapOf("percent" to BigDecimal("70")), VoiceAction.SetRate(PlaybackRate(70)))
+		assertAction(
+			"adjust_rate",
+			mapOf("delta_percent" to BigDecimal("-7")),
+			VoiceAction.AdjustRate(RateDeltaPercent.from(-7)!!),
+		)
+		for (value in listOf(BigDecimal("70.01"), BigDecimal("4294967366"), Double.NaN, null)) {
+			assertRejected(
+				listOf(VoiceModelToolCall("set_rate", mapOf("percent" to value))),
+				VoiceInterpretation.Rejection.InvalidArguments,
+			)
+		}
 	}
 
 	@Test

@@ -252,7 +252,11 @@ internal class FunctionGemmaPilotActivity : ComponentActivity() {
 			rawText?.let { append("\nModel raw text: $it") }
 			calls?.let { calls ->
 				append("\nRaw structured calls: ")
-				append(calls.joinToString(prefix = "[", postfix = "]") { call -> "${call.name}${JSONObject(call.arguments).toString()}" })
+				append(calls.joinToString(prefix = "[", postfix = "]") { call ->
+					val arguments = JSONObject()
+					call.arguments.forEach { (name, value) -> arguments.put(name, value ?: JSONObject.NULL) }
+					"${call.name}$arguments"
+				})
 			}
 			validatedPlan?.let { append("\nValidated model plan: $it") }
 			inferenceMillis?.let { append("\nInference: $it ms") }

@@ -65,12 +65,14 @@ internal object FunctionGemmaVoiceCommandInterpreter {
 		return call.arguments[expectedName].asInteger()
 	}
 
-	private fun Any?.asInteger(): Int? = when (this) {
-		is Int -> this
-		is Long -> takeIf { it >= Int.MIN_VALUE.toLong() && it <= Int.MAX_VALUE.toLong() }?.toInt()
-		is Float -> takeIf { isFinite() && this % 1f == 0f && this >= Int.MIN_VALUE && this <= Int.MAX_VALUE }?.toInt()
-		is Double -> takeIf { isFinite() && this % 1.0 == 0.0 && this >= Int.MIN_VALUE && this <= Int.MAX_VALUE }?.toInt()
-		else -> null
+	private fun Any?.asInteger(): Int? {
+		val number = this as? Number ?: return null
+		val decimal = number.toString().toBigDecimalOrNull() ?: return null
+		return try {
+			decimal.intValueExact()
+		} catch (_: ArithmeticException) {
+			null
+		}
 	}
 }
 

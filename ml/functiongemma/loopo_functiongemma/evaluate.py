@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import statistics
+import sys
 from collections import Counter
 from itertools import chain
 from pathlib import Path
@@ -80,6 +81,7 @@ def summarize(rows: list[dict]) -> dict:
     generation = [row["generation_ms"] for row in rows if row["generation_ms"] is not None]
     return {
         "exact_plan": rate(rows, lambda row: row["exact"]),
+        "positive_exact_plan": rate(positive, lambda row: row["exact"]),
         "ordered_tools_positive": rate(positive, lambda row: row["correct_tools"]),
         "arguments_given_correct_tools": rate(slots, lambda row: row["exact"]),
         "compound_exact": rate(compound, lambda row: row["exact"]),
@@ -87,6 +89,9 @@ def summarize(rows: list[dict]) -> dict:
         "no_call_on_unsupported": rate(unsupported, lambda row: row["exact"]),
         "no_call_on_ambiguous": rate(ambiguous, lambda row: row["exact"]),
         "false_accept_on_negatives": rate(negative, lambda row: bool(row["calls"])),
+        "wrong_usable_plan_on_positive": rate(
+            positive, lambda row: bool(row["calls"]) and row["calls"] != row["expected"]
+        ),
         "dispatch_risk": rate(rows, lambda row: row["dispatch_risk"]),
         "latency_ms": latency_summary([row["latency_ms"] for row in rows]),
         "generation_only_ms": latency_summary(generation) if generation else None,
@@ -156,11 +161,51 @@ def write_csv(path: Path, rows: list[dict]) -> None:
             })
 
 
-def compare(dataset: Path, inputs: dict[str, Path], output: Path) -> None:
+def quality_gates(summary: dict, min_positive_exact_rate: float | None,
+                  max_false_accept_rate: float | None,
+                  max_wrong_usable_rate: float | None) -> dict:
+    checks = {}
+    for name, threshold in (
+        ("min_positive_exact_rate", min_positive_exact_rate),
+        ("max_false_accept_rate", max_false_accept_rate),
+        ("max_wrong_usable_rate", max_wrong_usable_rate),
+    ):
+        if threshold is not None and not 0 <= threshold <= 1:
+            raise ValueError(f"{name} must be between 0 and 1")
+    if min_positive_exact_rate is not None:
+        observed = summary["positive_exact_plan"]["rate"]
+        checks["positive_exact_plan"] = {
+            "observed": observed, "minimum": min_positive_exact_rate,
+            "passed": observed is not None and observed >= min_positive_exact_rate,
+        }
+    if max_false_accept_rate is not None:
+        observed = summary["false_accept_on_negatives"]["rate"]
+        checks["false_accept_on_negatives"] = {
+            "observed": observed, "maximum": max_false_accept_rate,
+            "passed": observed is not None and observed <= max_false_accept_rate,
+        }
+    if max_wrong_usable_rate is not None:
+        observed = summary["wrong_usable_plan_on_positive"]["rate"]
+        checks["wrong_usable_plan_on_positive"] = {
+            "observed": observed, "maximum": max_wrong_usable_rate,
+            "passed": observed is not None and observed <= max_wrong_usable_rate,
+        }
+    return {"passed": all(check["passed"] for check in checks.values()), "checks": checks}
+
+
+def compare(dataset: Path, inputs: dict[str, Path], output: Path,
+            min_positive_exact_rate: float | None = None,
+            max_false_accept_rate: float | None = None,
+            max_wrong_usable_rate: float | None = None,
+            gate_inputs: set[str] | None = None) -> bool:
     rows = read_rows(dataset)
     if not rows:
         raise ValueError("evaluation dataset is empty")
     digest = hashlib.sha256(dataset.read_bytes()).hexdigest()
+    selected_gates = set(inputs) if gate_inputs is None else gate_inputs
+    unknown_gates = selected_gates - set(inputs)
+    if unknown_gates:
+        raise ValueError(f"unknown gate input(s): {', '.join(sorted(unknown_gates))}")
     systems = {}
     examples = []
     confusion_rows = []
@@ -174,10 +219,14 @@ def compare(dataset: Path, inputs: dict[str, Path], output: Path) -> None:
         observed, metadata = load_predictions(path, digest)
         scored = score(rows, observed)
         summary = summarize(scored)
+        gate = (quality_gates(summary, min_positive_exact_rate, max_false_accept_rate,
+                              max_wrong_usable_rate) if name in selected_gates else
+                {"passed": None, "checks": {}})
         matrix = confusion(scored)
         systems[name] = {
             "metadata": metadata, "metrics": summary, "by_category": metrics_by(scored, "category"),
             "by_variant": metrics_by(scored, "variant"), "per_tool": per_tool(scored), "confusion": matrix,
+            "quality_gate": gate,
         }
         examples.extend({"interpreter": name, **row} for row in scored)
         confusion_rows.extend({"interpreter": name, **cell} for cell in matrix)
@@ -194,6 +243,17 @@ def compare(dataset: Path, inputs: dict[str, Path], output: Path) -> None:
             for key, value in system["by_category"].items()
         )
         lines.append(f"- **{name}** — {detail}")
+    if any(system["quality_gate"]["checks"] for system in systems.values()):
+        lines.extend(["", "## Quality gates", ""])
+        for name, system in systems.items():
+            gate = system["quality_gate"]
+            status = "NOT GATED" if gate["passed"] is None else ("PASS" if gate["passed"] else "FAIL")
+            checks = ", ".join(
+                f"{key}: {value['observed']:.3%} ({'passed' if value['passed'] else 'failed'})"
+                if value["observed"] is not None else f"{key}: n/a (failed)"
+                for key, value in gate["checks"].items()
+            )
+            lines.append(f"- **{name}: {status}** — {checks}")
     lines.extend(["", "## Example failures", ""])
     for name in systems:
         failures = [row for row in examples if row["interpreter"] == name and not row["exact"]]
@@ -205,6 +265,7 @@ def compare(dataset: Path, inputs: dict[str, Path], output: Path) -> None:
     write_csv(output / "predictions.csv", examples)
     write_csv(output / "confusion.csv", confusion_rows)
     (output / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return all(systems[name]["quality_gate"]["passed"] for name in selected_gates)
 
 
 def select_checkpoint(dataset: Path, inputs: dict[str, Path], output: Path) -> None:
@@ -241,6 +302,12 @@ def main() -> None:
     report.add_argument("dataset", type=Path)
     report.add_argument("output", type=Path)
     report.add_argument("--input", metavar="NAME=PATH", action="append", required=True)
+    report.add_argument("--min-positive-exact-rate", type=float)
+    report.add_argument("--max-false-accept-rate", type=float)
+    report.add_argument("--max-wrong-usable-rate", type=float,
+                        help="maximum valid but wrong positive plans, divided by positives")
+    report.add_argument("--gate-input", action="append",
+                        help="apply thresholds only to this NAME (repeatable; defaults to all inputs)")
     selection = commands.add_parser("select", help="rank saved checkpoint predictions on validation only")
     selection.add_argument("dataset", type=Path)
     selection.add_argument("output", type=Path)
@@ -260,8 +327,15 @@ def main() -> None:
             if not name or not path or name in inputs:
                 parser.error("use --input NAME=PATH with unique nonempty names")
             inputs[name] = Path(path)
-        operation = select_checkpoint if args.command == "select" else compare
-        operation(args.dataset, inputs, args.output)
+        if args.command == "select":
+            select_checkpoint(args.dataset, inputs, args.output)
+        else:
+            passed = compare(args.dataset, inputs, args.output, args.min_positive_exact_rate,
+                             args.max_false_accept_rate, args.max_wrong_usable_rate,
+                             set(args.gate_input) if args.gate_input else None)
+            if not passed:
+                print(f"Quality gate failed; details: {args.output / 'summary.md'}", file=sys.stderr)
+                sys.exit(1)
 
 
 if __name__ == "__main__":

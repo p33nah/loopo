@@ -1,0 +1,225 @@
+# Frozen, independently authored parser holdout. Keep out of every training and validation split.
+# Format: label | family | transcript. `_asr` and `_dialect` families mark simulated noise.
+resume | resume_short | Dai, riprendi pure da qui
+resume | resume_context | Puoi continuare il brano dal punto in cui si è fermato
+resume | resume_context | Rimetti in moto la riproduzione da dove siamo
+resume | resume_context | Fai andare avanti la musica senza ricominciare
+resume | resume_context | Riporta l'audio in esecuzione al cursore attuale
+resume | resume_dialect | Fammi ripartire il pezzo da qua
+resume | resume_dialect | Vai avanti col brano, siamo rimasti lì
+resume | resume_dialect | Rimetti a suonare da questo passaggio
+resume | resume_asr | riprendi pure il pezzo da qui
+resume | resume_asr | fai play ancora da questo punto
+restart | restart_short | Ricomincia il brano dall'attacco
+restart | restart_context | Torna all'inizio della registrazione e avviala
+restart | restart_context | Riproduci di nuovo il pezzo partendo dal principio
+restart | restart_context | Voglio sentire il brano dall'inizio
+restart | restart_context | Riavvia questa traccia da zero
+restart | restart_context | Riporta la riproduzione al primo istante
+restart | restart_dialect | Rifai partire tutto dall'inizio
+restart | restart_dialect | Rimetti il pezzo da capo
+restart | restart_asr | ricomincia il brano dall inizio
+restart | restart_asr | riavvia la riproduzione da capo
+stay_paused | pause_short | Lascialo fermo per adesso
+stay_paused | pause_context | Per ora interrompi quello che sta suonando
+stay_paused | pause_context | Tieni la musica in pausa finché te lo dico
+stay_paused | pause_context | Ferma il brano qui senza ripartire
+stay_paused | pause_context | Metti in pausa la traccia che sto studiando
+stay_paused | pause_context | Lascia la riproduzione sospesa un momento
+stay_paused | pause_dialect | Stoppa un attimo il pezzo
+stay_paused | pause_dialect | Fermami l'audio qua
+stay_paused | pause_asr | interrompi la riproduzione per favore
+stay_paused | pause_asr | metti in pausa il brano adesso
+set_rate:37 | set_rate_clean | Metti la velocità esattamente a 37 per cento
+set_rate:43 | set_rate_clean | Imposta il ritmo su 43%
+set_rate:52 | set_rate_clean | Porta la velocità al 52 percento
+set_rate:61 | set_rate_clean | Regola la velocità a 61 per cento
+set_rate:68 | set_rate_clean | Metti il ritmo a 68%
+set_rate:74 | set_rate_clean | Imposta la velocità su 74 percento
+set_rate:82 | set_rate_clean | Porta il ritmo al 82 per cento
+set_rate:87 | set_rate_clean | Regola la velocità su 87%
+set_rate:93 | set_rate_clean | Imposta la velocità a 93 per cento
+set_rate:97 | set_rate_clean | Metti il ritmo su 97 percento
+set_rate:103 | set_rate_clean | Porta la velocità al 103%
+set_rate:108 | set_rate_clean | Regola il ritmo a 108 per cento
+set_rate:116 | set_rate_clean | Metti la velocità al 116 percento
+set_rate:121 | set_rate_clean | Imposta il ritmo su 121%
+set_rate:133 | set_rate_clean | Porta la velocità a 133 per cento
+set_rate:142 | set_rate_clean | Regola la velocità a 142%
+set_rate:157 | set_rate_clean | Imposta la velocità su 157 percento
+set_rate:169 | set_rate_clean | Metti il ritmo a 169%
+set_rate:184 | set_rate_clean | Porta la velocità al 184 per cento
+set_rate:196 | set_rate_clean | Regola il ritmo su 196 percento
+set_rate:39 | set_rate_asr | metti la velocita a 39 percento
+set_rate:46 | set_rate_asr | porta il ritmo al 46%
+set_rate:54 | set_rate_asr | imposta la velocita su 54 per cento
+set_rate:63 | set_rate_asr | regola il ritmo a 63 percento
+set_rate:72 | set_rate_dialect | Mettimelo ar 72% de velocità
+set_rate:78 | set_rate_dialect | Portalo all'78 per cento del ritmo
+set_rate:85 | set_rate_dialect | Fammi il brano all'85% di velocità
+set_rate:91 | set_rate_dialect | Mettici la velocità sull'91 percento
+set_rate:99 | set_rate_asr | al 99 per cento la velocita del brano
+set_rate:106 | set_rate_asr | porta la velocita su 106%
+set_rate:113 | set_rate_asr | imposta il ritmo al 113 percento
+set_rate:128 | set_rate_asr | regolami la velocita su 128 per cento
+set_rate:137 | set_rate_dialect | Fammi andare il pezzo al 137% de velocità
+set_rate:148 | set_rate_asr | metti il ritmo al 148 per cento
+set_rate:163 | set_rate_asr | porta la velocita a 163 percento
+set_rate:177 | set_rate_asr | imposta il ritmo su 177%
+set_rate:189 | set_rate_asr | regolami la velocita al 189 per cento
+set_rate:25 | set_rate_boundary | Imposta la velocità al 25 percento
+set_rate:200 | set_rate_boundary | Porta il ritmo al 200 per cento
+set_rate:58 | set_rate_words | Metti la velocità a cinquantotto percento
+set_rate:76 | set_rate_words | Imposta il ritmo su settantasei per cento
+set_rate:84 | set_rate_words | Porta la velocità all'ottantaquattro percento
+set_rate:95 | set_rate_words | Regola il ritmo a novantacinque per cento
+set_rate:111 | set_rate_words | Metti la velocità a centoundici percento
+set_rate:124 | set_rate_words | Imposta il ritmo su centoventiquattro per cento
+set_rate:153 | set_rate_words | Porta la velocità al centocinquantatré percento
+set_rate:172 | set_rate_words | Regola il ritmo a centosettantadue percento
+adjust_rate:3 | adjust_clean | Aumenta la velocità di 3 punti percentuali
+adjust_rate:5 | adjust_clean | Alza il ritmo di 5 percento
+adjust_rate:7 | adjust_clean | Incrementa la velocità di 7 per cento
+adjust_rate:9 | adjust_clean | Accelera di 9 punti percentuali
+adjust_rate:12 | adjust_clean | Aumenta il ritmo di 12 percento
+adjust_rate:16 | adjust_clean | Alza la velocità di 16 per cento
+adjust_rate:21 | adjust_clean | Incrementa il ritmo di 21 punti percentuali
+adjust_rate:28 | adjust_clean | Accelera la velocità di 28 percento
+adjust_rate:35 | adjust_clean | Aumenta di 35 punti percentuali il ritmo
+adjust_rate:48 | adjust_clean | Alza il ritmo di 48 per cento
+adjust_rate:-4 | adjust_clean | Riduci la velocità di 4 punti percentuali
+adjust_rate:-6 | adjust_clean | Abbassa il ritmo di 6 percento
+adjust_rate:-11 | adjust_clean | Diminuisci la velocità di 11 per cento
+adjust_rate:-17 | adjust_clean | Rallenta di 17 punti percentuali
+adjust_rate:-23 | adjust_clean | Riduci il ritmo di 23 percento
+adjust_rate:-32 | adjust_clean | Abbassa la velocità di 32 per cento
+adjust_rate:-41 | adjust_clean | Diminuisci il ritmo di 41 punti percentuali
+adjust_rate:-57 | adjust_clean | Rallenta la velocità di 57 percento
+adjust_rate:-73 | adjust_clean | Riduci di 73 punti percentuali il ritmo
+adjust_rate:-96 | adjust_clean | Abbassa la velocità di 96 per cento
+adjust_rate:8 | adjust_asr | aumenta la velocita di 8 punti percentuali
+adjust_rate:13 | adjust_asr | alza il ritmo di 13 per cento
+adjust_rate:19 | adjust_asr | incrementa la velocita di 19 percento
+adjust_rate:27 | adjust_dialect | Dammi 27 punti in più di velocità
+adjust_rate:34 | adjust_asr | accelera di 34 punti percentuali
+adjust_rate:44 | adjust_dialect | Mettici 44 punti di velocità in più
+adjust_rate:62 | adjust_asr | aumenta del 62 per cento la velocita
+adjust_rate:88 | adjust_asr | alza di 88 punti il ritmo
+adjust_rate:-9 | adjust_asr | riduci la velocita di 9 punti percentuali
+adjust_rate:-15 | adjust_asr | abbassa il ritmo di quindici punti percentuali
+adjust_rate:-26 | adjust_asr | diminuisci di 26 punti la velocita
+adjust_rate:-39 | adjust_dialect | Togli 39 punti di velocità al pezzo
+adjust_rate:-53 | adjust_asr | rallenta di 53 per cento
+adjust_rate:-68 | adjust_dialect | Leva 68 punti percentuali dal ritmo
+adjust_rate:-82 | adjust_asr | riduci la velocita del 82 per cento
+adjust_rate:-117 | adjust_asr | abbassa di 117 punti la velocita
+set_rate:64+resume | compound_set_resume | Metti la velocità al 64 percento e poi riprendi
+set_rate:118+restart | compound_set_restart | Porta il ritmo al 118% e poi ricomincia
+adjust_rate:6+resume | compound_adjust_resume | Alza la velocità di 6 punti e poi riprendi
+adjust_rate:-18+restart | compound_adjust_restart | Rallenta di 18 punti percentuali e poi ricomincia da capo
+set_rate:73+resume | compound_set_resume | Imposta la velocità su 73 per cento e poi continua
+set_rate:146+restart | compound_set_restart | Regola il ritmo al 146% e poi riavvia da zero
+adjust_rate:24+resume | compound_adjust_resume | Aumenta il ritmo di 24 punti e poi fai play
+adjust_rate:-31+restart | compound_adjust_restart | Riduci la velocità di 31 percento e poi ricomincia
+set_rate:89+resume | compound_set_resume | Metti il ritmo a 89 percento e poi avvia
+adjust_rate:42+resume | compound_adjust_resume | Incrementa la velocità di 42 punti percentuali e poi riprendi
+reject:ambiguous | ambiguous_value | Portala alla velocità giusta per questo passaggio
+reject:ambiguous | ambiguous_value | Mettimi il ritmo come prima, quello che avevo scelto
+reject:ambiguous | ambiguous_direction | La porto più su o la abbasso un po'?
+reject:ambiguous | ambiguous_choice | Preferisci il 72 o il 78 percento, quale dei due?
+reject:ambiguous | ambiguous_choice | Meglio riprendere oppure ricominciare da capo?
+reject:ambiguous | ambiguous_value | Abbassala alla percentuale che ti ho detto prima
+reject:ambiguous | ambiguous_fragment | Settanta, magari ottanta, non ricordo
+reject:ambiguous | ambiguous_fragment | Velocità più o meno quella, dai
+reject:ambiguous | ambiguous_direction | Potrei aumentare oppure diminuire di qualcosa
+reject:ambiguous | ambiguous_action | Pausa o riparti, decido tra poco
+reject:ambiguous | ambiguous_value | Impostala al numero che avevamo in mente
+reject:ambiguous | ambiguous_choice | A 66 per cento o a 86, come preferisci tu
+reject:ambiguous | ambiguous_fragment | Quasi al doppio, ma non proprio
+reject:ambiguous | ambiguous_direction | Fai una modifica piccola alla velocità
+reject:ambiguous | ambiguous_value | Rimettila sul valore precedente
+reject:ambiguous | ambiguous_choice | Puoi fermarla o lasciarla andare, vediamo
+reject:ambiguous | ambiguous_fragment | Quella cosa della velocità lì, sì
+reject:ambiguous | ambiguous_value | Portala a un valore più comodo
+reject:ambiguous | ambiguous_action | Riprendi, oppure no aspetta
+reject:negated | negated_restart | Non far ripartire il brano adesso
+reject:negated | negated_restart | Evita di ricominciare da zero
+reject:negated | negated_restart | Per favore non riavviare il pezzo
+reject:negated | negated_resume | Non riprendere ancora la riproduzione
+reject:negated | negated_resume | Lascia stare, non farlo andare
+reject:negated | negated_pause | Non metterlo in pausa, lascialo com'è
+reject:negated | negated_rate | Non alzare la velocità per ora
+reject:negated | negated_rate | Evita di rallentare la traccia
+reject:negated | negated_rate | Non impostarla al 72 percento
+reject:negated | negated_rate | Non ridurre di cinque punti la velocità
+reject:negated | negated_rate | Non voglio che il brano riparta
+reject:negated | negated_restart | Ti avevo detto di non ricominciare
+reject:negated | negated_resume | Non farlo ripartire dal punto attuale
+reject:negated | negated_pause | Non fermare la musica adesso
+reject:negated | negated_rate | Non aumentare di 12 punti il ritmo
+reject:negated | negated_rate | Non portare il tempo su 90 per cento
+reject:negated | negated_rate | Non cambiare la velocità, grazie
+reject:negated | negated_restart | Niente ripartenza dall'inizio, per favore
+reject:negated | negated_resume | Non dare play, sto ancora parlando
+reject:unsupported | unsupported_navigation | Passa alla traccia successiva della scaletta
+reject:unsupported | unsupported_navigation | Apri il brano che viene dopo questo
+reject:unsupported | unsupported_loop | Attiva il loop tra il punto A e il punto B
+reject:unsupported | unsupported_loop | Sposta il marcatore B fino alla fine del ritornello
+reject:unsupported | unsupported_library | Carica l'album che ho ascoltato ieri
+reject:unsupported | unsupported_library | Cerca un'altra registrazione nella cartella
+reject:unsupported | unsupported_seek | Salta avanti di trenta secondi
+reject:unsupported | unsupported_seek | Torna indietro fino all'ultima strofa
+reject:unsupported | unsupported_tempo | Cambia il tono di un semitono
+reject:unsupported | unsupported_tempo | Trasponi questa parte due toni sotto
+reject:unsupported | unsupported_equalizer | Alza i bassi e abbassa gli alti
+reject:unsupported | unsupported_equalizer | Attiva il filtro per togliere il rumore
+reject:unsupported | unsupported_recording | Registra una nota vocale mentre suona
+reject:unsupported | unsupported_recording | Esporta il passaggio in un file audio
+reject:unsupported | unsupported_ui | Nascondi la forma d'onda e allarga la vista
+reject:unsupported | unsupported_ui | Cambia il colore del marcatore A
+reject:unsupported | unsupported_automation | A ogni battuta aumenta la velocità di un punto
+reject:unsupported | unsupported_automation | Quando arriva il ritornello riparti da capo
+reject:unsupported | unsupported_sequence | Prima cerca un altro file e poi riproducilo
+reject:unsupported | unsupported_sequence | Imposta il timer e poi chiudi l'applicazione
+reject:unsupported | unsupported_sequence | Fai pausa, sposta il marcatore e riparti
+reject:unsupported | unsupported_sequence | Cambia traccia e poi metti la velocità al 90%
+reject:unsupported | unsupported_sequence | Imposta 80, riprendi e dopo fermala
+reject:unsupported | unsupported_sequence | Prima riparti e poi abbassa il ritmo
+reject:unsupported | unsupported_sequence | Abbassa di 10 punti e poi mettila in pausa
+reject:unsupported | unsupported_sequence | Aumenta la velocità, ricomincia e poi riprendi
+reject:unsupported | unsupported_asr | Passa alla tracia sucesiva per favore
+reject:unsupported | unsupported_asr | Apri il pezo dopo questo
+reject:ambiguous | ambiguous_asr | velocita quel numero li forse settanta no
+reject:ambiguous | ambiguous_asr | riprendi ricomincia da capo quale era
+reject:negated | negated_asr | non fare ripartire il branno adesso
+reject:negated | negated_asr | evita di alzare la velocita al novanta
+reject:unsupported | unsupported_asr | sposta il marcatore be alla fine del pezzo
+reject:unsupported | unsupported_asr | cambia traccia e poi alza il ritmo
+reject:ambiguous | ambiguous_asr | pausa continua aspetta no
+reject:unsupported | unsupported_asr | fammi registrare mentre va la musika
+reject:ambiguous | ambiguous_value | Portala a una velocità ragionevole per studiare
+reject:ambiguous | ambiguous_direction | Aggiungi qualcosa oppure toglilo, come vuoi
+reject:ambiguous | ambiguous_choice | Vuoi che riparta da capo o dal segno A?
+reject:ambiguous | ambiguous_fragment | Sessantacinque, o forse settantacinque
+reject:ambiguous | ambiguous_action | Fermala e lasciala andare, decidi tu
+reject:ambiguous | ambiguous_value | Metti la velocità su quel valore lì
+reject:negated | negated_restart | Non ricominciare la traccia, sto cercando il punto giusto
+reject:negated | negated_resume | Non avviare ancora, manca un attimo
+reject:negated | negated_rate | Non abbassare di 8 punti il ritmo
+reject:negated | negated_rate | Evita di metterla al 100 percento
+reject:negated | negated_pause | Non fermare il brano finché conto
+reject:unsupported | unsupported_loop | Togli la ripetizione automatica del passaggio
+reject:unsupported | unsupported_seek | Vai al minuto due e quindici
+reject:unsupported | unsupported_library | Ordina i brani per nome del file
+reject:unsupported | unsupported_tempo | Cambia la tonalità in maggiore
+reject:unsupported | unsupported_equalizer | Metti un po' di riverbero alla chitarra
+reject:unsupported | unsupported_recording | Salva questa esecuzione come nuova registrazione
+reject:unsupported | unsupported_ui | Ingrandisci la forma d'onda
+reject:unsupported | unsupported_automation | Al prossimo cambio di accordo aumenta il tempo
+reject:unsupported | unsupported_sequence | Metti in pausa e poi spostati al ritornello
+reject:unsupported | unsupported_sequence | Riparti da zero e dopo imposta il ritmo all'80%
+reject:unsupported | unsupported_sequence | Abbassa il volume e poi riprendi la traccia
+reject:unsupported | unsupported_sequence | Seleziona il loop e avvialo dall'inizio
+reject:unsupported | unsupported_sequence | Cerca la strofa e poi torna al ritornello
+reject:unsupported | unsupported_asr | apri il file dopo e cambia la tonalita
+reject:ambiguous | ambiguous_fragment | più veloce o più piano, boh

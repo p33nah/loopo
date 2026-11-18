@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from loopo_functiongemma.evaluate import compare, score, select_checkpoint, summarize
+from loopo_functiongemma.evaluate import compare, quality_gates, score, select_checkpoint, summarize
 
 
 RESUME = {"name": "resume", "arguments": {}}
@@ -43,11 +43,18 @@ def test_exact_ordered_plan_arguments_and_false_accepts(tmp_path):
         "predictions": predictions,
     }), encoding="utf-8")
     output = tmp_path / "report"
-    compare(dataset, {"fixture": input_path}, output)
+    assert compare(dataset, {"fixture": input_path}, output, 0.5, 0.5, 0.5,
+                   gate_inputs={"fixture"}) is True
     assert {path.name for path in output.iterdir()} == {
         "report.json", "predictions.csv", "confusion.csv", "summary.md",
     }
-    assert "wrong_plan" in (output / "summary.md").read_text(encoding="utf-8")
+    summary = (output / "summary.md").read_text(encoding="utf-8")
+    assert "wrong_plan" in summary
+    assert "fixture: PASS" in summary
+
+    assert compare(dataset, {"fixture": input_path}, output, 0.75, 0.5, 0.5,
+                   gate_inputs={"fixture"}) is False
+    assert "fixture: FAIL" in (output / "summary.md").read_text(encoding="utf-8")
 
     dataset.write_text(dataset.read_text(encoding="utf-8").replace("example", "changed"), encoding="utf-8")
     with pytest.raises(ValueError, match="different input"):
@@ -60,6 +67,31 @@ def test_comparison_rejects_missing_or_duplicate_prediction_ids():
     for observed in ([], [prediction, prediction]):
         with pytest.raises(ValueError, match="same IDs"):
             score([row], observed)
+
+
+def test_quality_gates_use_positive_and_negative_denominators():
+    rows = [
+        {"id": "hit", "expected": [RESUME], "category": "resume"},
+        {"id": "miss", "expected": [RATE], "category": "set_rate"},
+        {"id": "negative", "expected": [], "category": "ambiguous"},
+    ]
+    observed = [
+        {"id": "hit", "calls": [RESUME], "invalid": False, "latency_ms": 1},
+        {"id": "miss", "calls": [], "invalid": False, "latency_ms": 1},
+        {"id": "negative", "calls": [], "invalid": False, "latency_ms": 1},
+    ]
+    metrics = summarize(score(rows, observed))
+    passed = quality_gates(metrics, 0.5, 0.0, 0.0)
+    failed = quality_gates(metrics, 0.75, 0.0, 0.0)
+    assert passed["passed"] is True
+    assert passed["checks"]["positive_exact_plan"]["observed"] == 0.5
+    assert failed["passed"] is False
+    assert failed["checks"]["false_accept_on_negatives"]["observed"] == 0
+
+
+def test_quality_gate_thresholds_must_be_probabilities():
+    with pytest.raises(ValueError, match="between 0 and 1"):
+        quality_gates({}, 1.1, None, None)
 
 
 def test_checkpoint_selection_prefers_fewer_unwanted_calls_when_cost_ties(tmp_path):

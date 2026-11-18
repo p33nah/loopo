@@ -59,3 +59,18 @@ PY
 ```
 
 The probe JSONL has SHA-256 `d51d261b3f72c63cc712db190be9102f6ef7197e3bb89e56d4a398ac13a6fd35`. Use the [replay and comparison commands](../README.md#local-training-and-comparison) on that file for the parser and both adapters. The production parser rejected 32/32 negatives and matched 3/16 positive plans. The PR #67 classifier rejected 31/32 negatives and matched 8/16 positive plans, with one valid wrong plan on a positive. See the [PR evidence](https://github.com/p33nah/loopo/pull/73) for the adapter comparison.
+## Contrastive corpus audit
+
+The November 18, 2026 audit regenerated the 3,000-row `rejection-02` corpus before changing the generator. The new `contrastive` profile keeps the row count and the 1,200 no-call rows. The [generation command](../README.md#run-the-contrastive-follow-up) includes the prior rejection contribution and protects both evaluation files.
+
+| Training coverage | `rejection-02` | `contrastive` |
+| --- | ---: | ---: |
+| Absolute values represented at least once | 120/176 | 176/176 |
+| Absolute values represented in digits and words | 17/176 | 176/176 |
+| Signed deltas represented at least once | 178/350 | 350/350 |
+| Signed deltas represented in digits and words | 19/350 | 350/350 |
+| Generated context wrappers | 1,698 | 598 |
+
+The audit counts the first action of compound plans. The old generator used digits for even numeric expansions and words for odd expansions. The new generator uses both forms for every supported value. It includes absolute requests without a unit and absolute and relative requests sharing the same percentage unit. It varies negation, ambiguous choices, and values just inside or outside the supported range. The authored-label review changed three pure prohibitions from pause actions to no-call and dropped three weak transport examples in the new profile. Automated checks cover every generated row's structure, expected plan, numeric coverage, and overlap with evaluation templates.
+
+The test, challenge, and validation splits retain their historical bytes. The prior rejection probe, the earlier numeric replay, and 32 newly authored held-out examples run after checkpoint selection. The new probe includes natural paraphrases and one simulated recognition error. Run `evaluate compare` separately for each set so the results retain their denominators. The audit establishes dataset coverage. Model accuracy requires the GPU run.

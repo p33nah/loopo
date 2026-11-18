@@ -59,7 +59,35 @@ python -m loopo_functiongemma.corpus import generated/personale --examples examp
 
 `generate` adds your annotated examples to the balanced corpus before sampling. `import` uses your examples as the entire training split and keeps the original evaluation splits. Repeat `--examples` to read several files. The importer reports invalid labels, normalized duplicates, and numeric templates shared with evaluation. Human review is still needed for semantic duplicates.
 
-For the next Colab run, choose `balanced` and a fresh run name. To add personal examples, upload your text file to Colab and set `examples_file` to its runtime path, such as `/content/le-mie-frasi.txt`.
+To add personal examples, upload your text file to Colab and set `examples_file` to its runtime path, such as `/content/le-mie-frasi.txt`.
+
+## Run the contrastive follow-up
+
+The `contrastive` profile trains on paired phrasing for absolute rates, signed changes, and negated requests. Each supported absolute rate and signed delta appears in digits and words. The historic test and challenge files stay byte-identical. The prior numeric and rejection probes, plus the new [32-case evaluation set](reports/contrastive-holdout.txt), stay out of training and checkpoint selection.
+
+Generate and inspect the same input files before using a GPU. Run from `ml/functiongemma`.
+
+```sh
+python -m loopo_functiongemma.corpus generate generated/contrastive-v1 \
+  --profile contrastive \
+  --examples examples/rejection-followup.txt \
+  --holdout reports/rejection-probe.txt \
+  --holdout reports/contrastive-holdout.txt
+python -m loopo_functiongemma.corpus inspect generated/contrastive-v1
+```
+
+In the notebook, select **T4 GPU**. Set `repo_ref` to the full commit SHA, `experiment` to `contrastive`, `use_drive` to `True`, and `run_name` to a fresh name. Run the cells in order. The notebook verifies the Drive mount and format of every training target before training. For a fresh checkout, use the same commit in the notebook URL and `repo_ref`.
+
+The new profile retains every epoch checkpoint and a recovery checkpoint every 125 optimizer steps. Checkpoint selection uses generated plans on validation. It counts wrong or unwanted valid plans twice and other mismatches once. Ties prefer fewer wrong or unwanted plans, then the earlier checkpoint. Training also saves the loss-selected adapter for comparison. The notebook exports full-precision weights from the generation-selected checkpoint and evaluates those weights separately.
+
+The run directory is `MyDrive/loopo-functiongemma/contrastive/<run_name>`. It contains the corpus, copied configuration and notebook, package versions, input hashes, all checkpoints, the loss-selected adapter, the merged checkpoint, prediction files and reports. After an interruption, use the same SHA, GPU type and run name, enable `resume`, and run the cells again. The trainer resumes the latest complete checkpoint matching the run metadata. Keep the prior directory if no complete checkpoint exists, then use a fresh run name.
+
+The sibling ZIP includes per-file checksums and a `.zip.sha256` sidecar. The notebook reopens and verifies it. Keep the Drive directory for resume and copy the verified ZIP and sidecar to separate storage. When you generate the [INT8 bundle](../../docs/ml/functiongemma/ANDROID.md) from `merged-hf`, retain the bundle and its replay evidence in the run directory and create a newly named archive.
+
+```sh
+python -m loopo_functiongemma.artifacts archive /path/to/run /path/to/run-with-int8.zip
+python -m loopo_functiongemma.artifacts verify /path/to/run-with-int8.zip
+```
 
 ## Colab smoke and full run
 

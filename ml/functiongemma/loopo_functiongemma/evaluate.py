@@ -207,23 +207,50 @@ def compare(dataset: Path, inputs: dict[str, Path], output: Path) -> None:
     (output / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def select_checkpoint(dataset: Path, inputs: dict[str, Path], output: Path) -> None:
+    rows = read_rows(dataset)
+    digest = hashlib.sha256(dataset.read_bytes()).hexdigest()
+    if not rows or not any(row["expected"] for row in rows) or all(row["expected"] for row in rows):
+        raise ValueError("selection requires both positive and negative validation examples")
+    candidates = {}
+    for name, path in inputs.items():
+        observed, metadata = load_predictions(path, digest)
+        checkpoint = Path(metadata["adapter"])
+        if name != checkpoint.name or not name.startswith("checkpoint-"):
+            raise ValueError(f"{path}: expected predictions from {name}")
+        results = score(rows, observed)
+        errors = sum(not row["exact"] for row in results)
+        risky = sum(row["dispatch_risk"] for row in results)
+        candidates[name] = {"errors": errors, "wrong_or_unwanted": risky, "cost": errors + risky}
+    selected = min(candidates, key=lambda name: (
+        candidates[name]["cost"], candidates[name]["wrong_or_unwanted"], int(name.removeprefix("checkpoint-")),
+    ))
+    write_json(output, {"dataset_sha256": digest, "selected": selected, "candidates": candidates})
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     run = commands.add_parser("predict")
     run.add_argument("dataset", type=Path)
     run.add_argument("output", type=Path)
-    run.add_argument("--adapter", type=Path)
+    model = run.add_mutually_exclusive_group()
+    model.add_argument("--adapter", type=Path)
+    model.add_argument("--merged", type=Path)
     report = commands.add_parser("compare")
     report.add_argument("dataset", type=Path)
     report.add_argument("output", type=Path)
     report.add_argument("--input", metavar="NAME=PATH", action="append", required=True)
+    selection = commands.add_parser("select", help="rank saved checkpoint predictions on validation only")
+    selection.add_argument("dataset", type=Path)
+    selection.add_argument("output", type=Path)
+    selection.add_argument("--input", metavar="NAME=PATH", action="append", required=True)
     args = parser.parse_args()
     if args.command == "predict":
         rows = read_rows(args.dataset)
         if not rows:
             parser.error("input must be nonempty")
-        outputs, metadata = predictions(rows, args.adapter)
+        outputs, metadata = predictions(rows, args.adapter, merged=args.merged)
         metadata["dataset_sha256"] = hashlib.sha256(args.dataset.read_bytes()).hexdigest()
         write_json(args.output, {"metadata": metadata, "predictions": outputs})
     else:
@@ -233,7 +260,8 @@ def main() -> None:
             if not name or not path or name in inputs:
                 parser.error("use --input NAME=PATH with unique nonempty names")
             inputs[name] = Path(path)
-        compare(args.dataset, inputs, args.output)
+        operation = select_checkpoint if args.command == "select" else compare
+        operation(args.dataset, inputs, args.output)
 
 
 if __name__ == "__main__":

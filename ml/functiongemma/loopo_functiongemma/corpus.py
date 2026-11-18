@@ -221,6 +221,9 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     generate = commands.add_parser("generate", help="write a balanced corpus and frozen test splits")
     generate.add_argument("path", type=Path)
+    generate.add_argument("--profile", choices=("balanced", "contrastive"), default="balanced")
+    generate.add_argument("--holdout", type=Path, action="append", default=[],
+                          help="protect and emit an evaluation-only example file (contrastive only)")
     generate.add_argument("--rows", type=int, default=3000)
     generate.add_argument("--reject-percent", type=int, default=40)
     generate.add_argument("--examples", type=Path, action="append", default=[])
@@ -235,8 +238,18 @@ def main(argv: list[str] | None = None) -> int:
             dataset = {split: _read_jsonl(args.path / f"{split}.jsonl") for split in SPLITS}
             validate_splits(dataset)
         else:
-            dataset = (build_corpus(args.rows, args.reject_percent, args.examples)
-                       if args.command == "generate" else personal_corpus(args.examples))
+            probes = {}
+            if args.command == "import":
+                dataset = personal_corpus(args.examples)
+            elif args.profile == "contrastive":
+                from .contrastive import build_contrastive_corpus
+
+                dataset, probes = build_contrastive_corpus(args.rows, args.reject_percent, args.examples or [], args.holdout)
+            else:
+                if args.holdout:
+                    raise ValueError("--holdout requires --profile contrastive")
+                dataset = build_corpus(args.rows, args.reject_percent, args.examples)
+            dataset.update(probes)
             for split, samples in dataset.items():
                 _write_jsonl(args.path / f"{split}.jsonl", samples)
         print_summary(dataset)

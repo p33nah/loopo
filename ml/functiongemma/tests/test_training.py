@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from loopo_functiongemma.train import make_trainer
+from loopo_functiongemma.train import latest_checkpoint, make_trainer
 
 
 def test_cpu_training_masks_prompt_saves_and_reloads_adapter(tmp_path, monkeypatch):
@@ -41,6 +41,7 @@ def test_cpu_training_masks_prompt_saves_and_reloads_adapter(tmp_path, monkeypat
         {"id": "reject", "text": "Qual è la temperatura?", "expected": []},
     ]
     settings = tomllib.loads((Path(__file__).resolve().parents[1] / "configs/smoke.toml").read_text())
+    settings.update(checkpoint_steps=1, retain_all_checkpoints=True, max_steps=3)
     trainer = make_trainer(model, tokenizer, rows, rows, settings, tmp_path)
     batch = next(iter(trainer.get_train_dataloader()))
     assert batch["labels"][0, 0].item() == -100
@@ -48,18 +49,24 @@ def test_cpu_training_masks_prompt_saves_and_reloads_adapter(tmp_path, monkeypat
     class InterruptAfterOneStep(TrainerCallback):
         def on_step_end(self, args, state, control, **kwargs):
             if state.global_step == 1:
-                control.should_save = True
                 control.should_training_stop = True
 
     trainer.add_callback(InterruptAfterOneStep())
     assert trainer.train().global_step == 1
     checkpoint = tmp_path / "checkpoint-1"
     assert (checkpoint / "optimizer.pt").is_file()
+    assert latest_checkpoint(tmp_path, verified=True) == checkpoint
     trainer = make_trainer(Gemma3ForCausalLM(config), tokenizer, rows, rows, settings, tmp_path)
     result = trainer.train(resume_from_checkpoint=str(checkpoint))
-    assert result.global_step == 2
-    assert (tmp_path / "checkpoint-2" / "optimizer.pt").is_file()
+    assert result.global_step == 3
+    assert {path.name for path in tmp_path.glob("checkpoint-*")} == {"checkpoint-1", "checkpoint-2", "checkpoint-3"}
+    assert any(row.get("step") == 2 and "eval_loss" in row for row in trainer.state.log_history)
+    assert latest_checkpoint(tmp_path, verified=True) == tmp_path / "checkpoint-3"
     adapter = tmp_path / "adapter"
     trainer.save_model(adapter)
     reloaded = PeftModel.from_pretrained(Gemma3ForCausalLM(config), adapter)
     assert "default" in reloaded.peft_config
+    corrupt = tmp_path / "checkpoint-3" / "optimizer.pt"
+    state = corrupt.read_bytes()
+    corrupt.write_bytes(bytes([state[0] ^ 1]) + state[1:])
+    assert latest_checkpoint(tmp_path, verified=True) == tmp_path / "checkpoint-2"

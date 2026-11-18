@@ -48,13 +48,21 @@ def require_adapter_revision(adapter: Path) -> None:
         raise ValueError("adapter base model does not match this experiment")
 
 
-def predictions(rows: list[dict], adapter: Path | None = None) -> tuple[list[dict], dict]:
+def predictions(rows: list[dict], adapter: Path | None = None, *, merged: Path | None = None) -> tuple[list[dict], dict]:
     import torch
     from peft import PeftModel
+    from transformers import AutoModelForCausalLM, AutoTokenizer
 
     start = perf_counter_ns()
-    tokenizer = load_tokenizer()
-    model = load_base()
+    if merged is None:
+        tokenizer = load_tokenizer()
+        model = load_base()
+    else:
+        export = json.loads((merged / "loopo-export.json").read_text(encoding="utf-8"))
+        if (export.get("model"), export.get("revision")) != (MODEL_ID, MODEL_REVISION):
+            raise ValueError("merged model does not match this experiment")
+        tokenizer = AutoTokenizer.from_pretrained(merged, local_files_only=True)
+        model = AutoModelForCausalLM.from_pretrained(merged, dtype=torch.float32, local_files_only=True)
     if adapter:
         require_adapter_revision(adapter)
         model = PeftModel.from_pretrained(model, adapter)
@@ -68,6 +76,7 @@ def predictions(rows: list[dict], adapter: Path | None = None) -> tuple[list[dic
         "model": MODEL_ID,
         "revision": MODEL_REVISION,
         "adapter": str(adapter) if adapter else None,
+        "merged": str(merged) if merged else None,
         "device": torch.cuda.get_device_name() if device == "cuda" else platform.processor() or "CPU",
         "platform": platform.platform(),
         "dependencies": {package: version(package) for package in ("torch", "transformers", "peft")},
@@ -103,6 +112,7 @@ def predictions(rows: list[dict], adapter: Path | None = None) -> tuple[list[dic
             calls, error = [], str(exc)
         return {
             "id": row["id"], "calls": calls, "invalid": error is not None, "error": error,
+            "prompt_token_ids": prompt["input_ids"],
             "raw": raw, "generation_ms": generation_ms, "latency_ms": (perf_counter_ns() - start) / 1e6,
         }
 

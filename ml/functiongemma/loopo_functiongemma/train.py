@@ -10,11 +10,52 @@ import tomllib
 from importlib.metadata import version
 from pathlib import Path
 
+from .artifacts import sha256_file
 from .dataset import validate_dataset
 from .model import MODEL_ID, MODEL_REVISION, load_base, load_tokenizer
 from .protocol import training_features
 
 LOG = logging.getLogger(__name__)
+RESUME_FILES = (
+    "adapter_model.safetensors", "optimizer.pt", "rng_state.pth",
+    "scheduler.pt", "trainer_state.json",
+)
+CHECKPOINT_MANIFEST = "checkpoint-complete.json"
+
+
+def publish_json(path: Path, data: dict) -> None:
+    pending = path.with_suffix(".tmp")
+    pending.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    pending.replace(path)
+
+
+def checkpoint_hashes(path: Path) -> dict[str, str]:
+    return {name: sha256_file(path / name) for name in (*RESUME_FILES, "adapter_config.json")}
+
+
+def verify_checkpoint(path: Path) -> None:
+    manifest = json.loads((path / CHECKPOINT_MANIFEST).read_text(encoding="utf-8"))
+    if manifest != checkpoint_hashes(path):
+        raise ValueError(f"checkpoint checksum mismatch: {path}")
+
+
+def latest_checkpoint(output: Path, verified: bool) -> Path | None:
+    candidates = sorted(
+        ((int(path.name.removeprefix("checkpoint-")), path) for path in output.glob("checkpoint-*")
+         if path.name.removeprefix("checkpoint-").isdigit() and path.is_dir()),
+        reverse=True,
+    )
+    for _, path in candidates:
+        if verified:
+            try:
+                verify_checkpoint(path)
+                return path
+            except (OSError, ValueError):
+                pass
+            LOG.warning("Skipping incomplete or corrupt checkpoint: %s", path)
+        elif all((path / name).is_file() for name in RESUME_FILES):
+            return path
+    return None
 
 
 def read_rows(path: Path) -> list[dict]:
@@ -25,11 +66,30 @@ def make_trainer(model, tokenizer, train_rows: list[dict], validation_rows: list
     import torch
     from datasets import Dataset
     from peft import LoraConfig, TaskType
+    from transformers import TrainerCallback
     from trl import SFTConfig, SFTTrainer
 
     use_gpu = torch.cuda.is_available()
     bf16 = use_gpu and torch.cuda.is_bf16_supported(including_emulation=False)
     limit = config["max_length"]
+    interval = config.get("checkpoint_steps", 0)
+    retain_all = config.get("retain_all_checkpoints", False)
+    if type(interval) is not int or interval < 0:
+        raise ValueError("checkpoint_steps must be a nonnegative integer")
+    if type(retain_all) is not bool:
+        raise ValueError("retain_all_checkpoints must be a boolean")
+
+    class VerifiedCheckpoints(TrainerCallback):
+        def on_step_end(self, args, state, control, **kwargs):
+            if interval and state.global_step % interval == 0:
+                control.should_save = True
+
+        def on_save(self, args, state, control, **kwargs):
+            if not args.should_save:
+                return
+            path = output / f"checkpoint-{state.global_step}"
+            publish_json(path / CHECKPOINT_MANIFEST, checkpoint_hashes(path))
+
     train_dataset = Dataset.from_list([training_features(tokenizer, row, limit) for row in train_rows])
     eval_dataset = Dataset.from_list([training_features(tokenizer, row, limit) for row in validation_rows])
     args = SFTConfig(
@@ -52,7 +112,7 @@ def make_trainer(model, tokenizer, train_rows: list[dict], validation_rows: list
         completion_only_loss=True,
         eval_strategy="epoch",
         save_strategy="epoch",
-        save_total_limit=2,
+        save_total_limit=None if retain_all else 2,
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
         logging_steps=1,
@@ -62,6 +122,7 @@ def make_trainer(model, tokenizer, train_rows: list[dict], validation_rows: list
     return SFTTrainer(
         model=model, args=args, processing_class=tokenizer,
         train_dataset=train_dataset, eval_dataset=eval_dataset,
+        callbacks=[VerifiedCheckpoints()] if interval or retain_all else [],
         peft_config=LoraConfig(
             task_type=TaskType.CAUSAL_LM, r=8, lora_alpha=16, lora_dropout=0.05,
             target_modules=["q_proj", "v_proj"],
@@ -75,14 +136,8 @@ def train(dataset: Path, config_path: Path, output: Path, resume: bool) -> None:
 
     validate_dataset(dataset)
     config = tomllib.loads(config_path.read_text(encoding="utf-8"))
-    checkpoint_files = {"adapter_model.safetensors", "trainer_state.json", "optimizer.pt",
-                        "scheduler.pt", "rng_state.pth"}
-    complete = [
-        path for path in output.glob("checkpoint-*")
-        if path.name.removeprefix("checkpoint-").isdigit() and path.is_dir()
-        and all((path / name).is_file() for name in checkpoint_files)
-    ]
-    checkpoint = max(complete, key=lambda path: int(path.name.removeprefix("checkpoint-")), default=None)
+    verified = bool(config.get("checkpoint_steps") or config.get("retain_all_checkpoints"))
+    checkpoint = latest_checkpoint(output, verified) if resume else None
     if resume and not checkpoint:
         raise ValueError("no resumable checkpoint in the output directory")
     if not resume and output.is_dir() and any(output.iterdir()):
@@ -119,10 +174,12 @@ def train(dataset: Path, config_path: Path, output: Path, resume: bool) -> None:
         "device": torch.cuda.get_device_name() if torch.cuda.is_available() else "cpu",
     }
     metadata_path = output / "run.json"
-    if resume and json.loads(metadata_path.read_text(encoding="utf-8")) != metadata:
-        raise ValueError("checkpoint configuration, environment or training data changed")
-    output.mkdir(parents=True, exist_ok=True)
-    metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+    if resume:
+        if json.loads(metadata_path.read_text(encoding="utf-8")) != metadata:
+            raise ValueError("checkpoint configuration, environment or training data changed")
+    else:
+        output.mkdir(parents=True, exist_ok=True)
+        publish_json(metadata_path, metadata)
     LOG.info("Run configuration: %s", metadata)
     model = load_base(full_precision=True)
     model.config.use_cache = False
@@ -138,7 +195,7 @@ def train(dataset: Path, config_path: Path, output: Path, resume: bool) -> None:
         "history": trainer.state.log_history,
         "adapter": str(output / "adapter"),
     }
-    (output / "training-metrics.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    publish_json(output / "training-metrics.json", summary)
     LOG.info("Adapter: %s, selected validation loss: %s", output / "adapter", validation["eval_loss"])
 
 

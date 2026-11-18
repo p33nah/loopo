@@ -49,7 +49,8 @@ jobs:
           profile: pixel_6
           ram-size: 4096M
           cores: 4
-          target: google_apis_ps16k
+          target: google_apis_playstore_ps16k
+          emulator-boot-timeout: 360
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim
           script: bash .github/verify-api35-playback.sh

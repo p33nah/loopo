@@ -7,9 +7,11 @@ test "$(sed -n '2p' evidence/runtime.txt)" = 35
 test "$(sed -n '3p' evidence/runtime.txt)" = x86_64
 
 cp "$ANDROID_HOME/emulator/source.properties" evidence/emulator.txt
-adb shell 'su 0 setprop bionic.linker.16kb.app_compat.enabled false'
-adb shell 'su 0 setprop pm.16kb.app_compat.disabled true'
-adb shell 'getprop bionic.linker.16kb.app_compat.enabled; getprop pm.16kb.app_compat.disabled' >> evidence/runtime.txt
+if adb shell 'su 0 id' 2>/dev/null | grep -q 'uid=0'; then
+  adb shell 'su 0 setprop bionic.linker.16kb.app_compat.enabled false'
+  adb shell 'su 0 setprop pm.16kb.app_compat.disabled true'
+fi
+adb shell 'getprop ro.build.type; getprop bionic.linker.16kb.app_compat.enabled; getprop pm.16kb.app_compat.disabled' >> evidence/runtime.txt
 
 adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard

@@ -1,3 +1,4 @@
+import com.android.build.api.variant.HostTestBuilder
 import java.security.MessageDigest
 
 plugins {
@@ -135,6 +136,9 @@ dependencies {
 
 val wakeModelPath = providers.gradleProperty("loopoWakeModel")
 val functionGemmaEnabled = providers.gradleProperty("loopoFunctionGemma").orNull == "true"
+androidComponents.beforeVariants(androidComponents.selector().withBuildType("functionGemma")) { variant ->
+	variant.hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
+}
 androidComponents.onVariants(androidComponents.selector().all()) { variant ->
 	if (variant.buildType == "debug" || (functionGemmaEnabled && variant.buildType == "functionGemma")) {
 		if (variant.buildType == "functionGemma") {

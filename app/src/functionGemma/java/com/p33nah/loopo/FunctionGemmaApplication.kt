@@ -6,6 +6,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.p33nah.loopo.ui.voice.FunctionGemmaCommandInterpreter
+import com.p33nah.loopo.ui.voice.ItalianVoiceCommandParser
+import com.p33nah.loopo.ui.voice.VoiceModelToolCall
 import com.p33nah.loopo.ui.voice.VoiceExperiment
 import com.p33nah.loopo.ui.voice.VoiceExperimentSession
 import com.p33nah.loopo.ui.voice.VoiceInterpretation
@@ -103,45 +107,45 @@ internal class FunctionGemmaApplication : Application(), VoiceExperiment {
 			onDismissRequest = { showDialog = false },
 			title = { Text("Esperimento FunctionGemma") },
 			text = {
-			Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-				HorizontalDivider()
-				Text(
-					if (state.modelReady) "Bundle presente · SHA-256 verificato prima dell'uso" else "Bundle FunctionGemma non installato",
-					style = MaterialTheme.typography.bodySmall,
-				)
-				Button(
-					enabled = !armed && !state.sessionOpen && !state.importing,
-					onClick = { picker.launch(arrayOf("application/octet-stream", "*/*")) },
-				) { Text(if (state.modelReady) "Sostituisci bundle" else "Importa bundle .litertlm") }
-				Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-					InferenceBackend.entries.forEach { backend ->
-						if (state.backend == backend) {
-							Button(enabled = !armed && !state.sessionOpen && !state.importing, onClick = {}) {
-								Text(backend.label)
+				Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+					HorizontalDivider()
+					Text(
+						if (state.modelReady) "Bundle presente · SHA-256 verificato prima dell'uso" else "Bundle FunctionGemma non installato",
+						style = MaterialTheme.typography.bodySmall,
+					)
+					Button(
+						enabled = !armed && !state.sessionOpen && !state.importing,
+						onClick = { picker.launch(arrayOf("application/octet-stream", "*/*")) },
+					) { Text(if (state.modelReady) "Sostituisci bundle" else "Importa bundle .litertlm") }
+					Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+						InferenceBackend.entries.forEach { backend ->
+							if (state.backend == backend) {
+								Button(enabled = !armed && !state.sessionOpen && !state.importing, onClick = {}) {
+									Text(backend.label)
+								}
+							} else {
+								OutlinedButton(
+									enabled = !armed && !state.sessionOpen && !state.importing,
+									onClick = { scope.launch { application.selectBackend(backend) } },
+								) { Text(backend.label) }
 							}
-						} else {
-							OutlinedButton(
-								enabled = !armed && !state.sessionOpen && !state.importing,
-								onClick = { scope.launch { application.selectBackend(backend) } },
-							) { Text(backend.label) }
 						}
 					}
-				}
-				Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-					Switch(
-						checked = state.modelOnly,
-						enabled = !armed && !state.sessionOpen && !state.importing,
-						onCheckedChange = { enabled -> scope.launch { application.setModelOnly(enabled) } },
-					)
-					Column {
-						Text("Solo modello · modalità sperimentale")
-						Text("Se attiva, un piano può essere inviato anche quando il parser non concorda.", style = MaterialTheme.typography.bodySmall)
+					Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+						Switch(
+							checked = state.modelOnly,
+							enabled = !armed && !state.sessionOpen && !state.importing,
+							onCheckedChange = { enabled -> scope.launch { application.setModelOnly(enabled) } },
+						)
+						Column {
+							Text("Solo modello · modalità sperimentale")
+							Text("Se attiva, un piano può essere inviato anche quando il parser non concorda.", style = MaterialTheme.typography.bodySmall)
+						}
 					}
+					Text(state.status, style = MaterialTheme.typography.bodySmall)
+					state.lastInference?.let { Text("Ultima inferenza: $it", style = MaterialTheme.typography.bodySmall) }
+					state.lastTurn?.let { Text("Ultimo turno: $it", style = MaterialTheme.typography.bodySmall) }
 				}
-				Text(state.status, style = MaterialTheme.typography.bodySmall)
-				state.lastInference?.let { Text("Ultima inferenza: $it", style = MaterialTheme.typography.bodySmall) }
-				state.lastTurn?.let { Text("Ultimo turno: $it", style = MaterialTheme.typography.bodySmall) }
-			},
 			},
 			confirmButton = { TextButton(onClick = { showDialog = false }) { Text("Chiudi") } },
 		)
@@ -181,7 +185,7 @@ internal class FunctionGemmaApplication : Application(), VoiceExperiment {
 					engineInitializationMs = (System.nanoTime() - initializeStarted) / NANOS_PER_MILLI
 					engine = created
 				} catch (failure: Throwable) {
-					created.close()
+					runCatching { created.close() }.exceptionOrNull()?.let(failure::addSuppressed)
 					throw failure
 				}
 			}

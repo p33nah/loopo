@@ -1,0 +1,69 @@
+# label | family | transcript
+resume | val_from_marker | Continua la traccia dal punto in cui l'hai fermata.
+resume | val_from_marker | Dai di nuovo il via alla musica da dove siamo rimasti.
+resume | val_end_rest | La pausa è finita, puoi continuare a suonare.
+resume | val_end_rest | Basta pausa, manda avanti l'ascolto senza tornare indietro.
+resume | val_current_place | Rimetti in marcia il brano esattamente da qui.
+restart | val_opening_bar | Fammi riascoltare il pezzo dalla battuta d'apertura.
+restart | val_opening_bar | Rimandami alla prima battuta e falla partire.
+restart | val_reset_pass | Annulla il punto raggiunto e riparti dall'inizio.
+restart | val_reset_pass | Per questo ascolto ricomincia proprio dall'attacco.
+restart | val_reset_pass | Rimetti la riproduzione dall'inizio del giro corrente.
+stay_paused | val_hold_here | Tieni ferma la riproduzione su questo punto.
+stay_paused | val_hold_here | Congela qui l'ascolto.
+stay_paused | val_breath | Dagli una pausa, devo prendere fiato.
+stay_paused | val_breath | Sospendi la musica mentre riprendo fiato.
+stay_paused | val_breath | Nel frattempo lascia il pezzo in pausa.
+set_rate:42 | val_target_playback | Il nuovo valore della velocità di riproduzione dev'essere 42%.
+set_rate:116 | val_target_playback | Per la riproduzione voglio come nuovo valore 116 per cento.
+set_rate:85 | val_target_fixed | Da questo momento usa come velocità fissa l'85 percento.
+set_rate:131 | val_target_fixed | Tieni fissa la riproduzione al centotrentuno per cento.
+set_rate:54 | val_target_fixed | Fai in modo che la velocità resti al cinquantaquattro percento.
+adjust_rate:-11 | val_change_down | Sottrai undici punti percentuali dal valore corrente.
+adjust_rate:-9 | val_change_down | Fammi calare di nove punti percentuali rispetto a ora.
+adjust_rate:7 | val_change_up | Somma sette punti al valore attuale della velocità.
+adjust_rate:14 | val_change_up | Aggiungi quattordici punti alla percentuale a cui siamo adesso.
+adjust_rate:-3 | val_change_down | Fammi scendere di tre punti sulla percentuale attuale.
+set_rate:71+resume | val_compound_carry | Fai diventare la velocità settantuno per cento, quindi prosegui da qui.
+set_rate:53+restart | val_compound_reset | Scegli il cinquantatré percento per la velocità e avvia dall'inizio.
+adjust_rate:-4+resume | val_compound_rel | Adesso togli quattro punti alla velocità, poi continua dal punto fermo.
+adjust_rate:19+restart | val_compound_rel | Dai diciannove punti in più al tempo di riproduzione e dopo ricomincia dall'attacco.
+set_rate:148+resume | val_compound_carry | Una volta impostata la velocità a 148%, prosegui dal punto attuale.
+reject:negated | val_do_not_touch_transport | Ti ho chiesto di evitare che cominci un altro ascolto.
+reject:negated | val_do_not_touch_transport | Niente ripartenza da capo per il momento.
+reject:negated | val_do_not_touch_transport | La riproduzione non va interrotta di nuovo.
+reject:negated | val_do_not_touch_speed | Tengo questa velocità, fai a meno di modificarla.
+reject:negated | val_do_not_touch_speed | Evita qualsiasi variazione del tempo che ho già impostato.
+reject:negated | val_do_not_touch_speed | Per ora niente aumenti di velocità.
+reject:negated | val_do_not_touch_transport | Ti raccomando di non toccare il pulsante di avvio.
+reject:negated | val_do_not_touch_transport | Proibito rimetterlo in moto, per ora.
+reject:ambiguous | val_incomplete_rate | Correggi la velocità come prima, quella più adatta.
+reject:ambiguous | val_incomplete_rate | Avrei bisogno di una variazione della velocità, vediamo.
+reject:ambiguous | val_incomplete_rate | Sposta appena il controllo della velocità.
+reject:ambiguous | val_conflicting_actions | Fermalo, anzi non so se continuare o tornare all'inizio.
+reject:ambiguous | val_conflicting_actions | Preferisco ripartire da qui o forse dall'inizio, devo decidere.
+reject:ambiguous | val_conflicting_actions | Dovremmo restare fermi oppure mandare avanti il pezzo?
+reject:ambiguous | val_conflicting_actions | Metti in pausa ma lascia correre la riproduzione allo stesso tempo.
+reject:ambiguous | val_incomplete_rate | Quel valore percentuale lì, lo volevo diverso.
+reject:unsupported | val_mixer | Mandami il basso tutto a sinistra.
+reject:unsupported | val_mixer | Alza le alte frequenze senza cambiare il tempo.
+reject:unsupported | val_study_feature | Trascrivi gli accordi del ponte.
+reject:unsupported | val_study_feature | Metti un segnalibro sul secondo ritornello.
+reject:unsupported | val_study_feature | Vai direttamente al ritornello.
+reject:unsupported | val_study_feature | Esporta la parte che ho selezionato in MP3.
+reject:unsupported | val_mixer | Isola la voce dalla chitarra.
+reject:unsupported | val_study_feature | Annota sul brano che qui entra il rullante.
+reject:out_of_range | val_invalid_rate | Come rapporto di riproduzione mi serve il 219 per cento.
+reject:out_of_range | val_invalid_rate | Voglio una riproduzione dieci volte più veloce dell'originale.
+reject:out_of_range | val_invalid_rate | Come velocità di lettura mettimi esattamente 0%.
+reject:out_of_range | val_invalid_delta | Servono 187 punti percentuali di aumento dello stesso controllo.
+reject:out_of_range | val_invalid_delta | Chiedo una riduzione di 183 punti percentuali in un passaggio.
+reject:out_of_range | val_invalid_delta | Sottrai 250 punti percentuali alla velocità.
+reject:unrelated | val_rehearsal_chatter | La parte della batteria entra dopo la chitarra.
+reject:unrelated | val_rehearsal_chatter | Chi ha scritto l'arrangiamento di questo brano?
+reject:unrelated | val_rehearsal_chatter | Aspetto il maestro di musica in sala prove.
+reject:unrelated | val_rehearsal_chatter | Quello che hai sentito era un accordo di re minore.
+reject:unrelated | val_background | Oggi ho l'autobus dopo la lezione.
+reject:unrelated | val_background | Il finestrino è rimasto un po' aperto.
+reject:unrelated | val_background | Domani porto i cavi e il leggio ricurvo.
+reject:unrelated | val_background | Nel negozio vicino hanno cambiato la vetrina.

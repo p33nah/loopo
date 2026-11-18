@@ -1,0 +1,49 @@
+# Evaluation only. Freeze before training and use the same rows for both adapters.
+reject:ambiguous | unspecified_value | Portala alla percentuale che avevamo
+reject:ambiguous | unspecified_value | La velocità impostamela un pochino
+reject:ambiguous | unspecified_value | Metti il ritmo a quel numero lì
+reject:ambiguous | unspecified_value | Fai una variazione di velocità
+reject:ambiguous | contradictory_intent | Si continua o si ricomincia da capo?
+reject:ambiguous | contradictory_intent | Meglio continuare o aspettare in pausa?
+reject:ambiguous | contradictory_intent | Potresti riavviarla, magari no
+reject:ambiguous | contradictory_intent | Lascia che decida dopo se farla partire
+reject:ambiguous | unspecified_direction | Abbassa di quanto, avevamo un numero?
+reject:ambiguous | unspecified_direction | Di cinquantasei o fino a cinquantasei, come dicevi?
+reject:ambiguous | unspecified_direction | Riparti da circa due terzi del pezzo
+reject:ambiguous | unspecified_direction | Decido dopo se portare la velocità su o giù
+reject:negated | prohibition | Non voglio sentire il pezzo ripartire da capo
+reject:negated | prohibition | Per favore, niente riavvio
+reject:negated | prohibition | Non farlo tornare a suonare
+reject:negated | prohibition | Ho detto di evitare la ripartenza
+reject:negated | prohibition | Non impostarlo al centosei per cento
+reject:unsupported | absent_controls | Togli il ciclo fra A e B
+reject:unsupported | absent_controls | Accendi la modalità ripetizione
+reject:unsupported | absent_controls | Cambia il file con il prossimo della lista
+reject:unsupported | absent_controls | Spegni l'ascolto della voce
+reject:unsupported | absent_controls | Fai un salto alla seconda traccia
+reject:unsupported | automatic_changes | A ogni battuta aggiungi un punto di velocità
+reject:unsupported | automatic_changes | Scala il tempo gradatamente mentre suona
+reject:unsupported | automatic_changes | Al ritornello passa da metà tempo a tempo normale
+reject:unsupported | invalid_order | Imposta l'ottantatré percento e mettiti subito in pausa
+reject:unsupported | invalid_order | Fai partire, cambia velocità e fai partire di nuovo
+reject:unsupported | invalid_order | Riduci di quattordici punti e tieni l'audio in pausa
+reject:unsupported | invalid_order | Imposta il sessantasei percento, riprendi, poi ricomincia
+reject:unsupported | invalid_order | Avvia il brano e poi passa al novantasei percento
+reject:ambiguous | fragmentary_transcript | percento tre brano no vado
+reject:ambiguous | fragmentary_transcript | settanta come riprendi quanto
+set_rate:83 | clear_request | Imposta la velocità all'ottantatré percento
+set_rate:56 | clear_request | Fa' in modo che suoni al cinquantasei percento
+adjust_rate:-14 | clear_request | Riduci la velocità di quattordici punti percentuali
+adjust_rate:3 | clear_request | Dai tre punti percentuali in più al ritmo
+restart | clear_request | Fai partire il pezzo di nuovo dal principio
+restart | clear_request | Riparti daccapo dal passaggio in loop
+resume | clear_request | Riprendi esattamente da dove eravamo rimasti
+resume | clear_request | Ora puoi mandarlo di nuovo avanti da qui
+stay_paused | clear_request | Continua a tener fermo l'audio in pausa
+stay_paused | clear_request | Mantieni la riproduzione in pausa un altro momento
+set_rate:66+resume | clear_request | Imposta il sessantasei percento di velocità e riprendi
+set_rate:96+restart | clear_request | Porta la velocità al novantasei percento, poi ricomincia dall'inizio
+adjust_rate:-14+resume | clear_request | Riduci di quattordici punti e riprendi a suonare
+adjust_rate:3+restart | clear_request | Alza la velocità di tre punti e rimetti il pezzo da capo
+set_rate:106 | clear_request | Metti il tempo al centosei per cento e basta
+set_rate:109 | clear_request | Abbassa al centonove percento

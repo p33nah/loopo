@@ -1,0 +1,8 @@
+seed = 67
+max_length = 1024
+train_limit = 12
+validation_limit = 6
+max_steps = 2
+epochs = 1
+gradient_accumulation_steps = 1
+learning_rate = 0.0002

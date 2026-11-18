@@ -1,0 +1,27 @@
+# Regression only. The numbers and wording reproduce the 17 November 2026 experiment.
+set_rate:69 | explicit_absolute | imposta la velocità al 69 percento
+set_rate:70 | explicit_absolute | imposta la velocità al 70 percento
+set_rate:71 | explicit_absolute | imposta la velocità al 71 percento
+set_rate:69 | explicit_absolute | imposta la velocità al sessantanove percento
+set_rate:70 | explicit_absolute | imposta la velocità al settanta percento
+set_rate:71 | explicit_absolute | imposta la velocità al settantuno percento
+set_rate:69 | direction_absolute | riduci la velocità a 69
+set_rate:70 | direction_absolute | riduci la velocità a 70
+set_rate:71 | direction_absolute | riduci la velocità a 71
+set_rate:69 | direction_absolute | riduci la velocità a sessantanove
+set_rate:70 | direction_absolute | riduci la velocità a settanta
+set_rate:71 | direction_absolute | riduci la velocità a settantuno
+adjust_rate:-69 | explicit_relative | riduci la velocità di 69 punti percentuali
+adjust_rate:-70 | explicit_relative | riduci la velocità di 70 punti percentuali
+adjust_rate:-71 | explicit_relative | riduci la velocità di 71 punti percentuali
+adjust_rate:-69 | explicit_relative | riduci la velocità di sessantanove punti percentuali
+adjust_rate:-70 | explicit_relative | riduci la velocità di settanta punti percentuali
+adjust_rate:-71 | explicit_relative | riduci la velocità di settantuno punti percentuali
+reject:negated | numeric_negation | non impostare la velocità al 69 percento
+reject:negated | numeric_negation | non impostare la velocità al 70 percento
+reject:negated | numeric_negation | non impostare la velocità al 71 percento
+reject:negated | numeric_negation | non impostare la velocità al sessantanove percento
+reject:negated | numeric_negation | non impostare la velocità al settanta percento
+reject:negated | numeric_negation | non impostare la velocità al settantuno percento
+adjust_rate:-7 | explicit_relative | riduci la velocità di sette punti percentuali
+reject:negated | transport_negation | non ricominciare

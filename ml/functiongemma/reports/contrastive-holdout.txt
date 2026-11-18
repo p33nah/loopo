@@ -1,0 +1,33 @@
+# Evaluation only. Authored before the contrastive training run.
+set_rate:69 | new_target | Per questo passaggio mi fai sentire il brano al sessantanove per cento?
+set_rate:70 | new_target | Per le prossime battute voglio ascoltarlo esattamente al settanta per cento.
+set_rate:71 | new_target | Portami la traccia a settantuno, come percentuale di velocità.
+set_rate:25 | new_target | Proviamo a un quarto della velocità originale.
+set_rate:200 | new_target | Fammela sentire al duecento percento del tempo di partenza.
+adjust_rate:-70 | new_delta | Togli al valore corrente settanta punti percentuali di velocità.
+adjust_rate:7 | new_delta | Aggiungi sette punti percentuali alla velocità di adesso.
+adjust_rate:-1 | new_delta | Un punto percentuale in meno rispetto alla velocità attuale.
+adjust_rate:175 | new_delta | Somma centosettantacinque punti percentuali alla velocità corrente.
+adjust_rate:-71 | new_delta | Fammi scendere di settantuno punti percentuali dalla velocità che c'è ora.
+set_rate:70+restart | new_sequence | Il passaggio al settanta per cento, e poi riascoltiamolo dall'inizio.
+adjust_rate:7+resume | new_sequence | Sette punti percentuali in più sulla velocità e continua da lì.
+resume | new_transport | Puoi rimettere in moto l'audio dal punto in cui l'hai fermato?
+restart | new_transport | Rimetti il brano da dove comincia, per favore.
+stay_paused | new_transport | Aspetta in pausa un altro secondo.
+set_rate:83 | new_vosk_like | al bassa il brano all ottanta tre percento
+reject:negated | new_prohibition | Evita per ora di farlo andare al settanta per cento.
+reject:negated | new_prohibition | Tienila così, non togliere quei settanta punti percentuali.
+reject:negated | new_prohibition | Per questa battuta mi raccomando, niente ripartenza da capo.
+reject:negated | new_prohibition | Non mandarlo avanti dopo aver cambiato la velocità.
+reject:ambiguous | new_ambiguous | Mi sa che è settanta, o forse è di settanta che va abbassato.
+reject:ambiguous | new_ambiguous | Togli dalla velocità, ma ti dico dopo quanti punti.
+reject:ambiguous | new_ambiguous | Suona più piano di settanta.
+reject:unrelated | new_mention | Il maestro scrive sempre "vai al settanta per cento" sul quaderno.
+reject:unrelated | new_mention | A settantuno gradi il forno è ancora freddo.
+reject:unrelated | new_mention | Nel tutorial c'è scritto di riprendere, ma sto leggendo le istruzioni.
+reject:out_of_range | new_bound | Fammi ascoltare il brano al ventiquattro per cento della sua velocità.
+reject:out_of_range | new_bound | Al duecentouno per cento di velocità, grazie.
+reject:out_of_range | new_bound | Scala centosettantasei punti percentuali da questa velocità.
+reject:unsupported | new_unsupported | Parti dall'inizio e quando sei a metà aumenta di sette punti percentuali.
+reject:unsupported | new_unsupported | Impostala al settantuno per cento e sposta il marcatore B.
+reject:unsupported | new_unsupported | Imposta il settanta per cento e poi scendi al sessantanove.

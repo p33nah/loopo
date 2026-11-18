@@ -1,0 +1,11 @@
+/runs/
+/generated/
+/.venv/
+*.egg-info/
+*.safetensors
+*.litertlm
+*.tflite
+*.pt
+*.bin
+.ipynb_checkpoints/
+.pytest_cache/

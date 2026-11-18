@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+	<uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+	<application>
+		<activity android:name="com.p33nah.loopo.MainActivity">
+			<intent-filter tools:node="removeAll" />
+		</activity>
+		<activity
+			android:name="com.p33nah.loopo.ui.voice.FunctionGemmaPilotActivity"
+			android:exported="true"
+			android:label="Loopo FunctionGemma pilot">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+	</application>
+</manifest>

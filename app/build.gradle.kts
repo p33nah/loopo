@@ -43,6 +43,9 @@ android {
 		debug {
 			enableUnitTestCoverage = true
 			enableAndroidTestCoverage = true
+			if (providers.gradleProperty("loopoFunctionGemmaPilot").orNull == "true") {
+				applicationIdSuffix = ".functiongemma"
+			}
 		}
 		release {
 			isMinifyEnabled = false
@@ -93,6 +96,17 @@ android {
 	}
 }
 
+val functionGemmaPilotEnabled = providers.gradleProperty("loopoFunctionGemmaPilot").orNull == "true"
+if (functionGemmaPilotEnabled) {
+	android.sourceSets.getByName("debug").manifest.srcFile("src/functionGemmaPilotDebug/AndroidManifest.xml")
+}
+
+androidComponents.onVariants(androidComponents.selector().withBuildType("debug")) { variant ->
+	if (functionGemmaPilotEnabled) {
+		variant.sources.kotlin?.addStaticSourceDirectory("src/functionGemmaPilotDebug/java")
+	}
+}
+
 dependencies {
 	implementation(libs.androidx.activity.compose)
 	implementation(platform(libs.androidx.compose.bom))
@@ -111,6 +125,9 @@ dependencies {
 	debugImplementation(platform(libs.androidx.compose.bom))
 	debugImplementation("androidx.compose.ui:ui-test-manifest")
 	implementation(libs.vosk.android)
+	if (functionGemmaPilotEnabled) {
+		debugImplementation("com.google.ai.edge.litertlm:litertlm-android:0.18.0")
+	}
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.robolectric:robolectric:4.17")
 	testImplementation("androidx.test:core:1.7.0")

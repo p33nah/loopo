@@ -26,16 +26,24 @@ class DryRunTool(lm.Tool):
 
 def predict(engine, row):
     sampler = lm.SamplerConfig(top_k=1, top_p=1.0, temperature=1.0)
-    with engine.create_conversation(
-        system_message=DEVELOPER_PROMPT,
-        tools=[DryRunTool(tool) for tool in TOOLS],
-        automatic_tool_calling=False,
-        sampler_config=sampler,
-        max_output_tokens=64,
-    ) as conversation:
-        started = time.monotonic()
-        reply = conversation.send_message(row["text"])
-        latency_ms = (time.monotonic() - started) * 1000
+    started = time.monotonic()
+    try:
+        with engine.create_conversation(
+            system_message=DEVELOPER_PROMPT,
+            tools=[DryRunTool(tool) for tool in TOOLS],
+            automatic_tool_calling=False,
+            sampler_config=sampler,
+            max_output_tokens=64,
+        ) as conversation:
+            started = time.monotonic()
+            reply = conversation.send_message(row["text"])
+            latency_ms = (time.monotonic() - started) * 1000
+    except (RuntimeError, ValueError) as exc:
+        return {
+            "id": row["id"], "calls": [], "invalid": True,
+            "latency_ms": (time.monotonic() - started) * 1000,
+            "raw": "", "structured_calls": [], "error": f"Runtime {type(exc).__name__}: {exc}",
+        }
     raw = str(reply.contents)
     structured = [{"name": call.name, "arguments": call.arguments} for call in reply.tool_calls]
     error = None

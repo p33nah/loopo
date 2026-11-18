@@ -169,19 +169,19 @@ internal class FunctionGemmaPilotActivity : ComponentActivity() {
 		status = "Inizializzazione / inferenza CPU…"
 		val record = PilotInteraction(history.size + 1, transcript = transcript, parserPlan = "in attesa")
 		history += record
-		val parserPlan = ItalianVoiceCommandParser.parse(transcript)?.let(::formatPlan) ?: "rifiuto (nessun piano valido)"
-		val mutableRecord = record.copy(parserPlan = parserPlan)
+		val parserPlan = ItalianVoiceCommandParser.parse(transcript)
+		val mutableRecord = record.copy(parserPlan = parserPlan?.let(::formatPlan) ?: "rifiuto (nessun piano valido)")
 		history[history.lastIndex] = mutableRecord
 		activeOperation = lifecycleScope.launch {
 			try {
 				val result = withContext(Dispatchers.IO) { infer(transcript) }
+				val interpretation = FunctionGemmaVoiceCommandInterpreter.interpret(result.calls)
+				val guarded = FunctionGemmaVoiceCommandInterpreter.requireParserAgreement(interpretation, parserPlan)
 				history[history.lastIndex] = mutableRecord.copy(
 					rawText = result.rawText,
 					calls = result.calls,
-					validatedPlan = when (val interpretation = FunctionGemmaVoiceCommandInterpreter.interpret(result.calls)) {
-						is VoiceInterpretation.Accepted -> formatPlan(interpretation.plan)
-						is VoiceInterpretation.Rejected -> "rifiuto (${interpretation.reason})"
-					},
+					validatedPlan = formatInterpretation(interpretation),
+					guardedPlan = formatInterpretation(guarded),
 					inferenceMillis = result.inferenceMillis,
 				)
 				status = "Completato · ${result.inferenceMillis} ms"
@@ -197,6 +197,11 @@ internal class FunctionGemmaPilotActivity : ComponentActivity() {
 				busy = false
 			}
 		}
+	}
+
+	private fun formatInterpretation(interpretation: VoiceInterpretation): String = when (interpretation) {
+		is VoiceInterpretation.Accepted -> formatPlan(interpretation.plan)
+		is VoiceInterpretation.Rejected -> "rifiuto (${interpretation.reason})"
 	}
 
 	private fun infer(transcript: String): InferenceResult {
@@ -244,6 +249,7 @@ internal class FunctionGemmaPilotActivity : ComponentActivity() {
 		val rawText: String? = null,
 		val calls: List<VoiceModelToolCall>? = null,
 		val validatedPlan: String? = null,
+		val guardedPlan: String? = null,
 		val inferenceMillis: Long? = null,
 		val failure: String? = null,
 	) {
@@ -259,6 +265,7 @@ internal class FunctionGemmaPilotActivity : ComponentActivity() {
 				})
 			}
 			validatedPlan?.let { append("\nValidated model plan: $it") }
+			guardedPlan?.let { append("\nGuarded model plan: $it") }
 			inferenceMillis?.let { append("\nInference: $it ms") }
 			failure?.let { append("\nFailure: $it") }
 		}

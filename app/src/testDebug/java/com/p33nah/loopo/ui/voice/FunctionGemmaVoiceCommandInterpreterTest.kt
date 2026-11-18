@@ -97,6 +97,51 @@ class FunctionGemmaVoiceCommandInterpreterTest {
 	}
 
 	@Test
+	fun parserAgreementRequiresTheExactNumberAndCompleteOrderedPlan() {
+		val rate = VoiceModelToolCall("set_rate", mapOf("percent" to 70))
+		val restart = VoiceModelToolCall("restart", emptyMap())
+		val transcript = "imposta la velocità al settanta per cento e poi ricomincia"
+		val result = withParserAgreement(transcript, rate, restart)
+
+		assertAccepted(listOf(VoiceAction.SetRate(PlaybackRate(70)), VoiceAction.Restart), result)
+		for (calls in listOf(
+			listOf(rate.copy(arguments = mapOf("percent" to 71)), restart),
+			listOf(VoiceModelToolCall("adjust_rate", mapOf("delta_percent" to -70)), restart),
+			listOf(rate),
+			listOf(rate, VoiceModelToolCall("resume", emptyMap())),
+		)) {
+			assertEquals(
+				VoiceInterpretation.Rejected(VoiceInterpretation.Rejection.UnconfirmedTranscript),
+				withParserAgreement(transcript, *calls.toTypedArray()),
+			)
+		}
+	}
+
+	@Test
+	fun parserAgreementBlocksNegationAmbiguityAndUnsupportedActions() {
+		for (transcript in listOf("non ricominciare", "riparti o ricomincia", "attiva il loop")) {
+			assertEquals(
+				VoiceInterpretation.Rejected(VoiceInterpretation.Rejection.UnconfirmedTranscript),
+				withParserAgreement(transcript, VoiceModelToolCall("restart", emptyMap())),
+			)
+		}
+		assertEquals(
+			VoiceInterpretation.Rejected(VoiceInterpretation.Rejection.InvalidArguments),
+			withParserAgreement("imposta la velocità al 20 percento", VoiceModelToolCall("set_rate", mapOf("percent" to 20))),
+		)
+		assertEquals(
+			VoiceInterpretation.Rejected(VoiceInterpretation.Rejection.NoToolCalls),
+			withParserAgreement("imposta la velocità al 70 percento"),
+		)
+	}
+
+	private fun withParserAgreement(transcript: String, vararg calls: VoiceModelToolCall): VoiceInterpretation =
+		FunctionGemmaVoiceCommandInterpreter.requireParserAgreement(
+			FunctionGemmaVoiceCommandInterpreter.interpret(calls.toList()),
+			ItalianVoiceCommandParser.parse(transcript),
+		)
+
+	@Test
 	fun standaloneDryRunTracesDecisionWithoutPlaybackIntegration() = runBlocking {
 		var requestCount = 0
 		var trace: VoiceInterpreterTrace? = null

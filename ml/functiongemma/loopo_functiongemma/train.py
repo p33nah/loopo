@@ -12,7 +12,7 @@ from pathlib import Path
 
 from .artifacts import sha256_file
 from .dataset import validate_dataset
-from .model import MODEL_ID, MODEL_REVISION, load_base, load_tokenizer
+from .model import MODEL_ID, MODEL_REVISION, load_base, load_tokenizer, require_adapter_revision
 from .protocol import training_features
 
 LOG = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ def read_rows(path: Path) -> list[dict]:
 def make_trainer(model, tokenizer, train_rows: list[dict], validation_rows: list[dict], config: dict, output: Path):
     import torch
     from datasets import Dataset
-    from peft import LoraConfig, TaskType
+    from peft import LoraConfig, PeftModel, TaskType
     from transformers import TrainerCallback
     from trl import SFTConfig, SFTTrainer
 
@@ -123,15 +123,17 @@ def make_trainer(model, tokenizer, train_rows: list[dict], validation_rows: list
         model=model, args=args, processing_class=tokenizer,
         train_dataset=train_dataset, eval_dataset=eval_dataset,
         callbacks=[VerifiedCheckpoints()] if interval or retain_all else [],
-        peft_config=LoraConfig(
+        peft_config=None if isinstance(model, PeftModel) else LoraConfig(
             task_type=TaskType.CAUSAL_LM, r=8, lora_alpha=16, lora_dropout=0.05,
             target_modules=["q_proj", "v_proj"],
         ),
     )
 
 
-def train(dataset: Path, config_path: Path, output: Path, resume: bool) -> None:
+def train(dataset: Path, config_path: Path, output: Path, resume: bool, *,
+          initial_adapter: Path | None = None) -> None:
     import torch
+    from peft import PeftModel
     from transformers import set_seed
 
     validate_dataset(dataset)
@@ -173,6 +175,14 @@ def train(dataset: Path, config_path: Path, output: Path, resume: bool) -> None:
         )},
         "device": torch.cuda.get_device_name() if torch.cuda.is_available() else "cpu",
     }
+    if initial_adapter is not None:
+        require_adapter_revision(initial_adapter)
+        metadata["initial_adapter"] = {
+            "path": str(initial_adapter.resolve()),
+            "files": {name: sha256_file(initial_adapter / name) for name in (
+                "adapter_config.json", "adapter_model.safetensors",
+            )},
+        }
     metadata_path = output / "run.json"
     if resume:
         if json.loads(metadata_path.read_text(encoding="utf-8")) != metadata:
@@ -183,6 +193,8 @@ def train(dataset: Path, config_path: Path, output: Path, resume: bool) -> None:
     LOG.info("Run configuration: %s", metadata)
     model = load_base(full_precision=True)
     model.config.use_cache = False
+    if initial_adapter is not None:
+        model = PeftModel.from_pretrained(model, initial_adapter, is_trainable=True)
     trainer = make_trainer(model, load_tokenizer(), train_rows, validation_rows, config, output)
     trainer.model.print_trainable_parameters()
     trainer.train(resume_from_checkpoint=str(checkpoint) if resume else None)
@@ -205,9 +217,10 @@ def main() -> None:
     parser.add_argument("config", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--initial-adapter", type=Path, help="Start a fresh optimizer from an existing LoRA adapter")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    train(args.dataset, args.config, args.output, args.resume)
+    train(args.dataset, args.config, args.output, args.resume, initial_adapter=args.initial_adapter)
 
 
 if __name__ == "__main__":

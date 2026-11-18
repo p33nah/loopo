@@ -8,3 +8,4 @@ set_rate:86+resume | independent_compound | Porta la velocità a ottantasei perc
 reject:unsupported | independent_order | Ricomincia e dopo correggi il tempo al sessantasei percento
 reject:unsupported | independent_control | Ripeti questa battuta in loop due volte
 reject:unrelated | independent_mention | Nel mio quaderno c'è scritto sessantasei percento
+stay_paused | independent_pause | Sospendi un momento la riproduzione qui

@@ -52,7 +52,7 @@ def collision_sources() -> list[Path]:
     return [path for path in fixed if path != SOURCE]
 
 
-def audit(rows: list[dict]) -> None:
+def audit(rows: list[dict], other_splits: list[Path]) -> None:
     seen: dict[str, str] = {}
     for row in rows:
         key = text_key(row["text"])
@@ -61,7 +61,7 @@ def audit(rows: list[dict]) -> None:
         seen[key] = row["id"]
 
     collisions = []
-    for source in collision_sources():
+    for source in [*collision_sources(), *other_splits]:
         if source.suffix == ".jsonl":
             other_rows = read_rows(source)
             texts = ((row["id"], row["text"]) for row in other_rows)
@@ -72,7 +72,7 @@ def audit(rows: list[dict]) -> None:
         for other_id, transcript in texts:
             key = text_key(transcript)
             if key in seen:
-                collisions.append(f"{row_id_for(seen[key])} collides with {source.relative_to(PROJECT)}:{other_id}")
+                collisions.append(f"{seen[key]} collides with {source}:{other_id}")
     if collisions:
         raise ValueError("normalized transcript collisions:\n" + "\n".join(collisions[:20]))
 
@@ -89,20 +89,20 @@ def audit(rows: list[dict]) -> None:
         raise ValueError(f"holdout misses supported tools: {sorted(required_tools - tools)}")
 
 
-def row_id_for(value: str) -> str:
-    return value
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=OUTPUT)
-    parser.add_argument("--check", action="store_true", help="audit only; do not write JSONL")
+    parser.add_argument("--against", type=Path, action="append", default=[], help="also check a prior train or validation JSONL")
+    parser.add_argument("--check", action="store_true", help="verify the existing frozen JSONL without rewriting it")
     args = parser.parse_args()
     rows = read_source()
-    audit(rows)
-    if not args.check:
-        args.output.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
-                               encoding="utf-8")
+    audit(rows, args.against)
+    payload = "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows).encode("utf-8")
+    if args.check:
+        if args.output.read_bytes() != payload:
+            raise ValueError(f"frozen JSONL differs from the authored holdout: {args.output}")
+    else:
+        args.output.write_bytes(payload)
     positives = sum(bool(row["expected"]) for row in rows)
     print(f"Audited {len(rows)} held-out rows ({positives} positive, {len(rows) - positives} negative).")
     if not args.check:

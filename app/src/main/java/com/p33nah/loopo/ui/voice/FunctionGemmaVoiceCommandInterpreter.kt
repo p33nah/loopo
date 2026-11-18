@@ -18,6 +18,7 @@ internal sealed interface VoiceInterpretation {
 		UnknownTool,
 		InvalidArguments,
 		InvalidPlan,
+		UnconfirmedTranscript,
 	}
 }
 
@@ -54,6 +55,18 @@ internal object FunctionGemmaVoiceCommandInterpreter {
 			VoiceInterpretation.Rejected(VoiceInterpretation.Rejection.InvalidPlan)
 		} else {
 			VoiceInterpretation.Accepted(plan)
+		}
+	}
+
+	fun requireParserAgreement(
+		interpretation: VoiceInterpretation,
+		parserPlan: VoicePlan?,
+	): VoiceInterpretation = when (interpretation) {
+		is VoiceInterpretation.Rejected -> interpretation
+		is VoiceInterpretation.Accepted -> if (interpretation.plan.actions == parserPlan?.actions) {
+			interpretation
+		} else {
+			VoiceInterpretation.Rejected(VoiceInterpretation.Rejection.UnconfirmedTranscript)
 		}
 	}
 

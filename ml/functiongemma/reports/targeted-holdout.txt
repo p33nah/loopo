@@ -88,7 +88,7 @@ adjust_rate:28 | adjust_clean | Accelera la velocità di 28 percento
 adjust_rate:35 | adjust_clean | Aumenta di 35 punti percentuali il ritmo
 adjust_rate:48 | adjust_clean | Alza il ritmo di 48 per cento
 adjust_rate:-4 | adjust_clean | Riduci la velocità di 4 punti percentuali
-adjust_rate:-6 | adjust_clean | Abbassa il ritmo di 6 percento
+adjust_rate:-6 | adjust_clean | Riduci la velocità di sei punti percentuali
 adjust_rate:-11 | adjust_clean | Diminuisci la velocità di 11 per cento
 adjust_rate:-17 | adjust_clean | Rallenta di 17 punti percentuali
 adjust_rate:-23 | adjust_clean | Riduci il ritmo di 23 percento

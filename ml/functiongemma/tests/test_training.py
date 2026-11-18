@@ -10,7 +10,7 @@ def test_cpu_training_masks_prompt_saves_and_reloads_adapter(tmp_path, monkeypat
     torch = pytest.importorskip("torch")
     pytest.importorskip("trl")
     pytest.importorskip("peft")
-    from peft import PeftModel
+    from peft import PeftModel, get_peft_model_state_dict
     from tokenizers import Tokenizer
     from tokenizers.models import WordLevel
     from tokenizers.pre_tokenizers import WhitespaceSplit
@@ -66,6 +66,14 @@ def test_cpu_training_masks_prompt_saves_and_reloads_adapter(tmp_path, monkeypat
     trainer.save_model(adapter)
     reloaded = PeftModel.from_pretrained(Gemma3ForCausalLM(config), adapter)
     assert "default" in reloaded.peft_config
+
+    initial = PeftModel.from_pretrained(Gemma3ForCausalLM(config), adapter, is_trainable=True)
+    initial_weights = {key: value.detach().clone() for key, value in get_peft_model_state_dict(initial).items()}
+    continuation = make_trainer(initial, tokenizer, rows, rows, {**settings, "max_steps": 1}, tmp_path / "continued")
+    assert continuation.model is initial
+    assert continuation.train().global_step == 1
+    updated_weights = get_peft_model_state_dict(continuation.model)
+    assert any(not torch.equal(initial_weights[key], updated_weights[key]) for key in initial_weights)
     corrupt = tmp_path / "checkpoint-3" / "optimizer.pt"
     state = corrupt.read_bytes()
     corrupt.write_bytes(bytes([state[0] ^ 1]) + state[1:])

@@ -89,6 +89,28 @@ python -m loopo_functiongemma.artifacts archive /path/to/run /path/to/run-with-i
 python -m loopo_functiongemma.artifacts verify /path/to/run-with-int8.zip
 ```
 
+## Run the targeted Redmi follow-up
+
+The targeted run starts a new optimizer from the saved contrastive LoRA checkpoint. It uses only the 46 hand-labeled training phrases in `examples/redmi-targeted.txt`. They contrast explicit and negated commands, missing numbers, absolute rates and signed changes, supported and unsupported action order, and unrelated playback terms. Ten new validation phrases supplement the original validation split. Keep the frozen test, challenge, numeric replay, and targeted holdout out of checkpoint selection.
+
+In Colab, use the notebook from the same Git commit, select a GPU, set `experiment = "targeted"`, enable `use_drive`, and use a fresh `run_name`. Set `initial_adapter_path` to the contrastive generation-selected checkpoint. The notebook copies the input adapter and its base revision record into the new run, verifies the output ZIP, and saves the merged weights. Use the same options and `resume = True` to continue a run with saved checkpoints. The full-precision notebook report is a diagnostic. Export the selected model to INT8 and replay the same frozen transcripts before using the result to judge Android deployment.
+
+Run from `ml/functiongemma` in WSL. Install `litert-lm==0.18.0` into the replay environment alongside the project package.
+
+```sh
+python scripts/replay_baselines.py reports/targeted-holdout.jsonl --output-dir runs/targeted-parser
+python scripts/replay_litert.py /path/to/parent.litertlm runs/targeted-parent reports/targeted-holdout.jsonl
+python scripts/replay_litert.py /path/to/candidate.litertlm runs/targeted-candidate reports/targeted-holdout.jsonl
+python -m loopo_functiongemma.evaluate compare reports/targeted-holdout.jsonl runs/targeted-comparison \
+  --input parser=runs/targeted-parser/targeted-holdout.parser.jsonl \
+  --input parent=runs/targeted-parent/targeted-holdout-litert.json \
+  --input candidate=runs/targeted-candidate/targeted-holdout-litert.json \
+  --gate-input candidate --min-positive-exact-rate 0.95 \
+  --max-false-accept-rate 0.01 --max-wrong-usable-rate 0.01
+```
+
+A positive is exact when all actions, integer arguments, and their order match. The candidate needs at least 95% exact on valid commands. It may propose a valid action on at most 1% of negative requests and a valid wrong plan on at most 1% of positive requests. Send the same frozen transcripts to the Redmi pilot to verify the Android runtime separately. The pilot shows a second result that requires full parser agreement. Use the model result before that check to measure what FunctionGemma learned. The agreement check blocks unsupported or discrepant plans whenever the parser disagrees. It cannot extend parser coverage.
+
 ## Colab smoke and full run
 
 1. Open the [notebook](notebooks/loopo_functiongemma_finetuning.ipynb) in Google Colab using **File → Open notebook → GitHub**. Choose this repository, the ref containing the notebook and the notebook path. You can also download its `.ipynb` file and upload it in the **Upload** tab.

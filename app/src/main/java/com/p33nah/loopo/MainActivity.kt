@@ -23,6 +23,7 @@ import com.p33nah.loopo.platform.audio.PlaybackService
 import com.p33nah.loopo.ui.StudyScreen
 import com.p33nah.loopo.ui.StudyUiState
 import com.p33nah.loopo.ui.theme.LoopoTheme
+import com.p33nah.loopo.ui.voice.VoiceExperiment
 import com.p33nah.loopo.ui.voice.VoiceStudy
 
 class MainActivity : androidx.activity.ComponentActivity() {
@@ -68,6 +69,7 @@ class MainActivity : androidx.activity.ComponentActivity() {
 				}
 			}
 
+			val voiceExperiment = applicationContext as? VoiceExperiment
 			val trackUri = (state as? StudyUiState.Ready)?.inspection?.track?.uri
 			LoopoTheme {
 				VoiceStudy(session, trackUri, isSessionActive = { playbackSession === session }) { cancelVoice, voiceControls, voiceFeedback, overlayPermissionGranted ->
@@ -97,7 +99,14 @@ class MainActivity : androidx.activity.ComponentActivity() {
 							cancelVoice()
 							viewModel.setPlaybackRate(rate)
 						},
-						voiceControls = voiceControls,
+						voiceControls = if (voiceExperiment == null) voiceControls else {
+							{
+								val voiceStatus by session.voiceStatus.collectAsStateWithLifecycle()
+								voiceExperiment.Controls(voiceStatus.enabled)
+								voiceControls?.invoke()
+								Unit
+							}
+						},
 						voiceFeedback = voiceFeedback,
 						overlayPermissionGranted = overlayPermissionGranted,
 					)

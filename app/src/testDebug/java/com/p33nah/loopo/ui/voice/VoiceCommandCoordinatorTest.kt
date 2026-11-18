@@ -16,6 +16,54 @@ import org.junit.Test
 
 class VoiceCommandCoordinatorTest {
 	@Test
+	fun experimentalPlanUsesTheExistingDispatchAndReportsTheCompletedTurn() = runBlocking {
+		val actions = mutableListOf<VoiceAction>()
+		val phases = mutableListOf<VoiceStatus>()
+		val timings = mutableListOf<VoiceTurnTiming>()
+		val plan = VoicePlan.validated(listOf(VoiceAction.SetRate(PlaybackRate(73)), VoiceAction.Restart))
+		val result = VoiceCommandCoordinator(
+			pause = { VoicePauseOutcome.Paused(wasPlaying = true) },
+			transcribe = { onListening -> onListening(); TranscriptResult.Text("ripartiamo alla velocità di studio") },
+			interpret = { transcript ->
+				assertNull(ItalianVoiceCommandParser.parse(transcript))
+				plan
+			},
+			dispatch = { actions += it; true },
+			reportTiming = { timings += it },
+		).run { phases += it }
+
+		assertEquals(VoiceStatus.CommandSent, result)
+		assertEquals(plan?.actions, actions)
+		assertEquals(listOf(VoiceStatus.Pausing, VoiceStatus.Listening, VoiceStatus.Interpreting,
+			VoiceStatus.Applying, VoiceStatus.Applying), phases)
+		val timing = timings.single()
+		assertEquals(result, timing.outcome)
+		assertTrue(timing.captureMs != null && timing.interpretationMs != null && timing.dispatchMs != null)
+	}
+
+	@Test
+	fun inferenceFailureOrAnObsoleteTurnCannotDispatchAnAction() = runBlocking {
+		for (throwFailure in listOf(false, true)) {
+			var current = true
+			val timings = mutableListOf<VoiceTurnTiming>()
+			val result = VoiceCommandCoordinator(
+				pause = { VoicePauseOutcome.Paused(wasPlaying = true) },
+				transcribe = { TranscriptResult.Text("riprendi") },
+				interpret = {
+					if (throwFailure) error("model decoder failure")
+					current = false
+					VoicePlan.validated(listOf(VoiceAction.Resume))
+				},
+				dispatch = { error("An obsolete or failed turn must not dispatch") },
+				isCurrent = { current },
+				reportTiming = { timings += it },
+			).run()
+			assertEquals(if (throwFailure) VoiceStatus.Failed else VoiceStatus.Cancelled, result)
+			assertNull(timings.single().dispatchMs)
+		}
+	}
+
+	@Test
 	fun rateCommandResumesOnlyWhenTheVoiceTurnPausedActivePlayback() = runBlocking {
 		val cases = listOf(
 			true to listOf(VoiceAction.SetRate(PlaybackRate(80)), VoiceAction.Resume),

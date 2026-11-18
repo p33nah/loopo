@@ -6,16 +6,27 @@ import zipfile
 from pathlib import Path
 
 
-def verify(apk: Path, *, allow_model: bool = False) -> None:
-    expected_abis = {"armeabi-v7a", "arm64-v8a", "x86_64"}
+def verify(apk: Path, *, allow_model: bool = False, allow_functiongemma: bool = False) -> None:
+    expected_abis = {"arm64-v8a", "x86_64"} if allow_functiongemma else {"armeabi-v7a", "arm64-v8a", "x86_64"}
     with zipfile.ZipFile(apk) as archive, apk.open("rb") as raw:
         native = [entry for entry in archive.infolist() if entry.filename.endswith(".so")]
         assert native, "APK contains no native libraries"
         actual_abis = {entry.filename.split("/")[1] for entry in native}
         assert actual_abis == expected_abis, f"Unexpected ABI set: {actual_abis}"
+        package_names = [name.casefold() for name in archive.namelist()]
+        functiongemma_artifacts = [
+            name for name in package_names
+            if "litertlm" in name or "functiongemma" in name or name.endswith(".litertlm")
+        ]
+        if allow_functiongemma:
+            assert "assets/third_party_licenses/litert-lm-apache-2.0.txt" in package_names, "FunctionGemma APK must include the LiteRT-LM license"
+        else:
+            assert not functiongemma_artifacts, f"Official APK must exclude FunctionGemma artifacts: {functiongemma_artifacts}"
         for abi in expected_abis:
             assert f"lib/{abi}/libloopo_native.so" in archive.namelist(), f"Missing engine for {abi}"
             assert f"lib/{abi}/libvosk.so" in archive.namelist(), f"Missing Vosk runtime for {abi}"
+            if allow_functiongemma:
+                assert f"lib/{abi}/liblitertlm_jni.so" in archive.namelist(), f"Missing LiteRT-LM runtime for {abi}"
         if not allow_model:
             assert not any(name.endswith("loopo-vosk-it-0.22.zip") for name in archive.namelist()), "APK must not bundle the large Vosk model archive"
         for entry in native:
@@ -60,5 +71,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("apk", type=Path)
     parser.add_argument("--allow-model", action="store_true", help="allow the optional Vosk model archive in a debug test APK")
+    parser.add_argument("--allow-functiongemma", action="store_true", help="allow FunctionGemma artifacts and require its license in an experimental APK")
     arguments = parser.parse_args()
-    verify(arguments.apk, allow_model=arguments.allow_model)
+    verify(arguments.apk, allow_model=arguments.allow_model, allow_functiongemma=arguments.allow_functiongemma)

@@ -2,7 +2,11 @@ package com.p33nah.loopo.platform.audio
 
 import com.p33nah.loopo.domain.model.PlaybackRate
 import com.p33nah.loopo.ui.StudyUiState
+import com.p33nah.loopo.ui.voice.ItalianVoiceCommandParser
 import com.p33nah.loopo.ui.voice.TranscriptResult
+import com.p33nah.loopo.ui.voice.VoiceExperiment
+import com.p33nah.loopo.ui.voice.VoiceExperimentSession
+import com.p33nah.loopo.ui.voice.VoiceExperimentUnavailable
 import com.p33nah.loopo.ui.voice.VoiceAction
 import com.p33nah.loopo.ui.voice.VoiceCommandCoordinator
 import com.p33nah.loopo.ui.voice.VoiceStatus
@@ -16,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -105,7 +110,21 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 				val ready = state as? StudyUiState.Ready
 				ready?.inspection?.track?.uri to service.voiceSession.trackRevision
 			}
+			var experimentSession: VoiceExperimentSession? = null
 			try {
+				val experiment = service.applicationContext as? VoiceExperiment
+				if (experiment != null) {
+					try {
+						withContext(NonCancellable) { experimentSession = experiment.open() }
+						ensureActive()
+					} catch (unavailable: VoiceExperimentUnavailable) {
+						if (armed && sessionToken == token) {
+							setFeedback(VoicePhase.Feedback, unavailable.message ?: "FunctionGemma non disponibile.", VoiceTone.Error)
+						}
+						return@launch
+					}
+				}
+				val opened = experimentSession
 				combine(trackState, cancellationRevision, ::Pair).distinctUntilChanged().collectLatest { (track, turnRevision) ->
 					if (!armed || track.first == null || !hasMicrophonePermission(service)) {
 						armed = false
@@ -127,6 +146,10 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 						dispatch = { action -> execute(action, ::current) },
 						isCurrent = ::current,
 						onTranscript = ::showTranscript,
+						interpret = { transcript ->
+							if (opened == null) ItalianVoiceCommandParser.parse(transcript) else opened.interpret(transcript)
+						},
+						reportTiming = opened?.let { it::report },
 					)
 					val coordinator = WakeCommandCoordinator(
 						awaitWake = wakeDetector::awaitWake,
@@ -136,13 +159,22 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 					if (current()) this@launch.cancel(CancellationException("Voice session reached a terminal recognition state"))
 				}
 			} finally {
-				withContext(NonCancellable + Dispatchers.IO) { wakeDetector.close() }
-				if (sessionToken == token && armed) {
-					armed = false
-					val lastStatus = mutableStatus.value
-					mutableStatus.value = if (lastStatus.phase == VoicePhase.Feedback) lastStatus.copy(enabled = false)
-					else VoiceUiState.Idle
-					service.voiceBecameIdle()
+				try {
+					withContext(NonCancellable + Dispatchers.IO) {
+						try {
+							wakeDetector.close()
+						} finally {
+							experimentSession?.close()
+						}
+					}
+				} finally {
+					if (sessionToken == token && armed) {
+						armed = false
+						val lastStatus = mutableStatus.value
+						mutableStatus.value = if (lastStatus.phase == VoicePhase.Feedback) lastStatus.copy(enabled = false)
+						else VoiceUiState.Idle
+						service.voiceBecameIdle()
+					}
 				}
 			}
 		}
@@ -176,6 +208,7 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 			VoiceStatus.PermissionDenied -> "Consenti il microfono nelle impostazioni."
 			VoiceStatus.Pausing -> "Metto in pausa…"
 			VoiceStatus.Listening -> "Ti ascolto…"
+			VoiceStatus.Interpreting -> "Interpreto il comando…"
 			VoiceStatus.Applying -> "Applico il comando…"
 			VoiceStatus.WakeListening -> "In ascolto per Ehi Lupo…"
 			VoiceStatus.WakeFailed -> "Ascolto non riuscito. Tocca il lupo per riprovare."
@@ -204,7 +237,7 @@ internal class PlaybackVoiceController(private val service: PlaybackService) : P
 			VoiceStatus.WakeListening -> VoicePhase.WakeListening
 			VoiceStatus.Pausing -> VoicePhase.Pausing
 			VoiceStatus.Listening -> VoicePhase.Listening
-			VoiceStatus.Applying -> VoicePhase.Applying
+			VoiceStatus.Interpreting, VoiceStatus.Applying -> VoicePhase.Applying
 			VoiceStatus.Paused, VoiceStatus.CommandSent, VoiceStatus.PauseFailed, VoiceStatus.TimedOut,
 			VoiceStatus.WakeUnavailable, VoiceStatus.WakeFailed, VoiceStatus.Unavailable,
 			VoiceStatus.PermissionDenied, VoiceStatus.Unrecognized, VoiceStatus.Failed, VoiceStatus.Cancelled -> VoicePhase.Feedback

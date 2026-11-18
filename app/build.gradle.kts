@@ -1,3 +1,4 @@
+import com.android.build.api.variant.HostTestBuilder
 import java.security.MessageDigest
 
 plugins {
@@ -43,6 +44,16 @@ android {
 		debug {
 			enableUnitTestCoverage = true
 			enableAndroidTestCoverage = true
+		}
+		if (providers.gradleProperty("loopoFunctionGemma").orNull == "true") {
+			create("functionGemma") {
+				initWith(getByName("debug"))
+				applicationIdSuffix = ".functiongemma.player"
+				matchingFallbacks += listOf("debug")
+				isDebuggable = true
+				isMinifyEnabled = false
+				signingConfig = signingConfigs.getByName("debug")
+			}
 		}
 		release {
 			isMinifyEnabled = false
@@ -111,6 +122,9 @@ dependencies {
 	debugImplementation(platform(libs.androidx.compose.bom))
 	debugImplementation("androidx.compose.ui:ui-test-manifest")
 	implementation(libs.vosk.android)
+	if (providers.gradleProperty("loopoFunctionGemma").orNull == "true") {
+		add("functionGemmaImplementation", "com.google.ai.edge.litertlm:litertlm-android:0.18.0")
+	}
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.robolectric:robolectric:4.17")
 	testImplementation("androidx.test:core:1.7.0")
@@ -121,13 +135,22 @@ dependencies {
 }
 
 val wakeModelPath = providers.gradleProperty("loopoWakeModel")
-val prepareWakeModel = tasks.register<PrepareWakeModel>("prepareDebugWakeModelAsset") {
-	wakeModelPath.orNull?.let { archive.fileValue(file(it)) }
-	assetsDirectory.set(layout.buildDirectory.dir("generated/loopoWake/debug/assets"))
+val functionGemmaEnabled = providers.gradleProperty("loopoFunctionGemma").orNull == "true"
+androidComponents.beforeVariants(androidComponents.selector().withBuildType("functionGemma")) { variant ->
+	variant.hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
 }
-
-androidComponents.onVariants(androidComponents.selector().withBuildType("debug")) { variant ->
-	variant.sources.assets?.addGeneratedSourceDirectory(prepareWakeModel, PrepareWakeModel::assetsDirectory)
+androidComponents.onVariants(androidComponents.selector().all()) { variant ->
+	if (variant.buildType == "debug" || (functionGemmaEnabled && variant.buildType == "functionGemma")) {
+		if (variant.buildType == "functionGemma") {
+			variant.packaging.jniLibs.excludes.add("lib/armeabi-v7a/**")
+		}
+		val variantTitle = variant.name.replaceFirstChar { it.uppercase() }
+		val prepareWakeModel = tasks.register<PrepareWakeModel>("prepare${variantTitle}WakeModelAsset") {
+			wakeModelPath.orNull?.let { archive.fileValue(file(it)) }
+			assetsDirectory.set(layout.buildDirectory.dir("generated/loopoWake/${variant.name}/assets"))
+		}
+		variant.sources.assets?.addGeneratedSourceDirectory(prepareWakeModel, PrepareWakeModel::assetsDirectory)
+	}
 }
 
 abstract class PrepareWakeModel : DefaultTask() {

@@ -1,0 +1,48 @@
+# Small warm-start corpus for the concrete Redmi FunctionGemma failures.
+# Keep this separate from the frozen benchmark and targeted holdout.
+set_rate:64 | absolute_speed | Porta il brano al sessantaquattro per cento della velocità originale
+set_rate:87 | absolute_speed | Imposta il ritmo su ottantasette percento
+set_rate:118 | absolute_speed | Voglio ascoltarlo al centodiciotto per cento del tempo normale
+set_rate:200 | absolute_speed | Metti la traccia alla velocità massima consentita, duecento per cento
+adjust_rate:-8 | relative_speed | Togli otto punti percentuali alla velocità attuale
+adjust_rate:7 | relative_speed | Aggiungi sette punti percentuali al ritmo che c'è adesso
+adjust_rate:1 | relative_speed | Alza di un punto percentuale la velocità corrente
+adjust_rate:-35 | relative_speed | Rallenta di trentacinque punti rispetto a come sta suonando
+
+reject:out_of_range | absolute_bounds | Porta la velocità soltanto al ventiquattro per cento
+reject:out_of_range | absolute_bounds | Mettila al duecentouno per cento della velocità originale
+reject:out_of_range | delta_bounds | Togli zero punti percentuali al ritmo
+reject:out_of_range | delta_bounds | Aggiungi centosettantasei punti percentuali in un colpo
+
+reject:negated | negated_rate | Non portare il brano al sessantaquattro per cento, lascialo com'è
+set_rate:64 | negated_rate | Porta il brano al sessantaquattro per cento, per favore
+reject:negated | negated_rate | Evita di togliere otto punti percentuali alla velocità
+adjust_rate:-8 | negated_rate | Togli otto punti percentuali alla velocità corrente
+reject:negated | negated_transport | Non ricominciare il pezzo dall'inizio
+restart | negated_transport | Ricomincia il pezzo dall'inizio
+reject:negated | negated_transport | Non riprendere ancora la riproduzione
+resume | negated_transport | Riprendi la riproduzione dal punto in cui si è fermata
+
+reject:ambiguous | target_vs_delta | Alzala di sessantadue oppure portala al sessantadue per cento, devo decidere
+set_rate:62 | target_vs_delta | Portala al sessantadue per cento della velocità originale
+adjust_rate:62 | target_vs_delta | Aggiungi sessantadue punti percentuali alla velocità attuale
+reject:ambiguous | missing_number | Abbassa la velocità, ma non ricordo di quanto
+adjust_rate:-12 | missing_number | Abbassa la velocità di dodici punti percentuali
+reject:ambiguous | transport_choice | Vuoi che riprenda o ricominci? Non ho ancora scelto
+resume | transport_choice | Riprendi dal punto in cui si è fermato
+reject:ambiguous | noisy_transcript | velocita sessanta boh o settanta non so
+
+set_rate:64+resume | ordered_compound | Imposta il sessantaquattro per cento e poi fai ripartire l'audio
+set_rate:87+restart | ordered_compound | Metti il ritmo all'ottantasette per cento e ricomincia dall'attacco
+adjust_rate:-8+resume | ordered_compound | Togli otto punti percentuali e continua l'ascolto
+reject:unsupported | ordered_compound | Riprendi la musica e soltanto dopo imposta la velocità al sessantaquattro per cento
+reject:unsupported | ordered_compound | Cambia al sessantaquattro per cento, riparti e poi metti in pausa
+reject:ambiguous | ordered_compound | Mettila al sessantaquattro e poi forse riprendi, vediamo
+reject:unsupported | ordered_compound | Porta il ritmo a sessantaquattro e sposta il marcatore finale
+
+reject:unsupported | unsupported_controls | Attiva il loop e torna all'inizio della sezione
+reject:unsupported | unsupported_controls | Cambia al brano successivo e aumenta il volume
+reject:unsupported | unsupported_controls | Salta avanti di trenta secondi
+reject:unsupported | unsupported_controls | Fai aumentare la velocità gradualmente a ogni battuta
+reject:unrelated | mentioned_command | Nel foglio degli appunti ho scritto di riprendere al sessantaquattro per cento
+reject:unrelated | mentioned_command | Il maestro ha detto "rallenta di otto punti", ma sto leggendo la lezione

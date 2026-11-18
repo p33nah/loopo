@@ -138,24 +138,39 @@ def extend_bucket(train: list[dict], pool: list[dict], count: int, rng: random.R
 
 
 def check_authored_splits(splits: dict[str, list[dict]], new_train: list[dict],
-                          new_validation: list[dict]) -> set[str]:
+                          new_validation: list[dict], extra_evaluation: list[dict] | None = None) -> set[str]:
     validate_splits(splits)
     evaluation = [row for split in ("validation", "test", "challenge") for row in splits[split]]
+    extra_evaluation = extra_evaluation or []
+    evaluation.extend(extra_evaluation)
+    protected_text = {text_key(row["text"]) for row in evaluation}
     protected = {numeric_shape(row["text"]) for row in evaluation} - {None}
+    holdout_text = {text_key(row["text"]) for row in extra_evaluation}
+    holdout_shapes = {numeric_shape(row["text"]) for row in extra_evaluation} - {None}
     for row in new_train:
+        if text_key(row["text"]) in protected_text:
+            raise ValueError(f"training example overlaps an evaluation phrase: {row['text']!r}")
         if numeric_shape(row["text"]) in protected:
             raise ValueError(f"training example shares a numeric template with evaluation: {row['text']!r}")
     train_shapes = {numeric_shape(row["text"]) for row in splits["train"]} - {None}
     for row in new_validation:
+        if text_key(row["text"]) in holdout_text:
+            raise ValueError(f"validation example overlaps a holdout phrase: {row['text']!r}")
+        if numeric_shape(row["text"]) in holdout_shapes:
+            raise ValueError(f"validation example shares a numeric template with a holdout: {row['text']!r}")
         if numeric_shape(row["text"]) in train_shapes:
             raise ValueError(f"validation example shares a numeric template with training: {row['text']!r}")
     return protected
 
 
-def personal_corpus(examples: list[Path]) -> dict[str, list[dict]]:
+def personal_corpus(examples: list[Path], holdouts: list[Path] | None = None,
+                    validation_examples: list[Path] | None = None) -> dict[str, list[dict]]:
+    original = generate_dataset()
     train = [row for path in examples for row in read_examples(path, "contributed")]
-    splits = {**generate_dataset(), "train": train}
-    check_authored_splits(splits, train, [])
+    validation = [row for path in validation_examples or [] for row in read_examples(path, "contributed_validation")]
+    splits = {**original, "train": train, "validation": [*original["validation"], *validation]}
+    protected = [row for path in holdouts or [] for row in read_examples(path, f"heldout_{path.stem}")]
+    check_authored_splits(splits, train, validation, protected)
     return splits
 
 
@@ -230,6 +245,10 @@ def main(argv: list[str] | None = None) -> int:
     personal = commands.add_parser("import", help="use only personal training examples with the original evaluation splits")
     personal.add_argument("path", type=Path)
     personal.add_argument("--examples", type=Path, action="append", required=True)
+    personal.add_argument("--holdout", type=Path, action="append", default=[],
+                          help="protect evaluation-only phrases and numeric templates from training")
+    personal.add_argument("--validation", type=Path, action="append", default=[],
+                          help="add separately authored validation phrases without changing test splits")
     inspect = commands.add_parser("inspect", help="validate and summarize four dataset split files")
     inspect.add_argument("path", type=Path)
     args = parser.parse_args(argv)
@@ -240,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             probes = {}
             if args.command == "import":
-                dataset = personal_corpus(args.examples)
+                dataset = personal_corpus(args.examples, args.holdout, args.validation)
             elif args.profile == "contrastive":
                 from .contrastive import build_contrastive_corpus
 

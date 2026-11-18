@@ -1,0 +1,10 @@
+# Independent phrasing for selecting checkpoints; do not move these into training.
+set_rate:73 | independent_absolute | Metti il tempo al settantatré percento di quello originale
+adjust_rate:-12 | independent_delta | Scendi di dodici punti percentuali da dove sei adesso
+reject:negated | independent_negation | Non cambiare il ritmo attuale, per favore
+reject:out_of_range | independent_bounds | Vorrei ascoltare il pezzo al ventidue per cento della velocità iniziale
+reject:ambiguous | independent_ambiguity | Fai qualcosa per la velocità, ma non ho deciso cosa
+set_rate:86+resume | independent_compound | Porta la velocità a ottantasei percento e riattiva l'ascolto
+reject:unsupported | independent_order | Ricomincia e dopo correggi il tempo al sessantasei percento
+reject:unsupported | independent_control | Ripeti questa battuta in loop due volte
+reject:unrelated | independent_mention | Nel mio quaderno c'è scritto sessantasei percento

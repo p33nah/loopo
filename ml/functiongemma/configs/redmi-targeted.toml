@@ -1,0 +1,10 @@
+seed = 67
+max_length = 512
+train_limit = 0
+validation_limit = 0
+max_steps = -1
+epochs = 8
+gradient_accumulation_steps = 2
+learning_rate = 0.00005
+checkpoint_steps = 20
+retain_all_checkpoints = true

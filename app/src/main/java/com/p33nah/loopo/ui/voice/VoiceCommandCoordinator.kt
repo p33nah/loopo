@@ -3,6 +3,7 @@ package com.p33nah.loopo.ui.voice
 import com.p33nah.loopo.domain.model.PlaybackRate
 import com.p33nah.loopo.domain.model.PlaybackRate.Companion.MAX_PERCENT
 import com.p33nah.loopo.domain.model.PlaybackRate.Companion.MIN_PERCENT
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import java.util.Locale
@@ -45,7 +46,7 @@ internal class VoicePlan private constructor(val actions: List<VoiceAction>) {
 }
 
 internal enum class VoiceStatus {
-	PermissionDenied, Pausing, Listening, Applying, Paused, CommandSent, PauseFailed,
+	PermissionDenied, Pausing, Listening, Interpreting, Applying, Paused, CommandSent, PauseFailed,
 	TimedOut, Unavailable, WakeListening, WakeUnavailable, WakeFailed, Unrecognized, Failed, Cancelled,
 }
 
@@ -65,22 +66,47 @@ internal class VoiceCommandCoordinator(
 	private val dispatch: suspend (VoiceAction) -> Boolean,
 	private val isCurrent: () -> Boolean = { true },
 	private val onTranscript: (String) -> Unit = {},
+	private val interpret: suspend (String) -> VoicePlan? = ItalianVoiceCommandParser::parse,
+	private val reportTiming: ((VoiceTurnTiming) -> Unit)? = null,
 ) {
 	suspend fun run(onStatus: (VoiceStatus) -> Unit = {}): VoiceStatus {
+		val timing = reportTiming?.let { TurnTiming() }
+		val outcome = runTurn(timing, onStatus)
+		if (timing != null) reportTiming(timing.finish(outcome))
+		return outcome
+	}
+
+	private suspend fun runTurn(timing: TurnTiming?, onStatus: (VoiceStatus) -> Unit): VoiceStatus {
 		if (!isCurrent()) return VoiceStatus.Cancelled
 		onStatus(VoiceStatus.Pausing)
 		val pauseOutcome = pause()
 		if (!isCurrent()) return VoiceStatus.Cancelled
 		if (pauseOutcome !is VoicePauseOutcome.Paused) return VoiceStatus.PauseFailed
 		currentCoroutineContext().ensureActive()
+		timing?.startCapture()
 		val transcript = transcribe { onStatus(VoiceStatus.Listening) }
+		timing?.finishCapture()
 		currentCoroutineContext().ensureActive()
 		if (!isCurrent()) return VoiceStatus.Cancelled
 
 		return when (transcript) {
 			is TranscriptResult.Text -> {
 				onTranscript(transcript.value)
-				val plan = ItalianVoiceCommandParser.parse(transcript.value) ?: return VoiceStatus.Unrecognized
+				if (timing != null) onStatus(VoiceStatus.Interpreting)
+				timing?.startInterpretation()
+				val plan = try {
+					interpret(transcript.value)
+				} catch (cancelled: CancellationException) {
+					throw cancelled
+				} catch (_: Exception) {
+					return VoiceStatus.Failed
+				} finally {
+					timing?.finishInterpretation()
+				}
+				currentCoroutineContext().ensureActive()
+				if (!isCurrent()) return VoiceStatus.Cancelled
+				plan ?: return VoiceStatus.Unrecognized
+				timing?.startDispatch()
 				for (action in plan.actions) {
 					currentCoroutineContext().ensureActive()
 					if (!isCurrent()) return VoiceStatus.Cancelled
@@ -103,6 +129,26 @@ internal class VoiceCommandCoordinator(
 			TranscriptResult.Failed -> VoiceStatus.Failed
 			TranscriptResult.Cancelled -> VoiceStatus.Cancelled
 		}
+	}
+
+	private class TurnTiming {
+		private val startedAt = System.nanoTime()
+		private var stageStartedAt = startedAt
+		private var captureMs: Long? = null
+		private var interpretationMs: Long? = null
+		private var dispatchStartedAt: Long? = null
+
+		fun startCapture() { stageStartedAt = System.nanoTime() }
+		fun finishCapture() { captureMs = elapsed(stageStartedAt) }
+		fun startInterpretation() { stageStartedAt = System.nanoTime() }
+		fun finishInterpretation() { interpretationMs = elapsed(stageStartedAt) }
+		fun startDispatch() { dispatchStartedAt = System.nanoTime() }
+
+		fun finish(outcome: VoiceStatus) = VoiceTurnTiming(
+			captureMs, interpretationMs, dispatchStartedAt?.let(::elapsed), elapsed(startedAt), outcome,
+		)
+
+		private fun elapsed(start: Long): Long = (System.nanoTime() - start) / 1_000_000
 	}
 }
 

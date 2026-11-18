@@ -213,7 +213,7 @@ internal class FunctionGemmaApplication : Application(), VoiceExperiment {
 			}
 			val selected = mutableUi.value.backend
 			val explanation = if (selected == InferenceBackend.GPU && backendInitializationAttempted) {
-				"GPU FunctionGemma non disponibile su questo dispositivo. Seleziona CPU per riprovare."
+				"Inizializzazione GPU FunctionGemma non riuscita. Seleziona CPU per riprovare."
 			} else {
 				"Impossibile inizializzare FunctionGemma: ${failure.message ?: failure.javaClass.simpleName}"
 			}
@@ -411,13 +411,15 @@ internal class FunctionGemmaApplication : Application(), VoiceExperiment {
 			"Interpreta un comando vocale italiano per Loopo. Usa soltanto gli strumenti dichiarati. " +
 			"È ammessa una sola azione oppure un cambio di velocità seguito da riprendi o ricomincia. " +
 			"Per richieste ambigue, negate o non supportate, non chiamare strumenti e rispondi: Comando non riconosciuto."
-		val FUNCTIONGEMMA_TOOLS = listOf(
-			functionTool("resume", "Riprendi la riproduzione dal punto corrente."),
-			functionTool("restart", "Ricomincia la riproduzione dall'inizio del loop o del brano."),
-			functionTool("stay_paused", "Lascia la riproduzione in pausa."),
-			functionTool("set_rate", "Imposta la velocità assoluta senza avviare la traccia.", "percent", "Percentuale intera da 25 a 200.", 25, 200),
-			functionTool("adjust_rate", "Varia la velocità corrente senza avviare la traccia.", "delta_percent", "Variazione intera non zero da -175 a 175.", -175, 175, rejectZero = true),
-		)
+		val FUNCTIONGEMMA_TOOLS by lazy {
+			listOf(
+				functionTool("resume", "Riprendi la riproduzione dal punto corrente."),
+				functionTool("restart", "Ricomincia la riproduzione dall'inizio del loop o del brano."),
+				functionTool("stay_paused", "Lascia la riproduzione in pausa."),
+				functionTool("set_rate", "Imposta la velocità assoluta di riproduzione senza avviare la traccia.", "percent", "Velocità intera in percentuale da 25 a 200.", 25, 200),
+				functionTool("adjust_rate", "Aumenta o riduce la velocità corrente senza avviare la traccia.", "delta_percent", "Variazione intera in punti percentuali da -175 a 175, escluso zero.", -175, 175, rejectZero = true),
+			)
+		}
 
 		fun functionTool(
 			name: String,

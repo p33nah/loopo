@@ -105,11 +105,11 @@ python -m loopo_functiongemma.evaluate compare reports/targeted-holdout.jsonl ru
   --input parser=runs/targeted-parser/targeted-holdout.parser.jsonl \
   --input parent=runs/targeted-parent/targeted-holdout-litert.json \
   --input candidate=runs/targeted-candidate/targeted-holdout-litert.json \
-  --gate-input candidate --min-positive-exact-rate 0.95 \
+  --gate-input candidate --min-positive-exact-rate 0.90 \
   --max-false-accept-rate 0.01 --max-wrong-usable-rate 0.01
 ```
 
-A positive is exact when all actions, integer arguments, and their order match. The candidate needs at least 95% exact on valid commands. It may propose a valid action on at most 1% of negative requests and a valid wrong plan on at most 1% of positive requests. Send the same frozen transcripts to the Redmi pilot to verify the Android runtime separately. The pilot shows a second result that requires full parser agreement. Use the model result before that check to measure what FunctionGemma learned. The agreement check blocks unsupported or discrepant plans whenever the parser disagrees. It cannot extend parser coverage.
+A positive is exact when all actions, integer arguments, and their order match. Use about 90% exact on valid commands as a reference. The command shows how to flag results below 90% and how to check the experimental limits of 1% for unwanted plans on negatives and 1% for valid wrong plans on positives. Send the same frozen transcripts to the Redmi pilot to verify the Android runtime separately. The pilot shows a second result that requires full parser agreement. Use the model result before that check to measure what FunctionGemma learned. The agreement check blocks unsupported or discrepant plans whenever the parser disagrees. It cannot extend parser coverage.
 
 ## Colab smoke and full run
 

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Studia musica con Loopo per Android. Ripeti un passaggio, cambia velocità senza cambiare tonalità e controlla la riproduzione con la voce.">
+  <meta name="theme-color" content="#101411">
+  <title>Loopo · Studia musica al tuo ritmo</title>
+  <link rel="icon" href="assets/loopo-mark.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="tour.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#contenuto">Salta al contenuto</a>
+  <header class="site-header">
+    <div class="header-content wrap">
+      <a class="brand" href="./">
+        <img src="assets/loopo-mark.png" width="40" height="40" alt="">
+        <span>Loopo</span>
+      </a>
+      <a class="button button-primary" id="apk-link" href="https://github.com/p33nah/loopo/releases/download/v0.0.1/loopo-v0.0.1.apk">
+        Scarica APK <span aria-hidden="true">↓</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="contenuto" class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">App Android per studiare musica</p>
+        <h1 id="hero-title">Suona al<br>tuo ritmo<span class="accent">.</span></h1>
+        <p class="intro">Isola un passaggio, rallentalo senza cambiare tonalità e ripetilo finché ti viene. Quando hai le mani sullo strumento, di’ <strong>«Ehi Lupo»</strong>.</p>
+        <div class="hero-actions">
+          <a class="button button-outline" href="#tutorial">Inizia il tutorial <span aria-hidden="true">↓</span></a>
+          <a class="text-link" href="#voce" hidden>Vai ai comandi vocali <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <figure class="hero-media">
+        <img src="assets/studio-velocita-73.png" alt="Schermata Loopo con forma d’onda, marcatori A e B, loop attivo e velocità al 73%" width="2400" height="1080">
+        <figcaption><span><i class="marker marker-a" aria-hidden="true">A</i><i class="marker marker-b" aria-hidden="true">B</i> Loop di un passaggio</span><span>73% della velocità</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="tutorial" id="tutorial" aria-labelledby="tutorial-title">
+      <div class="tutorial-heading">
+        <h2 id="tutorial-title">Prova Loopo</h2>
+        <p>Dal primo brano al controllo con la voce.</p>
+      </div>
+
+      <div class="tour-layout" id="tour" hidden>
+        <nav class="step-nav" aria-label="Passi del tutorial">
+          <ol id="steps"></ol>
+        </nav>
+        <article class="step-card" id="step-card" aria-labelledby="step-title">
+          <div class="step-copy">
+            <p class="eyebrow" id="step-progress"></p>
+            <h3 id="step-title" tabindex="-1"></h3>
+            <p id="step-body"></p>
+            <ol class="instructions" id="step-instructions" hidden></ol>
+            <p class="step-note" id="step-note" hidden></p>
+            <div class="step-download" id="step-download" hidden>
+              <a class="button button-primary" id="step-apk-link">Scarica Loopo per Android <span aria-hidden="true">↓</span></a>
+              <a class="text-link" href="https://github.com/p33nah/loopo/releases/tag/v0.0.1">Dettagli della release v0.0.1</a>
+            </div>
+          </div>
+          <div class="step-media">
+            <figure class="step-figure">
+              <img id="step-image" alt="">
+              <figcaption id="step-caption"></figcaption>
+            </figure>
+            <ul class="examples" id="step-examples" aria-label="Esempi da pronunciare" hidden></ul>
+          </div>
+          <div class="step-controls">
+            <button class="button button-outline" id="previous" type="button"><span aria-hidden="true">←</span> Indietro</button>
+            <button class="button button-primary" id="next" type="button">Avanti <span aria-hidden="true">→</span></button>
+          </div>
+        </article>
+      </div>
+
+      <noscript><p>Consulta il tutorial e gli esempi vocali nella <a href="https://github.com/p33nah/loopo#comandi-vocali-mentre-ascolti">guida di Loopo</a>.</p></noscript>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap">
+    <p>Loopo è open source. Brani e sessioni restano sul dispositivo.</p>
+    <a href="https://github.com/p33nah/loopo">Codice su GitHub <span aria-hidden="true">↗</span></a>
+  </footer>
+</body>
+</html>

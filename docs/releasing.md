@@ -1,6 +1,6 @@
 # Prepare the first signed release
 
-The first planned version is `0.0.1`, with Android `versionCode` 1. Do not publish it until every gate in [release readiness](release-readiness.md) has evidence. Later releases must increase `versionCode`; changing only `versionName` is insufficient for Android updates.
+The first planned version is `0.0.1`, with Android `versionCode` 1. Complete the gates in [release readiness](release-readiness.md) before official publication. Use an owner-approved prerelease for the first production model-download check as described below. Later releases must increase `versionCode`; changing only `versionName` is insufficient for Android updates.
 
 1. Merge reviewed pull requests through the repository owner. Keep application changes off direct pushes to `main`.
 2. Run CI at the exact intended commit and complete the physical-device matrix in [Testing](testing.md).
@@ -8,7 +8,9 @@ The first planned version is `0.0.1`, with Android `versionCode` 1. Do not publi
 4. Verify the GitHub `release` environment still requires approval from `p33nah` and only accepts protected branches. That rule was configured on 2026-10-30. Store `LOOPO_KEYSTORE_BASE64`, `LOOPO_KEYSTORE_PASSWORD`, `LOOPO_KEY_ALIAS`, and `LOOPO_KEY_PASSWORD` as environment secrets. The workflow does not create a key or choose one for the owner.
 5. Create an annotated `v0.0.1` tag at the verified `main` commit. Push the tag after reviewing its target.
 6. Run **Prepare signed release draft** on `main`, supplying that existing tag. The workflow repeats verification, checks that tag and version match the dispatched commit, signs the APK, verifies signature and native packaging, downloads and verifies the pinned Italian Vosk model, and creates a draft GitHub release with the APK, model archive, notices, and SHA-256 checksums. The app fetches the model asset from the published versioned release after the user first enables voice.
-7. Review the draft APK, install it on physical devices, test an update signed by the same key, and record the signing-certificate fingerprint. Publish the draft manually only after owner approval.
+7. Review the draft APK and compare its signing-certificate SHA-256 with the identity in the release record. Install it on a clean test device. Save a study session, then reinstall the same APK with `adb install -r` and confirm that the session survives. This verifies replacement with the same signing key. Record the device, APK hash, certificate, and results.
+8. The model asset in a draft is unavailable to the app's unauthenticated HTTPS downloader. After reviewing the draft, the owner publishes it as a prerelease with `gh release edit v0.0.1 --repo p33nah/loopo --draft=false --prerelease --latest=false`. This makes the APK and model public for the remaining checks. On a clean signed install, verify the model download, cancel, retry, checksum, extraction, and voice commands. Reopen Loopo offline and verify cached recognition. Check the exact production URL `https://github.com/p33nah/loopo/releases/download/v0.0.1/loopo-vosk-it-0.22.zip` and record the results.
+9. After the signed-install, update, model, and remaining release checks pass, the owner promotes the tested prerelease with `gh release edit v0.0.1 --repo p33nah/loopo --prerelease=false --latest`. If a check fails, retain the prerelease status and resolve the failure through a reviewed PR. A changed application artifact needs a new version and tag.
 
 The workflow creates a draft. It does not publish a release or upload to a store. Missing secrets, open release-blocker issues, failed checks, mismatched versions, or a tag pointing elsewhere must stop it.
 

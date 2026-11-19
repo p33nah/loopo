@@ -1,6 +1,6 @@
 # First release readiness
 
-Status on 2026-11-19 is **verified prerelease awaiting final owner review**. [Version 0.0.1](https://github.com/p33nah/loopo/releases/tag/v0.0.1) is public as a prerelease. Signed installation, same-key replacement, production model setup, cancellation, retry, and cached offline initialization have passed. The owner confirmed a voice command setting the signed app to 80%. The owner chose an encrypted Desktop backup on the same PC, with recovery credentials stored separately. Acceptance of the coverage limits below and official promotion remain owner actions. [Release record #77](https://github.com/p33nah/loopo/issues/77) contains the current results.
+Status on 2026-11-19 is **official v0.0.1 release published**. [Version 0.0.1](https://github.com/p33nah/loopo/releases/tag/v0.0.1) is public with `draft=false` and `prerelease=false`. The owner accepted the documented coverage limits within this release's scope. Signed installation, same-key replacement, production model setup, cancellation, retry, and cached offline initialization passed. The owner confirmed a voice command setting the signed app to 80%. The owner chose an encrypted Desktop backup on the same PC, with recovery credentials stored separately. [Release record #77](https://github.com/p33nah/loopo/issues/77) records the verification and publication.
 
 The hardening work adds automated verification before further product features. Each result must name the commit and executed check. A missing check remains open even if the build succeeds.
 
@@ -84,4 +84,4 @@ These results do not close every hardware and failure-path check. Physical ARMv7
 
 Time/frame conversions now use checked arithmetic. Remaining source risks include delayed detection of truncated WAV payloads, best-effort session saving during abrupt process death, and playback transitions not covered by automated evidence. Resolve reproduced defects with focused regressions. Keep assumptions about vendor codecs and output routes labeled until physical evidence exists.
 
-PR #17 established the test and release infrastructure. Each follow-up records its current-head CI evidence in the linked issue and PR. Update this record with actual test outputs, physical-device results, and signed-artifact checks before tagging the first version.
+PR #17 established the test and release infrastructure. Each follow-up records its current-head CI evidence in the linked issue and PR. Keep this record current with new test outputs, physical-device results, and signed-artifact checks for future releases.

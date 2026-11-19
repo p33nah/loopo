@@ -1,8 +1,4 @@
-# Loopo
-
-<p align="center">
-  <img src="docs/images/loopo-mark.png" width="112" alt="Logo di Loopo">
-</p>
+<h1><img src="docs/images/loopo-mark.png" width="48" alt="Icona di Loopo"> Loopo</h1>
 
 Loopo è un'app Android per studiare musica partendo dai brani sul tuo dispositivo. Apri un file audio, isola un passaggio e ripetilo alla velocità che preferisci.
 

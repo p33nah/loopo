@@ -1,6 +1,6 @@
 # Verify Loopo
 
-Use JDK 17, SDK Platform 37.0, Build Tools 36.0.0, NDK 27.0.12077973, and CMake 3.22.1. The Gradle wrapper pins Gradle 9.9.0 and verifies the distribution checksum. Test dependencies are pinned in `app/build.gradle.kts`. Playback accepts mono or stereo PCM at 8 to 192 kHz and rejects unsupported configurations before native allocation.
+Use JDK 17, SDK Platform 37.0, Build Tools 36.0.0, NDK 27.0.12077973, and CMake 3.22.1. The Gradle wrapper pins Gradle 9.9.1 and verifies the distribution checksum. Test dependencies are pinned in `app/build.gradle.kts`. Playback accepts mono or stereo PCM at 8 to 192 kHz and rejects unsupported configurations before native allocation.
 
 Run JVM tests, lint, debug and release packaging, and instrumentation APK compilation in Ubuntu WSL with the Linux toolchain described below:
 

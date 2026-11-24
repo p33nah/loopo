@@ -1,0 +1,60 @@
+clean|resume|Riprendi la riproduzione
+clean|resume|Fai ripartire il loop
+clean|resume|Continua da dove avevo fermato
+clean|resume|Avvia di nuovo l'ascolto
+clean|pause|Ferma un attimo la musica
+clean|pause|Metti in pausa il brano
+clean|pause|Sospendi la riproduzione
+clean|pause|Interrompi l'audio per ora
+clean|set:80|Imposta la velocità all'ottanta per cento
+clean|set:80|Porta la riproduzione a 80
+clean|set:80|Metti la velocità del loop a ottanta percento
+clean|delta:-5|Rallenta di cinque punti percentuali
+clean|delta:5|Accelera di cinque punti percentuali la velocità
+clean|set:80,resume|Imposta 80 e riparti
+clean|set:80,resume|Porta il loop a ottanta e avvialo
+paraphrase|resume|Dai, facciamolo continuare
+paraphrase|resume|Togli la pausa e riparti
+paraphrase|resume|Rimetti in moto l'ascolto
+paraphrase|resume|Puoi far suonare di nuovo il loop?
+paraphrase|pause|Lascia il brano fermo qui
+paraphrase|pause|Congela per un momento la riproduzione
+paraphrase|pause|Fermiamo l'esercizio senza chiuderlo
+paraphrase|pause|Blocca l'audio finché non te lo dico
+paraphrase|set:80|Vorrei ascoltare al livello dell'ottanta percento
+paraphrase|set:80|Regola la riproduzione su 80 per cento
+paraphrase|set:80|Fissa la rapidità a ottanta
+paraphrase|delta:-5|Scendi di cinque sulla percentuale di velocità
+paraphrase|delta:5|Aggiungi cinque punti percentuali al ritmo del loop
+paraphrase|set:80,resume|Metti l'andatura a 80 per cento e continua
+paraphrase|set:80,resume|Regola a ottanta, poi fai partire l'audio
+noisy|resume|Riprendi la riproduzion
+noisy|resume|Fai ripartire il loopp
+noisy|resume|Continua da dove avevo fermato, dai
+noisy|resume|Togli la pausa e avvia l'ascoltoo
+noisy|pause|Metti in pausa il branno
+noisy|pause|Ferma la riproduzione un attimoo
+noisy|pause|Sospendi l'audio, per favore
+noisy|pause|Blocca il loop qui un secondo
+noisy|set:80|Imposta la velocità all'ottanta per cento, eh
+noisy|set:80|Porta la riproduzione a ottanta
+noisy|set:80|Metti la veloctà del loop a 80 percento
+noisy|delta:-5|Rallenta di cinque puntii
+noisy|delta:5|Alzza il ritmo del cinque per cento
+noisy|set:80,resume|Setta a ottanta e fai ripartire
+noisy|set:80,resume|Imposta 80, poi riprendi il loop
+negative|reject|Metti in pausa il timer del telefono
+negative|reject|Ferma il cronometro dopo cinque minuti
+negative|reject|Sospendi la registrazione della lezione
+negative|reject|Riprendi il download del brano
+negative|reject|Continua la chiamata da dove si era interrotta
+negative|reject|Metti in pausa il video sul tablet
+negative|reject|Alza la velocità di cinque punti
+negative|reject|Aumenta il tempo del loop di cinque percento
+negative|reject|Cambia la velocità di cinque punti senza dire se salire o scendere
+negative|reject|Porta il player a ottantacinque, aumentando di cinque
+negative|reject|Abbassa il volume di cinque tacche
+negative|reject|Imposta il metronomo a 80 bpm
+negative|reject|Ripeti la frase musicale altre cinque volte
+negative|reject|Salta al minuto ottanta della traccia
+negative|reject|Riprendi il capitolo del podcast
